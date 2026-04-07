@@ -1,65 +1,385 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@/lib/auth-context";
+import { navigationGroups } from "@/components/panel/data";
+import { ScreenRenderer } from "@/components/panel/screens";
+import type { ScreenKey } from "@/components/panel/types";
+import { FullPageSpinner } from "@/components/ui/spinner";
+import {
+  Bars3Icon,
+  XMarkIcon,
+  Squares2X2Icon,
+  BuildingStorefrontIcon,
+  UserGroupIcon,
+  PencilSquareIcon,
+  CalendarDaysIcon,
+  ShareIcon,
+  MagnifyingGlassIcon,
+  StarIcon,
+  ChartBarIcon,
+  CpuChipIcon,
+  SparklesIcon,
+  ClockIcon,
+} from "@heroicons/react/24/outline";
+
+/* ── Nav item icon map ────────────────────── */
+const NAV_ICONS: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
+  dashboard: Squares2X2Icon,
+  profil: BuildingStorefrontIcon,
+  ekip: UserGroupIcon,
+  icerik: PencilSquareIcon,
+  takvim: CalendarDaysIcon,
+  zamanlayici: ClockIcon,
+  sosyal: ShareIcon,
+  seo: MagnifyingGlassIcon,
+  reklam: StarIcon,
+  performans: ChartBarIcon,
+  "yapay-zeka": CpuChipIcon,
+  "kreatif-studyo": SparklesIcon,
+};
+
+/* ── Hash → screen sync helpers ──────── */
+function getScreenFromHash(): ScreenKey {
+  if (typeof window === "undefined") return "dashboard";
+  const hash = window.location.hash.replace("#", "");
+  if (!hash) return "dashboard";
+  return hash as ScreenKey;
+}
 
 export default function Home() {
+  const { user, companies, activeCompany, setActiveCompany, loading, logout } = useAuth();
+  const [active, setActiveRaw] = useState<ScreenKey>(() => getScreenFromHash());
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [brandMenuOpen, setBrandMenuOpen] = useState(false);
+  const [studioPostId, setStudioPostId] = useState<number | undefined>();
+  const [kreatifTopics, setKreatifTopics] = useState<string[]>([]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const setActive = useCallback((key: ScreenKey) => {
+    setActiveRaw(key);
+    if (typeof window !== "undefined") {
+      window.location.hash = key === "dashboard" ? "" : key;
+    }
+  }, []);
+
+  useEffect(() => {
+    const onHashChange = () => {
+      setActiveRaw(getScreenFromHash());
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  if (loading || !user) return <FullPageSpinner />;
+
+  const fullName = [user.first_name, user.last_name].filter(Boolean).join(" ") || "Kullanıcı";
+  const initials = [user.first_name?.[0], user.last_name?.[0]].filter(Boolean).join("").toUpperCase() || "U";
+  const companyName = activeCompany?.name || "DIO";
+  const companyInitials = companyName.split(" ").length > 1 
+    ? companyName.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase()
+    : companyName.substring(0, 2).toUpperCase();
+
+  const handleNavClick = (key: string) => {
+    setActive(key as ScreenKey);
+    setMobileMenuOpen(false);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="min-h-screen bg-[#FAFAFA] text-foreground flex flex-col lg:flex-row">
+      
+      {/* ═══ Mobile Top Bar ═══ */}
+      <div className="lg:hidden flex items-center justify-between bg-white border-b border-zinc-200 px-4 py-3 sticky top-0 z-30 shadow-sm shadow-zinc-100">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setMobileMenuOpen(true)}
+            className="p-1.5 -ml-1.5 text-foreground hover:bg-zinc-100 rounded-lg transition"
+          >
+            <Bars3Icon className="w-6 h-6" />
+          </button>
+          <img src="/dio.svg" alt="DIO" className="h-6 w-auto" />
+        </div>
+        <div className="flex items-center gap-3">
+          <button onClick={() => { setActive("profil" as ScreenKey); setMobileMenuOpen(false); }} className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E73932] text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
+            {initials}
+          </button>
+        </div>
+      </div>
+
+      {/* ═══ Mobile Drawer Menu ═══ */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden transition-opacity" 
+          onClick={() => setMobileMenuOpen(false)}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+      )}
+      
+      <div className={`fixed inset-y-0 left-0 bg-white w-[280px] shadow-2xl z-50 lg:hidden transform transition-transform duration-300 ease-in-out flex flex-col ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <div className="flex flex-col border-b border-zinc-100">
+          <div className="flex items-center justify-between px-5 pt-6 pb-5">
+             <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E73932] text-[13px] font-bold text-white shadow-sm">
+                DIO
+              </span>
+              <div className="flex flex-col leading-tight">
+                <span className="text-[17px] font-extrabold text-zinc-900 tracking-tight">DIO</span>
+                <span className="text-[11px] font-medium text-zinc-400 mt-[1px]">DİJİTAL İŞ ORTAĞI</span>
+              </div>
+            </div>
+            <button 
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-1.5 text-muted hover:bg-zinc-100 hover:text-foreground rounded-lg transition"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              <XMarkIcon className="w-6 h-6" />
+            </button>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        {/* Mobile Navigation Content */}
+        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 sidebar-nav">
+          {navigationGroups.map((group) => (
+            <div key={group.id} className="space-y-1">
+              <p className="px-2 mb-2 text-[11px] font-bold uppercase tracking-widest text-[#A1A1A8]">{group.label}</p>
+              <div className="space-y-[2px]">
+                {group.items.map((item) => {
+                  const selected = item.key === active;
+                  return (
+                    <button
+                      key={item.key}
+                      onClick={() => handleNavClick(item.key)}
+                      className={`flex w-full items-center gap-3.5 rounded-xl px-3 py-2.5 text-left text-[14px] transition-all duration-150 ${
+                        selected 
+                          ? "bg-[#FFF5F3] text-[#E73932] font-semibold" 
+                          : "text-[#6B7280] hover:bg-zinc-50 hover:text-zinc-900 font-medium"
+                      }`}
+                    >
+                      {(() => { 
+                         const Icon = NAV_ICONS[item.key];
+                         return Icon ? (
+                           <Icon className={`w-[20px] h-[20px] flex-shrink-0 ${selected ? "text-[#E73932]" : "text-[#9CA3AF]"}`} />
+                         ) : (
+                           <span className={`w-[20px] h-[20px] flex items-center justify-center text-[12px] font-bold flex-shrink-0 ${selected ? "text-[#E73932]" : "text-[#9CA3AF]"}`}>{item.icon as string}</span>
+                         );
+                      })()}
+                      <span>{item.label}</span>
+                      {item.badge && (
+                          <span
+                            className={
+                              item.badge.variant === "new"
+                                ? "ml-auto rounded-full bg-[#D1FAE5] px-2 py-[2px] text-[10px] font-bold text-[#059669]"
+                                : "ml-auto flex h-[22px] w-[22px] items-center justify-center rounded-full bg-[#E73932] text-[10px] font-bold text-white shadow-sm"
+                            }
+                          >
+                            {item.badge.text}
+                          </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {/* Mobile Bottom Profile Area */}
+        <div className="p-4 border-t border-zinc-100 relative">
+          <button onClick={() => setBrandMenuOpen(!brandMenuOpen)} className="w-full flex items-center gap-3 rounded-[14px] bg-[#F4F4F5] p-3 mx-auto text-left transition hover:bg-[#EBEBEB]">
+             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E73932] text-[12px] font-bold text-white shadow-sm flex-shrink-0">
+               {companyInitials}
+             </div>
+             <div className="flex flex-col min-w-0">
+               <span className="text-[14px] font-bold text-zinc-900 truncate">{companyName}</span>
+               <span className="text-[12px] font-medium text-zinc-500">Pro Plan</span>
+             </div>
+          </button>
+          
+          {brandMenuOpen && (
+              <div className="absolute bottom-[calc(100%+8px)] left-4 right-4 z-50 rounded-xl border border-zinc-200 bg-white shadow-xl max-h-60 overflow-y-auto">
+                <div className="p-2">
+                  <p className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted">Markalarınız</p>
+                  {companies.map((c) => (
+                    <button
+                      key={c.id}
+                      onClick={() => {
+                        setActiveCompany(c);
+                        setBrandMenuOpen(false);
+                        setMobileMenuOpen(false);
+                        setActive("dashboard");
+                      }}
+                      className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition ${
+                        activeCompany?.id === c.id
+                          ? "bg-[#FFF5F3] text-[#E73932] font-medium"
+                          : "text-zinc-600 hover:bg-zinc-50"
+                      }`}
+                    >
+                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-zinc-100 text-[10px] font-bold text-zinc-700">
+                        {c.name.substring(0,2).toUpperCase()}
+                      </span>
+                      <span className="truncate text-[13px]">{c.name}</span>
+                      {activeCompany?.id === c.id && <span className="ml-auto text-[#E73932] text-xs">✓</span>}
+                    </button>
+                  ))}
+                </div>
+                <div className="border-t border-zinc-100 p-2">
+                   <button onClick={() => logout()} className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50">
+                      Çıkış Yap
+                   </button>
+                </div>
+              </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex-1 flex max-w-[1600px] mx-auto w-full lg:overflow-hidden">
+        {/* ═══ Desktop Sidebar Panel ═══ */}
+        <aside className="sidebar-panel hidden lg:flex flex-col w-[260px] h-screen bg-white flex-shrink-0">
+          
+          {/* Logo Section */}
+          <div className="flex items-center gap-3 px-6 pt-7 pb-6 border-b border-[#EAEAEA]">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#E73932] text-[15px] tracking-tight font-extrabold text-white shadow-sm">
+              DIO
+            </span>
+            <div className="flex flex-col leading-tight">
+              <span className="text-[17px] font-extrabold text-[#111827] tracking-tight">DIO</span>
+              <span className="text-[11px] font-semibold text-[#9CA3AF] mt-[2px]">DİJİTAL İŞ ORTAĞI</span>
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 overflow-y-auto px-5 py-6 space-y-[26px] sidebar-nav">
+            {navigationGroups.map((group) => (
+              <div key={group.id} className="space-y-1.5">
+                <p className="px-2 mb-2.5 text-[11px] font-extrabold tracking-widest text-[#9CA3AF] uppercase">
+                  {group.label}
+                </p>
+                <div className="space-y-[4px]">
+                  {group.items.map((item) => {
+                    const selected = item.key === active;
+                    return (
+                      <button
+                        key={item.key}
+                        onClick={() => handleNavClick(item.key)}
+                        className={`group flex w-full items-center gap-3.5 rounded-[12px] px-3 py-[9px] text-left text-[14.5px] transition-all duration-150 ${
+                          selected
+                            ? "bg-[#FFF5F3] text-[#E73932] font-semibold"
+                            : "text-[#6B7280] hover:bg-zinc-50 hover:text-[#111827] font-medium"
+                        }`}
+                      >
+                        {(() => { 
+                           const Icon = NAV_ICONS[item.key];
+                           return Icon ? (
+                             <Icon className={`w-[20px] h-[20px] flex-shrink-0 transition-transform group-hover:scale-110 duration-200 ${selected ? "text-[#E73932]" : "text-[#9CA3AF] group-hover:text-[#6B7280]"}`} />
+                           ) : (
+                             <span className={`w-[20px] h-[20px] flex items-center justify-center text-[13px] font-bold flex-shrink-0 transition-transform group-hover:scale-110 duration-200 ${selected ? "text-[#E73932]" : "text-[#9CA3AF] group-hover:text-[#6B7280]"}`}>{item.icon as string}</span>
+                           );
+                        })()}
+                        <span>{item.label}</span>
+                        {item.badge && (
+                          <span
+                            className={
+                              item.badge.variant === "new"
+                                ? "ml-auto rounded-full bg-[#D1FAE5] px-[7px] py-[2px] text-[10px] font-bold text-[#059669]"
+                                : "ml-auto flex h-[22px] w-[22px] items-center justify-center rounded-full bg-[#E73932] text-[11px] font-bold text-white shadow-sm"
+                            }
+                          >
+                            {item.badge.text}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </nav>
+
+          {/* Bottom Profile Header */}
+          <div className="p-[20px] border-t border-[#EAEAEA] relative bg-white">
+            <button
+              onClick={() => setBrandMenuOpen(!brandMenuOpen)}
+              className="w-full flex items-center gap-3 rounded-[12px] bg-[#F4F4F5] p-3.5 text-left transition hover:bg-[#EBEBEB]"
+            >
+              <div className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-[#E73932] text-[14px] font-bold text-white flex-shrink-0">
+                {companyInitials}
+              </div>
+              <div className="flex flex-col min-w-0 pt-[1px]">
+                <span className="text-[15px] font-bold text-[#111827] truncate leading-tight">{companyName}</span>
+                <span className="text-[12px] font-medium text-[#6B7280] mt-[2px]">Pro Plan</span>
+              </div>
+            </button>
+            {/* Brand Dropdown */}
+            {brandMenuOpen && (
+               <>
+                 <div className="fixed inset-0 z-40" onClick={() => setBrandMenuOpen(false)} />
+                 <div className="absolute left-5 right-5 bottom-[100%] mb-3 z-50 rounded-[14px] border border-zinc-200 bg-white shadow-xl shadow-black/5 animate-fade-in-up overflow-hidden">
+                   <div className="max-h-60 overflow-y-auto p-2">
+                     <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-[#9CA3AF]">Markalarınız</p>
+                     <div className="space-y-1">
+                       {companies.map((c) => (
+                         <button
+                           key={c.id}
+                           onClick={() => {
+                             setActiveCompany(c);
+                             setBrandMenuOpen(false);
+                             setActive("dashboard");
+                           }}
+                           className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[14.5px] transition ${
+                             activeCompany?.id === c.id
+                               ? "bg-[#FFF5F3] text-[#E73932] font-semibold"
+                               : "text-[#4B5563] hover:bg-zinc-50 font-medium"
+                           }`}
+                         >
+                           {c.logo_url ? (
+                             <img src={`${process.env.NEXT_PUBLIC_API_URL}${c.logo_url}`} alt={c.name} className="h-8 w-8 rounded-full object-cover border border-zinc-100" />
+                           ) : (
+                             <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 text-[11px] font-bold text-zinc-600 border border-zinc-100">
+                               {c.name.substring(0,2).toUpperCase()}
+                             </span>
+                           )}
+                           <span className="truncate">{c.name}</span>
+                           {activeCompany?.id === c.id && <span className="ml-auto text-[#E73932] text-sm">✓</span>}
+                         </button>
+                       ))}
+                     </div>
+                   </div>
+                   <div className="border-t border-[#EAEAEA] p-2 bg-zinc-50/50">
+                     <button
+                       onClick={() => { setBrandMenuOpen(false); setActive("profil"); }}
+                       className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-[14px] font-semibold text-[#E73932] transition hover:bg-[#FFF5F3]"
+                     >
+                       <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg border-2 border-dashed border-[#E73932]/40 text-[#E73932] text-xs">+</span>
+                       Yeni Marka Ekle
+                     </button>
+                     <button onClick={() => logout()} className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 mt-1 text-[14px] font-semibold text-red-600 transition hover:bg-red-50">
+                        Çıkış Yap
+                     </button>
+                   </div>
+                 </div>
+               </>
+            )}
+          </div>
+        </aside>
+
+        {/* ═══ Main content ═══════════════════ */}
+        <main className="flex-1 w-full max-w-full overflow-hidden lg:overflow-y-auto h-screen bg-white">
+          <div className="min-h-[calc(100vh-3.5rem)] lg:min-h-0 lg:h-full p-4 md:p-6 lg:p-8 w-full max-w-full overflow-x-auto overflow-y-auto relative z-10">
+            <ScreenRenderer
+              screen={active}
+              onNavigate={(key) => setActive(key)}
+              studioPostId={studioPostId}
+              onStudioNavigate={(postId) => {
+                setStudioPostId(postId);
+                setActive("studio");
+              }}
+              kreatifTopics={kreatifTopics}
+              onKreatifNavigate={(topics: string[]) => {
+                setKreatifTopics(topics);
+                setActive("kreatif-olustur");
+              }}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
