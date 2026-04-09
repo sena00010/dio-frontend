@@ -12,6 +12,7 @@ export type ScreenKey =
   | "takvim"
   | "zamanlayici"
   | "kreatif-studyo"
+  | "urun-gorseli-studyosu"
   | "kreatif-olustur"
   | "profil"
   | "ayarlar";

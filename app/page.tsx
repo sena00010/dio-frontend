@@ -21,6 +21,7 @@ import {
   CpuChipIcon,
   SparklesIcon,
   ClockIcon,
+  PhotoIcon,
 } from "@heroicons/react/24/outline";
 
 /* ── Nav item icon map ────────────────────── */
@@ -37,6 +38,7 @@ const NAV_ICONS: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement
   performans: ChartBarIcon,
   "yapay-zeka": CpuChipIcon,
   "kreatif-studyo": SparklesIcon,
+  "urun-gorseli-studyosu": PhotoIcon,
 };
 
 /* ── Hash → screen sync helpers ──────── */

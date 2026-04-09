@@ -15,6 +15,7 @@ const ContentCalendar = dynamic(() => import("./ContentCalendar"), { ssr: false 
 const KreatifStudyoScreen = dynamic(() => import("./KreatifStudyo"), { ssr: false });
 const KreatifOlusturScreen = dynamic(() => import("./KreatifOlustur"), { ssr: false });
 const ZamanlayiciScreen = dynamic(() => import("./ZamanlayiciScreen"), { ssr: false });
+const ProductImageStudio = dynamic(() => import("./ProductImageStudio"), { ssr: false });
 
 // Recharts — lazy import to avoid SSR issues
 const {
@@ -2264,6 +2265,7 @@ export function ScreenRenderer({
   if (screen === "sosyal") return <SosyalScreen />;
   if (screen === "performans") return <PerformansScreen />;
   if (screen === "yapay-zeka") return <AiAssistantScreen />;
+  if (screen === "urun-gorseli-studyosu") return <ProductImageStudio />;
   if (screen === "kreatif-studyo")
     return <KreatifStudyoScreen onKreatifNavigate={onKreatifNavigate} />;
   if (screen === "kreatif-olustur")
