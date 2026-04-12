@@ -2,6 +2,14 @@ export type ScreenKey =
   | "dashboard"
   | "reklam"
   | "seo"
+  | "seo-genel-bakis"
+  | "seo-aksiyonlar"
+  | "seo-siralamalar"
+  | "seo-kelimeler"
+  | "seo-icerik"
+  | "seo-teknik"
+  | "seo-backlink"
+  | "seo-ai"
   | "sosyal"
   | "performans"
   | "yapay-zeka"
@@ -25,6 +33,7 @@ export type NavItem = {
     text: string;
     variant: "new" | "count";
   };
+  children?: NavItem[];
 };
 
 export type NavGroup = {

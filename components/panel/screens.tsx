@@ -7,7 +7,7 @@ import api from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import NewContentWizard from "./NewContentWizard";
 import dynamic from "next/dynamic";
-import { PhotoIcon, BuildingOffice2Icon, SparklesIcon, ShareIcon, PaintBrushIcon, ComputerDesktopIcon, AdjustmentsHorizontalIcon, LinkIcon, LanguageIcon, TagIcon, BuildingLibraryIcon, UserGroupIcon, IdentificationIcon } from "@heroicons/react/24/outline";
+import { PhotoIcon, BuildingOffice2Icon, SparklesIcon, ShareIcon, PaintBrushIcon, ComputerDesktopIcon, AdjustmentsHorizontalIcon, LinkIcon, LanguageIcon, TagIcon, BuildingLibraryIcon, UserGroupIcon, IdentificationIcon, EyeIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { CustomSelect, SearchableFontSelect, GenderToggle, SocialMediaManager } from "./AdvancedInputs";
 
 const ImageStudio = dynamic(() => import("./ImageStudio"), { ssr: false });
@@ -16,6 +16,7 @@ const KreatifStudyoScreen = dynamic(() => import("./KreatifStudyo"), { ssr: fals
 const KreatifOlusturScreen = dynamic(() => import("./KreatifOlustur"), { ssr: false });
 const ZamanlayiciScreen = dynamic(() => import("./ZamanlayiciScreen"), { ssr: false });
 const ProductImageStudio = dynamic(() => import("./ProductImageStudio"), { ssr: false });
+const SeoGenelBakis = dynamic(() => import("./SeoGenelBakis"), { ssr: false });
 
 // Recharts — lazy import to avoid SSR issues
 const {
@@ -548,6 +549,10 @@ function SeoScreen() {
       )}
     </div>
   );
+}
+
+function SeoGenelBakisScreen() {
+  return <SeoGenelBakis />;
 }
 
 function SosyalScreen() {
@@ -2262,6 +2267,27 @@ export function ScreenRenderer({
   if (screen === "reklam") return <ReklamScreen />;
   if (screen === "ekip") return <EkipScreen />;
   if (screen === "seo") return <SeoScreen />;
+  if (screen === "seo-genel-bakis" || screen === "seo-aksiyonlar" || screen === "seo-siralamalar" || screen === "seo-kelimeler" || screen === "seo-icerik" || screen === "seo-teknik" || screen === "seo-backlink" || screen === "seo-ai") {
+    const tabMap: Record<string, string> = {
+      "seo-genel-bakis": "genel",
+      "seo-aksiyonlar": "aksiyonlar",
+      "seo-siralamalar": "siralamalar",
+      "seo-kelimeler": "kelimeler",
+      "seo-icerik": "icerik",
+      "seo-teknik": "teknik",
+      "seo-backlink": "backlink",
+      "seo-ai": "ai_visibility",
+    };
+    return (
+      <SeoGenelBakis
+        initialTab={tabMap[screen] || "genel"}
+        onNavigateToKreatif={(topics) => {
+          onKreatifNavigate?.(topics);
+          onNavigate?.("kreatif-olustur");
+        }}
+      />
+    );
+  }
   if (screen === "sosyal") return <SosyalScreen />;
   if (screen === "performans") return <PerformansScreen />;
   if (screen === "yapay-zeka") return <AiAssistantScreen />;

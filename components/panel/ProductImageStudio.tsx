@@ -2,7 +2,8 @@
 
 import { useAuth } from "@/lib/auth-context";
 import api from "@/lib/api";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import ProductCanvasStudio from "@/components/panel/ProductCanvasStudio";
 
 type SidebarModule = {
   key: string;
@@ -164,6 +165,64 @@ const BG_STYLES = [
   { key: "soft", label: "Soft", bg: "#EDE9F5", border: "border-zinc-200" },
 ];
 
+// ── Creation Mode Constants ──────────────────────────────
+const ECOM_COLORS = [
+  "#FFFFFF", "#F5F5F5", "#E8E8E8", "#D4D0C8", "#C4B998", "#E8D5B7",
+  "#E0F0E0", "#D0E8E8", "#F0D0E0", "#E0D0F0", "#1A1A1A", "#2D2D2D",
+  "#333333", "#F14B2A", "#1877F2", "#16A34A", "#D97706", "#7C3AED",
+];
+
+const FONT_STYLES = [
+  { key: "bold", label: "BOLD", desc: "Kampanya, indirim", family: "Bebas Neue", weight: 800 },
+  { key: "elegant", label: "Elegant", desc: "Lüks, moda", family: "Playfair Display", weight: 400 },
+  { key: "modern", label: "MODERN", desc: "Minimal, sade", family: "Inter", weight: 600 },
+  { key: "playful", label: "Playful!", desc: "Eğlenceli, genç", family: "Fredoka One", weight: 400 },
+];
+
+const GOOGLE_FONTS = [
+  "Abel", "Abril Fatface", "Alegreya", "Anton", "Archivo", "Arvo",
+  "Barlow", "Bebas Neue", "Bitter", "Cabin", "Cairo", "Comfortaa",
+  "Cormorant Garamond", "Crimson Text", "DM Sans", "DM Serif Display",
+  "Dosis", "EB Garamond", "Exo 2", "Fira Sans", "Fjalla One",
+  "Fredoka One", "Geologica", "Great Vibes", "Heebo", "IBM Plex Sans",
+  "Inconsolata", "Inter", "Josefin Sans", "Kanit", "Karla",
+  "Lato", "Libre Baskerville", "Lobster", "Lora", "Manrope",
+  "Merriweather", "Montserrat", "Mulish", "Nunito", "Open Sans",
+  "Oswald", "Outfit", "Pacifico", "Poppins", "Playfair Display",
+  "PT Sans", "Quicksand", "Raleway", "Righteous", "Roboto",
+  "Roboto Condensed", "Roboto Slab", "Rubik", "Sacramento",
+  "Source Sans 3", "Space Grotesk", "Titillium Web", "Ubuntu",
+  "Work Sans", "Yanone Kaffeesatz", "Zilla Slab",
+];
+
+const ASPECT_RATIOS = [
+  { key: "1:1", label: "1:1", w: 1, h: 1 },
+  { key: "4:5", label: "4:5", w: 4, h: 5 },
+  { key: "9:16", label: "9:16", w: 9, h: 16 },
+  { key: "16:9", label: "16:9", w: 16, h: 9 },
+  { key: "TY", label: "TY", w: 2, h: 3, desc: "Trendyol" },
+  { key: "HB", label: "HB", w: 1, h: 1, desc: "Hepsiburada" },
+  { key: "IG", label: "IG", w: 4, h: 5, desc: "Instagram" },
+];
+
+const LABEL_TEMPLATES = [
+  { key: "indirim", label: "İndirim", icon: "🔴", text: "%30 İndirim 🔥" },
+  { key: "yeni-sezon", label: "Yeni Sezon", icon: "🟢", text: "Yeni Sezon ✨" },
+  { key: "son-stok", label: "Son Stok", icon: "🟠", text: "Son Stok!" },
+  { key: "kargo", label: "Kargo", icon: "🔵", text: "Ücretsiz Kargo 🚚" },
+  { key: "cok-satan", label: "Çok Satan", icon: "🟣", text: "Çok Satan ⭐" },
+  { key: "ozel", label: "Özel", icon: "🎨", text: "Özel Fırsat" },
+];
+
+const TEXT_POSITIONS = [
+  { key: "top-left", label: "Sol Üst" },
+  { key: "bottom-right", label: "Sağ Alt" },
+  { key: "center", label: "Merkez" },
+  { key: "bottom-center", label: "Alt Merkez" },
+];
+
+const SCENE_TAGS = ["beyaz stüdyo", "mağaza vitrini", "doğal ışık", "premium", "minimalist", "lifestyle", "neon", "lüks", "doğa"];
+
 const SLOT_CHOICES = [
   { key: "1-ana", label: "1. Ana" },
   { key: "2-4-ek", label: "2-4. Ek" },
@@ -186,6 +245,16 @@ async function downloadImage(url: string, filename: string) {
   } catch {
     window.open(url, "_blank");
   }
+}
+
+const _loadedFonts = new Set<string>();
+function loadGoogleFont(f: string) {
+  if (_loadedFonts.has(f)) return;
+  _loadedFonts.add(f);
+  const l = document.createElement("link");
+  l.rel = "stylesheet";
+  l.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(f)}:wght@400;600;700;800&display=swap`;
+  document.head.appendChild(l);
 }
 
 function toneClasses(tone?: string) {
@@ -369,7 +438,7 @@ function AdPreview({
 }
 
 export default function ProductImageStudio() {
-  const { activeCompany } = useAuth();
+  const { activeCompany, companies } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const promptTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [modules, setModules] = useState<SidebarModule[]>([]);
@@ -394,6 +463,9 @@ export default function ProductImageStudio() {
   const [generating, setGenerating] = useState(false);
   const [savingStudio, setSavingStudio] = useState(false);
   const [analyzingStudio, setAnalyzingStudio] = useState(false);
+  const [aiCategorySuggesting, setAiCategorySuggesting] = useState(false);
+  const [aiCategories, setAiCategories] = useState<string[]>([]);
+  const [showAiCategories, setShowAiCategories] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
   const [job, setJob] = useState<JobState | null>(null);
@@ -402,6 +474,49 @@ export default function ProductImageStudio() {
   const [showBriefLibrary, setShowBriefLibrary] = useState(false);
   const [savingBrief, setSavingBrief] = useState(false);
   const [briefTitle, setBriefTitle] = useState("");
+
+  // Canvas stüdyosu state
+  const [canvasVariant, setCanvasVariant] = useState<{
+    id: number;
+    name: string;
+    imageUrl: string;
+    isAd: boolean;
+  } | null>(null);
+
+  // ── Creation Mode State (görselsiz başlangıç) ─────────
+  type CreationTextLayer = {
+    id: string;
+    text: string;
+    fontStyle: string;
+    fontSize: number;
+    color: string;
+    position: string;
+  };
+  const [scenePrompt, setScenePrompt] = useState("");
+  const [bgType, setBgType] = useState<"solid" | "gradient" | "texture" | "scene">("solid");
+  const [bgColor, setBgColor] = useState("#FFFFFF");
+  const [bgGradient, setBgGradient] = useState({ color1: "#FFFFFF", color2: "#F5F5F5", direction: "to bottom" });
+  const [bgOpacity, setBgOpacity] = useState(100);
+  const [creationTexts, setCreationTexts] = useState<CreationTextLayer[]>([]);
+  const [editingTextId, setEditingTextId] = useState<string | null>(null);
+  const [effectShadow, setEffectShadow] = useState(true);
+  const [effectReflection, setEffectReflection] = useState(false);
+  const [effectHighlight, setEffectHighlight] = useState(true);
+  const [effectBgBlur, setEffectBgBlur] = useState(false);
+  const [shadowIntensity, setShadowIntensity] = useState(50);
+  const [selectedRatio, setSelectedRatio] = useState("1:1");
+  const [fontSearch, setFontSearch] = useState("");
+
+  // ── Brand Selection & Gemini New Image State ──
+  const [selectedBrandId, setSelectedBrandId] = useState<number | null>(null);
+  const [generatingNew, setGeneratingNew] = useState(false);
+  const [showBrandSelector, setShowBrandSelector] = useState(false);
+  const [creationImageUrl, setCreationImageUrl] = useState<string | null>(null);
+  const [creationGenerating, setCreationGenerating] = useState(false);
+  const [useBrandLogo, setUseBrandLogo] = useState(false);
+
+  // Determine if we're in creation mode (no source image)
+  const isCreationMode = !currentStudio?.source_image;
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -557,7 +672,6 @@ export default function ProductImageStudio() {
     if (!activeCompany?.id) return;
     setUploading(true);
     setError("");
-    setSaveMessage("");
     try {
       const formData = new FormData();
       formData.append("company_id", String(activeCompany.id));
@@ -570,27 +684,53 @@ export default function ProductImageStudio() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setCurrentStudio(data.studio);
-      const generation = await api.post(`/api/protected/product-image-studio/${data.studio.id}/generate`, { force: true });
-      setGenerating(true);
-      setJob(generation.data);
       await fetchStudios();
+      showToast("Görsel yüklendi ✓ Seçenekleri ayarlayıp Görsel Oluştur'a basın");
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
       setError(msg || "Gorsel yuklenemedi");
     } finally {
       setUploading(false);
     }
-  }, [activeCompany?.id, fetchStudios, selectedCategory, selectedSlot, title]);
+  }, [activeCompany?.id, fetchStudios, selectedCategory, selectedSlot, showToast, title]);
 
-  const handleGenerateProducts = useCallback(async (force = false) => {
+  const handleAiCategorySuggest = useCallback(async () => {
+    if (!currentStudio?.id) return;
+    setAiCategorySuggesting(true);
+    setShowAiCategories(true);
+    try {
+      const { data } = await api.post(`/api/protected/product-image-studio/${currentStudio.id}/analyze`);
+      const summary = data.studio?.source_summary || "";
+      // AI summary'den anlamlı kategori çıkar
+      const suggestions: string[] = [];
+      const lower = summary.toLowerCase();
+      if (lower.includes("kedi") || lower.includes("mama") || lower.includes("pet") || lower.includes("cat")) suggestions.push("Evcil Hayvan");
+      if (lower.includes("giyim") || lower.includes("elbise") || lower.includes("dress") || lower.includes("moda")) suggestions.push("Giyim & Moda");
+      if (lower.includes("ayakkab") || lower.includes("shoe") || lower.includes("sneaker")) suggestions.push("Ayakkabı");
+      if (lower.includes("kozmetik") || lower.includes("serum") || lower.includes("cosmeti")) suggestions.push("Kozmetik");
+      if (lower.includes("elektro") || lower.includes("phone") || lower.includes("teknol")) suggestions.push("Elektronik");
+      if (lower.includes("dekorasyon") || lower.includes("ev") || lower.includes("home")) suggestions.push("Ev Dekorasyon");
+      if (suggestions.length === 0) suggestions.push("Diğer");
+      setAiCategories(suggestions);
+      setSourceSummaryDraft(summary);
+      setCurrentStudio(data.studio);
+    } catch {
+      setAiCategories(["Diğer"]);
+    } finally {
+      setAiCategorySuggesting(false);
+    }
+  }, [currentStudio?.id]);
+
+  const handleGenerateProducts = useCallback(async (force = false, promptOverride?: string) => {
     if (!currentStudio?.id) return;
     setGenerating(true);
     setError("");
+    const finalPrompt = promptOverride ?? sourceSummaryDraft;
     try {
       await api.patch(`/api/protected/product-image-studio/${currentStudio.id}`, {
         title,
         category: selectedCategory,
-        source_summary: sourceSummaryDraft,
+        source_summary: finalPrompt,
         active_tab: "urun-gorseli-studyosu",
       });
       const { data } = await api.post(`/api/protected/product-image-studio/${currentStudio.id}/generate`, { force });
@@ -698,11 +838,66 @@ export default function ProductImageStudio() {
     await handleGenerateProducts(true);
   }, [activeTab, currentStudio?.id, handleGenerateAds, handleGenerateProducts]);
 
+  // ── Gemini ile yeni ürün görseli üretimi ──
+  const handleGenerateNewImage = useCallback(async () => {
+    if (!currentStudio?.id) return;
+    setGeneratingNew(true);
+    setError("");
+    try {
+      const { data } = await api.post(`/api/protected/product-image-studio/${currentStudio.id}/generate-new`, {
+        brand_id: selectedBrandId || activeCompany?.id,
+        category: selectedCategory,
+        aspect_ratio: selectedRatio,
+      });
+      setCurrentStudio(data.studio);
+      if (data.variant?.id) {
+        setSelectedVariantId(data.variant.id);
+      }
+      showToast("Yeni ürün görseli üretildi ✓");
+      await fetchStudios();
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      setError(msg || "Görsel üretilemedi");
+    } finally {
+      setGeneratingNew(false);
+    }
+  }, [currentStudio?.id, selectedBrandId, activeCompany?.id, selectedCategory, selectedRatio, showToast, fetchStudios]);
+
   const progress = job ? Math.min(100, Math.round((job.completed / Math.max(job.total, 1)) * 100)) : 0;
   const brief = creativeBrief(activeTab, selectedCategory);
 
+  // Canvas stüdyosu açıksa — ana layout içinde (sidebar görünür kalır)
+  if (canvasVariant) {
+    return (
+      <div className="-m-4 sm:-m-5 lg:-m-6" style={{ height: "calc(100vh - 60px)" }}>
+        <ProductCanvasStudio
+          imageUrl={canvasVariant.imageUrl}
+          variantId={canvasVariant.id}
+          variantName={canvasVariant.name}
+          isAdVariant={canvasVariant.isAd}
+          onBack={() => setCanvasVariant(null)}
+          onSaved={(newUrl) => {
+            if (canvasVariant.isAd) {
+              setCurrentStudio((prev) => prev ? {
+                ...prev,
+                ad_variants: prev.ad_variants?.map((v) => v.id === canvasVariant.id ? { ...v, preview_url: newUrl } : v),
+              } : prev);
+            } else {
+              setCurrentStudio((prev) => prev ? {
+                ...prev,
+                variants: prev.variants?.map((v) => v.id === canvasVariant.id ? { ...v, preview_url: newUrl } : v),
+              } : prev);
+            }
+            showToast("Canvas kaydedildi ✓");
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="-m-4 sm:-m-5 lg:-m-6">
+
       {/* Toast */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-[9999] flex items-center gap-2 rounded-xl bg-zinc-900 px-4 py-3 text-sm font-semibold text-white shadow-xl animate-fade-in-up">
@@ -712,48 +907,630 @@ export default function ProductImageStudio() {
       )}
       <div className="bg-white">
         <div className="border-b border-zinc-100 px-4 py-0 sm:px-5">
-          <div className="flex flex-wrap items-end gap-5">
+          <div className="flex flex-wrap items-end gap-0">
             {modules.map((module) => {
               const isActive =
-                (module.key === "product-image-studio" && activeTab === "urun-gorseli-studyosu") ||
+                (module.key === "product-image-studio" && activeTab === "urun-gorseli-studyosu" && !isCreationMode) ||
                 (module.key === "ad-studio" && activeTab === "reklam-studyosu");
               const labelOverrides: Record<string, string> = {
                 "product-image-studio": "Ürün Görseli Stüdyosu",
                 "ad-studio": "Reklam Stüdyosu",
               };
               const label = labelOverrides[module.key] || module.label;
+
+              // "Yeni Ürün Görseli" tabını "Reklam Stüdyosu"ndan hemen önce göster
+              const showNewTabBeforeThis = module.key === "ad-studio";
+
               return (
-                <button
-                  key={module.key}
-                  type="button"
-                  onClick={() => {
-                    if (module.key === "ad-studio") {
-                      setActiveTab("reklam-studyosu");
-                      if (currentStudio?.id) handleSaveStudioSettings("reklam-studyosu");
-                    }
-                    if (module.key === "product-image-studio") {
-                      setActiveTab("urun-gorseli-studyosu");
-                      if (currentStudio?.id) handleSaveStudioSettings("urun-gorseli-studyosu");
-                    }
-                  }}
-                  className={`inline-flex items-center gap-1.5 border-b-2 py-3 text-[13px] font-semibold transition ${
-                    isActive ? "border-[#F14B2A] text-[#E64A2E]" : "border-transparent text-zinc-400 hover:text-zinc-600"
-                  }`}
-                >
-                  <span className="text-base">{module.icon}</span>
-                  {label}
-                  {module.badge && <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold tracking-wide text-emerald-700">{module.badge}</span>}
-                </button>
+                <React.Fragment key={module.key}>
+                  {showNewTabBeforeThis && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCurrentStudio(null);
+                        setActiveTab("urun-gorseli-studyosu");
+                        setSelectedVariantId(null);
+                        setSelectedAdVariantId(null);
+                        setScenePrompt("");
+                        setCreationTexts([]);
+                        showToast("Yeni ürün görseli stüdyosu açıldı");
+                      }}
+                      className={`inline-flex items-center gap-1.5 border-b-2 px-4 py-3 text-[13px] font-semibold transition ${
+                        isCreationMode && activeTab === "urun-gorseli-studyosu"
+                          ? "border-[#F14B2A] text-[#E64A2E]"
+                          : "border-transparent text-zinc-400 hover:text-zinc-600"
+                      }`}
+                      title="Yeni Ürün Görseli Oluştur"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="8" y1="4" x2="8" y2="12" /><line x1="4" y1="8" x2="12" y2="8" /></svg>
+                      Yeni Ürün Görseli
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (module.key === "ad-studio") {
+                        setActiveTab("reklam-studyosu");
+                        if (currentStudio?.id) handleSaveStudioSettings("reklam-studyosu");
+                      }
+                      if (module.key === "product-image-studio") {
+                        setActiveTab("urun-gorseli-studyosu");
+                        if (currentStudio?.id) handleSaveStudioSettings("urun-gorseli-studyosu");
+                      }
+                    }}
+                    className={`inline-flex items-center gap-1.5 border-b-2 px-4 py-3 text-[13px] font-semibold transition ${
+                      isActive ? "border-[#F14B2A] text-[#E64A2E]" : "border-transparent text-zinc-400 hover:text-zinc-600"
+                    }`}
+                  >
+                    <span className="text-base">{module.icon}</span>
+                    {label}
+                    {module.badge && <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold tracking-wide text-emerald-700">{module.badge}</span>}
+                  </button>
+                </React.Fragment>
               );
             })}
           </div>
         </div>
 
         <div className="grid gap-0 2xl:grid-cols-[260px_minmax(0,1fr)_300px]">
-          <aside className="border-b border-zinc-100 2xl:border-b-0 2xl:border-r bg-[#FAFAF9] flex flex-col">
+          <aside className="border-b border-zinc-100 2xl:border-b-0 2xl:border-r bg-[#FAFAF9] flex flex-col overflow-y-auto" style={{ maxHeight: "calc(100vh - 120px)" }}>
+
+            {isCreationMode ? (
+              /* ═══════════════════════════════════════════════
+                 CREATION MODE — Görselsiz Başlangıç Arayüzü
+                 ═══════════════════════════════════════════════ */
+              <>
+                {/* SECTION HEADER */}
+                <div className="px-3 pt-3 pb-2">
+                  <h2 className="text-sm font-extrabold text-zinc-800">Görsel &amp; Arka Plan Ayarları</h2>
+                </div>
+
+                {/* 1. ÜRÜN GÖRSELİ */}
+                <div className="px-3 pb-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">1. Ürün Görseli</p>
+                  <div className="mt-2 relative overflow-hidden rounded-xl border-2 border-dashed border-zinc-300 bg-white cursor-pointer transition hover:border-[#F14B2A] hover:bg-orange-50/30" onClick={() => fileInputRef.current?.click()}>
+                    <div className="flex flex-col items-center justify-center gap-2 py-6 text-center">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-100">
+                        <span className="text-xl">📷</span>
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-zinc-700">Ürün fotoğrafını yükle</p>
+                        <p className="mt-1 text-[10px] leading-3.5 text-zinc-400">Telefonla çekilen ham görsel · JPG, PNG, WEBP<br />AI arka planı otomatik kaldırır</p>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="mt-1.5 text-[10px] leading-4 text-zinc-400">
+                    💡 <strong>İpucu:</strong> Karmaşık arka planlar sorun değil — AI ürünü otomatik ayırır. Düz zemin üzerinde çekim ideal sonuç verir.
+                  </p>
+                  {/* Son Çalışmalarım — mevcut stüdyolara dönüş */}
+                  {studios.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-zinc-400 mb-1.5">Son Çalışmalarım</p>
+                      <div className="flex gap-1.5 overflow-x-auto pb-1">
+                        {studios.slice(0, 5).map((studio) => (
+                          <button
+                            key={studio.id}
+                            type="button"
+                            onClick={() => {
+                              setCurrentStudio(studio);
+                              setActiveTab("urun-gorseli-studyosu");
+                            }}
+                            className="group flex shrink-0 flex-col items-center gap-1 rounded-lg border border-zinc-200 bg-white p-1.5 transition hover:border-[#F14B2A] hover:shadow-sm"
+                            title={studio.title || "Stüdyo"}
+                          >
+                            {studio.source_image ? (
+                              <img src={mediaUrl(studio.source_image)} alt={studio.title} className="h-10 w-10 rounded-md object-cover" />
+                            ) : (
+                              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-zinc-100 text-sm">🖼</div>
+                            )}
+                            <span className="w-12 truncate text-center text-[8px] font-medium text-zinc-500 group-hover:text-zinc-700">{studio.title || "Ürün"}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* MARKA LOGO TOGGLE */}
+                <div className="border-t border-zinc-100 px-3 py-3">
+                  <div className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-3 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">🏷️</span>
+                      <div>
+                        <span className="text-xs font-semibold text-zinc-700">Marka logosunu kullan</span>
+                        <p className="text-[9px] text-zinc-400">Logo görselde yer alsın mı?</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setUseBrandLogo(!useBrandLogo)}
+                      className={`relative h-5 w-9 rounded-full transition ${useBrandLogo ? "bg-[#F14B2A]" : "bg-zinc-200"}`}
+                    >
+                      <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${useBrandLogo ? "left-[18px]" : "left-0.5"}`} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* 2. AI SAHNESİ */}
+                <div className="border-t border-zinc-100 px-3 py-3">
+                  <div className="flex items-center gap-2">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">2. AI Sahnesi</p>
+                    <span className="rounded bg-[#F14B2A] px-1.5 py-0.5 text-[8px] font-bold text-white">DIO ÖZEL</span>
+                  </div>
+                  {/* Prompt Box */}
+                  <div className="mt-2 rounded-xl border border-zinc-800 bg-zinc-900 p-3">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="flex items-center gap-1 text-[11px] font-bold text-white">✶ Ne istiyorsun? </span>
+                      <span className="rounded bg-zinc-700 px-1.5 py-0.5 text-[9px] font-medium text-zinc-300">Türkçe yaz</span>
+                    </div>
+                    <textarea
+                      value={scenePrompt}
+                      onChange={(e) => setScenePrompt(e.target.value)}
+                      onInput={(e) => { const t = e.currentTarget; t.style.height = "auto"; t.style.height = t.scrollHeight + "px"; }}
+                      style={{ minHeight: "60px" }}
+                      className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-800 px-2.5 py-2 text-[11px] leading-4 text-zinc-200 outline-none placeholder:text-zinc-500 focus:border-zinc-500"
+                      placeholder="Ürünü beyaz stüdyo arka planına koy, sağ alt köşede %30 indirim etiketi olsun..."
+                    />
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {SCENE_TAGS.map((tag) => (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => setScenePrompt((prev) => prev ? `${prev}, ${tag}` : tag)}
+                          className="rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-[10px] font-medium text-zinc-300 transition hover:border-zinc-500 hover:text-white"
+                        >
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* AI Sahne Oluştur butonu */}
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!scenePrompt.trim()) return;
+                      setCreationGenerating(true);
+                      setError("");
+                      try {
+                        const { data } = await api.post("/api/protected/product-image-studio/create-image", {
+                          scene_prompt: scenePrompt,
+                          bg_type: bgType,
+                          bg_color: bgColor,
+                          grad_color1: bgGradient.color1,
+                          grad_color2: bgGradient.color2,
+                          grad_direction: bgGradient.direction,
+                          bg_opacity: bgOpacity,
+                          aspect_ratio: selectedRatio,
+                          category: selectedCategory,
+                          text_layers: creationTexts.map(t => ({
+                            text: t.text,
+                            font_style: t.fontStyle,
+                            font_size: t.fontSize,
+                            color: t.color,
+                            position: t.position,
+                          })),
+                          effect_shadow: effectShadow,
+                          effect_reflection: effectReflection,
+                          effect_highlight: effectHighlight,
+                          effect_bg_blur: effectBgBlur,
+                          shadow_intensity: shadowIntensity,
+                          platforms: selectedPlatforms,
+                          brand_id: selectedBrandId || activeCompany?.id,
+                          company_id: activeCompany?.id,
+                          use_brand_logo: useBrandLogo,
+                        });
+                        if (data.imageUrl) {
+                          setCreationImageUrl(mediaUrl(data.imageUrl));
+                          showToast("Ürün görseli üretildi ✓");
+                        }
+                      } catch (err: unknown) {
+                        const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+                        setError(msg || "Görsel üretilemedi");
+                      } finally {
+                        setCreationGenerating(false);
+                      }
+                    }}
+                    disabled={!scenePrompt.trim() || creationGenerating}
+                    className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#F14B2A] py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#D93E1F] disabled:opacity-50"
+                  >
+                    {creationGenerating ? (
+                      <>
+                        <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        AI ile üretiliyor...
+                      </>
+                    ) : (
+                      <>✦ AI Görsel Üret</>
+                    )}
+                  </button>
+                  {creationGenerating && (
+                    <p className="mt-1 text-center text-[9px] text-zinc-400 animate-pulse">Görsel üretiliyor, lütfen bekleyin...</p>
+                  )}
+                </div>
+
+                {/* 3. MANUEL ARKA PLAN */}
+                <div className="border-t border-zinc-100 px-3 py-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">3. Manuel Arka Plan</p>
+                  {/* Tab bar */}
+                  <div className="mt-2 flex rounded-lg border border-zinc-200 bg-white p-0.5">
+                    {(["solid", "gradient", "texture", "scene"] as const).map((t) => {
+                      const labels = { solid: "Düz Renk", gradient: "Gradient", texture: "Doku", scene: "Yaşam" };
+                      return (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setBgType(t)}
+                          className={`flex-1 rounded-md py-1.5 text-[10px] font-semibold transition ${bgType === t ? "bg-zinc-900 text-white" : "text-zinc-500 hover:text-zinc-700"}`}
+                        >
+                          {labels[t]}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {bgType === "solid" && (
+                    <div className="mt-3 space-y-3">
+                      {/* E-ticaret Standart Renkleri */}
+                      <div>
+                        <p className="text-[10px] font-semibold text-zinc-500">E-ticaret Standart Renkleri</p>
+                        <div className="mt-1.5 grid grid-cols-6 gap-1.5">
+                          {ECOM_COLORS.map((c) => (
+                            <button
+                              key={c}
+                              type="button"
+                              onClick={() => setBgColor(c)}
+                              className={`aspect-square rounded-lg border-2 transition hover:scale-105 ${bgColor === c ? "border-[#F14B2A] shadow-sm" : "border-zinc-200"}`}
+                              style={{ backgroundColor: c }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      {/* Özel Renk */}
+                      <div>
+                        <p className="text-[10px] font-semibold text-zinc-500">Özel Renk</p>
+                        <div className="mt-1 flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={bgColor}
+                            onChange={(e) => setBgColor(e.target.value)}
+                            className="h-8 w-8 cursor-pointer rounded-lg border border-zinc-200"
+                          />
+                          <input
+                            type="text"
+                            value={bgColor.toUpperCase()}
+                            onChange={(e) => setBgColor(e.target.value)}
+                            className="flex-1 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-mono outline-none focus:border-[#F14B2A]"
+                          />
+                        </div>
+                      </div>
+                      {/* Opaklık */}
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-semibold text-zinc-500">Opaklık:</span>
+                          <span className="text-[10px] font-bold text-zinc-700">{bgOpacity}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          value={bgOpacity}
+                          onChange={(e) => setBgOpacity(Number(e.target.value))}
+                          className="mt-1 h-2 w-full cursor-pointer rounded-full bg-zinc-200 accent-[#F14B2A]"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {bgType === "gradient" && (
+                    <div className="mt-3 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1">
+                          <p className="text-[9px] text-zinc-400 mb-0.5">Renk 1</p>
+                          <input type="color" value={bgGradient.color1} onChange={(e) => setBgGradient(p => ({ ...p, color1: e.target.value }))} className="h-8 w-full cursor-pointer rounded-lg border border-zinc-200" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-[9px] text-zinc-400 mb-0.5">Renk 2</p>
+                          <input type="color" value={bgGradient.color2} onChange={(e) => setBgGradient(p => ({ ...p, color2: e.target.value }))} className="h-8 w-full cursor-pointer rounded-lg border border-zinc-200" />
+                        </div>
+                      </div>
+                      <div className="h-10 w-full rounded-lg border border-zinc-200" style={{ background: `linear-gradient(${bgGradient.direction}, ${bgGradient.color1}, ${bgGradient.color2})` }} />
+                    </div>
+                  )}
+
+                  {bgType === "texture" && (
+                    <div className="mt-3 grid grid-cols-3 gap-1.5">
+                      {["Mermer", "Ahşap", "Kumaş", "Beton", "Kum", "Yaprak"].map((t) => (
+                        <button key={t} type="button" onClick={() => setScenePrompt(p => p ? `${p}, ${t.toLowerCase()} doku` : `${t.toLowerCase()} doku arka plan`)} className="rounded-xl border border-zinc-200 bg-white px-2 py-3 text-center text-[10px] font-semibold text-zinc-600 transition hover:border-[#F14B2A] hover:bg-orange-50">
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {bgType === "scene" && (
+                    <div className="mt-3 grid grid-cols-2 gap-1.5">
+                      {["Mutfak Tezgahı", "Bahçe", "Ofis Masası", "Deniz Kenarı", "Yatak Odası", "Salon"].map((s) => (
+                        <button key={s} type="button" onClick={() => setScenePrompt(p => p ? `${p}, ${s.toLowerCase()} sahnesinde` : `${s.toLowerCase()} sahnesinde`)} className="rounded-xl border border-zinc-200 bg-white px-2 py-3 text-center text-[10px] font-semibold text-zinc-600 transition hover:border-[#F14B2A] hover:bg-orange-50">
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. METİN & ETİKET */}
+                <div className="border-t border-zinc-100 px-3 py-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">4. Metin &amp; Etiket</p>
+
+                  {/* Eklenen metin katmanları */}
+                  {creationTexts.map((layer) => {
+                    const isEditing = editingTextId === layer.id;
+                    return (
+                      <div key={layer.id} className={`mt-2 rounded-xl border px-3 py-2 transition ${isEditing ? "border-[#F14B2A] bg-orange-50/50" : "border-zinc-200 bg-white"}`}>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-zinc-800" style={{ fontFamily: layer.fontStyle }}>{layer.text}</span>
+                          <div className="flex items-center gap-1.5">
+                            <button type="button" onClick={() => setEditingTextId(isEditing ? null : layer.id)} className="text-[10px] font-semibold text-zinc-400 hover:text-[#F14B2A]">
+                              Düzenle ↗
+                            </button>
+                            <button type="button" onClick={() => { setCreationTexts(prev => prev.filter(t => t.id !== layer.id)); if (isEditing) setEditingTextId(null); }} className="text-[10px] font-semibold text-red-400 hover:text-red-600" title="Katmanı sil">
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+
+                        {isEditing && (
+                          <div className="mt-2 space-y-2.5 pt-2 border-t border-zinc-100">
+                            {/* Metin input */}
+                            <div>
+                              <label className="text-[9px] font-semibold text-zinc-400">Metin:</label>
+                              <input
+                                type="text"
+                                value={layer.text}
+                                onChange={(e) => setCreationTexts(prev => prev.map(t => t.id === layer.id ? { ...t, text: e.target.value } : t))}
+                                className="mt-0.5 w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-bold outline-none focus:border-[#F14B2A]"
+                              />
+                            </div>
+                            {/* Font Seç — Google Fonts */}
+                            <div>
+                              <label className="text-[9px] font-semibold text-zinc-400">Font Seç:</label>
+                              {/* Hızlı preset butonları */}
+                              <div className="mt-1 grid grid-cols-2 gap-1">
+                                {FONT_STYLES.map((fs) => (
+                                  <button
+                                    key={fs.key}
+                                    type="button"
+                                    onClick={() => { loadGoogleFont(fs.family); setCreationTexts(prev => prev.map(t => t.id === layer.id ? { ...t, fontStyle: fs.family } : t)); }}
+                                    className={`rounded-lg border px-2 py-1.5 text-center transition ${layer.fontStyle === fs.family ? "border-[#F14B2A] bg-orange-50" : "border-zinc-200 bg-white hover:border-zinc-300"}`}
+                                  >
+                                    <span className="block text-[11px] font-bold" style={{ fontFamily: fs.family }}>{fs.label}</span>
+                                    <span className="block text-[8px] text-zinc-400">{fs.desc}</span>
+                                  </button>
+                                ))}
+                              </div>
+                              {/* Google Fonts arama ve listesi */}
+                              <div className="mt-1.5">
+                                <input
+                                  type="text"
+                                  value={fontSearch}
+                                  onChange={(e) => setFontSearch(e.target.value)}
+                                  placeholder="Font ara... (ör: Montserrat)"
+                                  className="w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-[10px] outline-none focus:border-[#F14B2A]"
+                                />
+                                <div className="mt-1 max-h-32 overflow-y-auto rounded-lg border border-zinc-100 bg-white">
+                                  {GOOGLE_FONTS
+                                    .filter(f => !fontSearch || f.toLowerCase().includes(fontSearch.toLowerCase()))
+                                    .map((font) => (
+                                      <button
+                                        key={font}
+                                        type="button"
+                                        onClick={() => { loadGoogleFont(font); setCreationTexts(prev => prev.map(t => t.id === layer.id ? { ...t, fontStyle: font } : t)); setFontSearch(""); }}
+                                        onMouseEnter={() => loadGoogleFont(font)}
+                                        className={`flex w-full items-center justify-between px-2.5 py-1.5 text-left text-[10px] transition hover:bg-orange-50 ${layer.fontStyle === font ? "bg-orange-50 font-bold text-[#E64A2E]" : "text-zinc-600"}`}
+                                      >
+                                        <span style={{ fontFamily: font }}>{font}</span>
+                                        {layer.fontStyle === font && <span className="text-[8px]">✓</span>}
+                                      </button>
+                                    ))
+                                  }
+                                </div>
+                              </div>
+                              <p className="mt-0.5 text-[8px] text-zinc-400">Seçili: <strong style={{ fontFamily: layer.fontStyle }}>{layer.fontStyle}</strong></p>
+                            </div>
+                            {/* Boyut */}
+                            <div>
+                              <div className="flex items-center justify-between">
+                                <label className="text-[9px] font-semibold text-zinc-400">Boyut:</label>
+                                <span className="text-[9px] text-zinc-400">{layer.fontSize}px</span>
+                              </div>
+                              <input
+                                type="range"
+                                min={10}
+                                max={80}
+                                value={layer.fontSize}
+                                onChange={(e) => setCreationTexts(prev => prev.map(t => t.id === layer.id ? { ...t, fontSize: Number(e.target.value) } : t))}
+                                className="mt-0.5 h-2 w-full cursor-pointer rounded-full bg-zinc-200 accent-[#F14B2A]"
+                              />
+                            </div>
+                            {/* Renk */}
+                            <div>
+                              <label className="text-[9px] font-semibold text-zinc-400">Renk:</label>
+                              <div className="mt-0.5 flex gap-1.5">
+                                {["#FFFFFF", "#F14B2A", "#000000", "#FFD93D", "#16A34A"].map((c) => (
+                                  <button
+                                    key={c}
+                                    type="button"
+                                    onClick={() => setCreationTexts(prev => prev.map(t => t.id === layer.id ? { ...t, color: c } : t))}
+                                    className={`h-6 w-6 rounded-md border-2 transition ${layer.color === c ? "border-[#F14B2A]" : "border-zinc-200"}`}
+                                    style={{ backgroundColor: c }}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                            {/* Pozisyon */}
+                            <div>
+                              <label className="text-[9px] font-semibold text-zinc-400">Pozisyon:</label>
+                              <div className="mt-0.5 flex flex-wrap gap-1">
+                                {TEXT_POSITIONS.map((pos) => (
+                                  <button
+                                    key={pos.key}
+                                    type="button"
+                                    onClick={() => setCreationTexts(prev => prev.map(t => t.id === layer.id ? { ...t, position: pos.key } : t))}
+                                    className={`rounded-lg px-2 py-1 text-[10px] font-semibold transition ${layer.position === pos.key ? "bg-[#F14B2A] text-white" : "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
+                                  >
+                                    {pos.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                            {/* Sil */}
+                            <button
+                              type="button"
+                              onClick={() => { setCreationTexts(prev => prev.filter(t => t.id !== layer.id)); setEditingTextId(null); }}
+                              className="w-full rounded-lg border border-red-200 bg-red-50 py-1 text-[10px] font-bold text-red-500 hover:bg-red-100"
+                            >
+                              Katmanı Sil
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {/* + Metin Katmanı Ekle */}
+                  <button
+                    type="button"
+                    onClick={() => { loadGoogleFont("Bebas Neue"); setCreationTexts(prev => [...prev, { id: `txt_${Date.now()}`, text: "Metin yaz...", fontStyle: "Bebas Neue", fontSize: 32, color: "#FFFFFF", position: "bottom-right" }]); }}
+                    className="mt-2 w-full rounded-xl border border-dashed border-zinc-300 bg-white py-2.5 text-xs font-semibold text-zinc-500 transition hover:border-[#F14B2A] hover:text-[#F14B2A]"
+                  >
+                    + Metin Katmanı Ekle
+                  </button>
+
+                  {/* Hazır Etiket Şablonları */}
+                  <div className="mt-3">
+                    <p className="text-[10px] font-semibold text-zinc-500">Hazır Etiket Şablonları</p>
+                    <div className="mt-1.5 grid grid-cols-3 gap-1.5">
+                      {LABEL_TEMPLATES.map((tpl) => (
+                        <button
+                          key={tpl.key}
+                          type="button"
+                          onClick={() => { loadGoogleFont("Bebas Neue"); setCreationTexts(prev => [...prev, { id: `label_${Date.now()}`, text: tpl.text, fontStyle: "Bebas Neue", fontSize: 24, color: "#FFFFFF", position: "bottom-right" }]); }}
+                          className="flex flex-col items-center gap-1 rounded-xl border border-zinc-200 bg-white px-2 py-2.5 transition hover:border-[#F14B2A] hover:bg-orange-50"
+                        >
+                          <span className="text-base">{tpl.icon}</span>
+                          <span className="text-[10px] font-semibold text-zinc-600">{tpl.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 5. GÖLGE & EFEKTLER */}
+                <div className="border-t border-zinc-100 px-3 py-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">5. Gölge &amp; Efektler</p>
+                  <div className="mt-2 space-y-2">
+                    {[
+                      { label: "Ürün Gölgesi", value: effectShadow, setter: setEffectShadow },
+                      { label: "Ürün Yansıması", value: effectReflection, setter: setEffectReflection },
+                      { label: "Işık Vurgusu", value: effectHighlight, setter: setEffectHighlight },
+                      { label: "Arka Plan Blur", value: effectBgBlur, setter: setEffectBgBlur },
+                    ].map(({ label, value, setter }) => (
+                      <div key={label} className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-3 py-2.5">
+                        <span className="text-xs font-medium text-zinc-700">{label}</span>
+                        <button
+                          type="button"
+                          onClick={() => setter(!value)}
+                          className={`relative h-5 w-9 rounded-full transition ${value ? "bg-[#F14B2A]" : "bg-zinc-200"}`}
+                        >
+                          <div className={`absolute top-[2px] h-4 w-4 rounded-full bg-white shadow transition-all ${value ? "left-[18px]" : "left-[2px]"}`} />
+                        </button>
+                      </div>
+                    ))}
+                    {/* Gölge Yoğunluğu */}
+                    <div className="rounded-xl border border-zinc-200 bg-white px-3 py-2.5">
+                      <div className="flex justify-between text-xs">
+                        <span className="font-medium text-zinc-700">Gölge Yoğunluğu</span>
+                        <span className="text-zinc-400">{shadowIntensity}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        value={shadowIntensity}
+                        onChange={(e) => setShadowIntensity(Number(e.target.value))}
+                        className="mt-1.5 h-2 w-full cursor-pointer rounded-full bg-zinc-200 accent-[#F14B2A]"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* ANA BUTON — Oluştur & Platforma Hazırla */}
+                <div className="border-t border-zinc-100 px-3 py-3">
+                  <button
+                    type="button"
+                    disabled={generating}
+                    onClick={() => {
+                      // Build comprehensive prompt from all creation settings
+                      const parts: string[] = [];
+                      if (scenePrompt.trim()) parts.push(scenePrompt.trim());
+                      if (bgType === "solid" && bgColor !== "#FFFFFF") parts.push(`arka plan rengi: ${bgColor}`);
+                      if (bgType === "gradient") parts.push(`gradient arka plan: ${bgGradient.color1} - ${bgGradient.color2}`);
+                      if (bgType === "texture") parts.push("dokulu arka plan");
+                      if (bgType === "scene") parts.push("yaşam sahnesi");
+                      creationTexts.forEach((t) => {
+                        parts.push(`metin ekle: "${t.text}" pozisyon: ${t.position}`);
+                      });
+                      if (effectShadow) parts.push("ürün gölgesi ekle");
+                      if (effectReflection) parts.push("ürün yansıması ekle");
+                      if (effectHighlight) parts.push("ışık vurgusu ekle");
+                      if (effectBgBlur) parts.push("arka planı bulanıklaştır");
+
+                      const fullPrompt = parts.join(". ");
+                      setSourceSummaryDraft(fullPrompt);
+
+                      if (currentStudio?.id) {
+                        handleGenerateProducts(true, fullPrompt);
+                      } else {
+                        showToast("Önce bir ürün görseli yükleyin veya AI sahne oluşturun");
+                      }
+                    }}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#F14B2A] px-4 py-3 text-sm font-bold text-white shadow-md shadow-orange-200 transition hover:bg-[#D93E1F] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {generating ? (
+                      <>⏳ Üretiliyor...</>
+                    ) : (
+                      <>✦ Oluştur &amp; Platforma Hazırla</>
+                    )}
+                  </button>
+                </div>
+              </>
+            ) : (
+              /* ═══════════════════════════════════════════════
+                 EXISTING MODE — Görsel Yüklenmiş Arayüz
+                 ═══════════════════════════════════════════════ */
+              <>
             {/* Fotoğraf Alanı */}
             <div className="p-3">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">Ürün Fotoğrafı</p>
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">Ürün Fotoğrafı</p>
+                {/* + Yeni ürün butonu */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCurrentStudio(null);
+                    setActiveTab("urun-gorseli-studyosu");
+                    setSelectedVariantId(null);
+                    setSelectedAdVariantId(null);
+                    setScenePrompt("");
+                    setCreationTexts([]);
+                    showToast("Yeni ürün görseli stüdyosu açıldı");
+                  }}
+                  className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-bold text-zinc-500 transition hover:border-[#F14B2A] hover:bg-orange-50 hover:text-[#E64A2E]"
+                  title="Yeni Ürün Görseli Oluştur"
+                >
+                  <svg className="h-3 w-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="8" y1="3" x2="8" y2="13" /><line x1="3" y1="8" x2="13" y2="8" /></svg>
+                  Yeni
+                </button>
+              </div>
               <div className="mt-2 relative overflow-hidden rounded-xl border border-zinc-200 bg-[#F6F0E9] cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                 {currentStudio?.source_image ? (
                   <img src={mediaUrl(currentStudio.source_image)} alt="Kaynak ürün" className="aspect-square w-full object-cover" />
@@ -914,6 +1691,37 @@ export default function ProductImageStudio() {
                   </button>
                 ))}
               </div>
+              {/* AI Kategori Önerisi */}
+              <button
+                type="button"
+                disabled={!currentStudio?.id || aiCategorySuggesting}
+                onClick={handleAiCategorySuggest}
+                className="mt-2 flex w-full items-center gap-1.5 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 px-2.5 py-2 text-left text-[11px] text-zinc-500 transition hover:border-[#E64A2E] hover:bg-orange-50 hover:text-[#E64A2E] disabled:opacity-50"
+              >
+                <span>🤖</span>
+                {aiCategorySuggesting ? "AI analiz ediyor..." : "AI ile ürün kategorisi öner"}
+              </button>
+              {showAiCategories && aiCategories.length > 0 && (
+                <div className="mt-1.5 space-y-1">
+                  <p className="text-[9px] font-semibold text-emerald-600">✨ AI Önerileri:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {aiCategories.map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => { setSelectedCategory(cat); setShowAiCategories(false); showToast(`Kategori seçildi: ${cat}`); }}
+                        className={`rounded-lg border px-2 py-1 text-[10px] font-bold transition ${
+                          selectedCategory === cat
+                            ? "border-emerald-400 bg-emerald-50 text-emerald-700"
+                            : "border-zinc-200 bg-white text-zinc-600 hover:border-emerald-300 hover:bg-emerald-50"
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Platform */}
@@ -1027,7 +1835,8 @@ export default function ProductImageStudio() {
                     } varyant oluşturulacak`}
               </p>
             </div>
-
+              </>
+            )}
 
             <input
               ref={fileInputRef}
@@ -1088,16 +1897,154 @@ export default function ProductImageStudio() {
                 )}
 
                 {!currentStudio && !loading && (
-                  <div className="mt-6 rounded-xl border border-dashed border-zinc-200 bg-zinc-50 px-6 py-12 text-center">
-                    <p className="text-sm font-bold text-zinc-800">Ürün görseli yükleyerek başlayın</p>
-                    <p className="mt-1 text-xs text-zinc-400">Sistem önce yüklenen ürünü analiz eder, sonra aynı ürüne sadık kalarak pazaryeri ve sosyal medya için birden fazla kreatif varyant oluşturur.</p>
-                    <button type="button" onClick={() => fileInputRef.current?.click()} className="mt-3 rounded-lg bg-[#F14B2A] px-4 py-2 text-xs font-bold text-white">
-                      Görsel Yükle
-                    </button>
+                  <>
+                    {/* ── Aspect Ratio Bar ── */}
+                    <div className="mb-3 flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3 py-2">
+                      {ASPECT_RATIOS.map((ratio) => (
+                        <button
+                          key={ratio.key}
+                          type="button"
+                          onClick={() => setSelectedRatio(ratio.key)}
+                          className={`rounded-lg px-3 py-1.5 text-[11px] font-bold transition ${
+                            selectedRatio === ratio.key
+                              ? "bg-[#F14B2A] text-white"
+                              : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
+                          }`}
+                          title={(ratio as { desc?: string }).desc || ratio.key}
+                        >
+                          {ratio.label}
+                        </button>
+                      ))}
+                      <div className="ml-auto flex items-center gap-1.5">
+                        <button type="button" className="rounded-lg bg-zinc-800 px-2 py-1.5 text-[11px] font-semibold text-zinc-400 hover:bg-zinc-700 hover:text-white">↺ Geri Al</button>
+                      </div>
+                    </div>
+
+                    {/* ── Canvas Preview ── */}
+                    <div className="flex flex-1 items-center justify-center rounded-2xl bg-zinc-950 p-6" style={{ minHeight: "420px" }}>
+                      {(() => {
+                        const ratio = ASPECT_RATIOS.find(r => r.key === selectedRatio) || ASPECT_RATIOS[0];
+                        const maxW = 380; const maxH = 480;
+                        let cW = maxW; let cH = maxW * ratio.h / ratio.w;
+                        if (cH > maxH) { cH = maxH; cW = maxH * ratio.w / ratio.h; }
+                        const bgStyle: React.CSSProperties = {};
+                        if (bgType === "solid") { bgStyle.backgroundColor = bgColor; bgStyle.opacity = bgOpacity / 100; }
+                        else if (bgType === "gradient") bgStyle.background = `linear-gradient(${bgGradient.direction}, ${bgGradient.color1}, ${bgGradient.color2})`;
+                        else if (bgType === "texture") bgStyle.background = "repeating-conic-gradient(#ddd 0% 25%, #eee 0% 50%) 0 0 / 20px 20px";
+                        else bgStyle.backgroundColor = "#f5f5f5";
+
+                        return (
+                          <div className="relative overflow-hidden rounded-xl shadow-2xl" style={{ width: cW, height: cH, ...bgStyle }}>
+                            {/* Ürün placeholder veya üretilen görsel */}
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              {creationImageUrl ? (
+                                <img src={creationImageUrl} alt="AI üretilen görsel" className="h-full w-full object-cover" />
+                              ) : creationGenerating ? (
+                                <div className="flex flex-col items-center gap-3">
+                                  <div className="h-10 w-10 animate-spin rounded-full border-3 border-zinc-300 border-t-[#F14B2A]" />
+                                  <span className="text-[11px] font-semibold text-zinc-400">Görsel üretiliyor...</span>
+                                </div>
+                              ) : (
+                                <div className="flex flex-col items-center gap-2 opacity-30">
+                                  <svg className="h-12 w-12 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                  <span className="text-[10px] text-zinc-400">Ürün görseli</span>
+                                </div>
+                              )}
+                            </div>
+                            {/* Metin katmanları — AI prompt ipucu olarak gösterilir */}
+                            {creationTexts.length > 0 && !creationImageUrl && (
+                              <div className="absolute bottom-3 left-3 right-3 flex flex-wrap gap-1">
+                                {creationTexts.map((layer) => (
+                                  <span key={layer.id} className="inline-flex items-center gap-1 rounded-md border border-dashed border-white/40 bg-black/30 px-2 py-0.5 text-[9px] font-medium text-white/80 backdrop-blur-sm">
+                                    ✦ {layer.text}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                            {/* Efekt göstergeleri */}
+                            {effectShadow && <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/10 to-transparent" />}
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    {/* ── Canvas Alt Bilgi Barı ── */}
+                    <div className="mt-2 flex items-center justify-between rounded-xl bg-zinc-100 px-4 py-2">
+                      <div className="flex items-center gap-3 text-[10px] text-zinc-500">
+                        <span>
+                          {(() => {
+                            const r = ASPECT_RATIOS.find(a => a.key === selectedRatio);
+                            if (!r) return "1200×1200px";
+                            if (r.key === "TY") return "1200×1800px";
+                            if (r.key === "HB") return "1200×1200px";
+                            if (r.key === "IG") return "1080×1350px";
+                            return `${r.w * 300}×${r.h * 300}px`;
+                          })()}
+                        </span>
+                        <span>·</span>
+                        <span>{selectedRatio}</span>
+                        <span>·</span>
+                        <span>{bgType === "solid" ? "Düz Renk" : bgType === "gradient" ? "Gradient" : bgType === "texture" ? "Doku" : "Sahne"}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[10px]">
+                        {creationTexts.length > 0 && <span className="text-zinc-500">{creationTexts.length} metin</span>}
+                        {effectShadow && <span className="rounded bg-zinc-200 px-1.5 py-0.5 text-zinc-500">Gölge</span>}
+                        {effectHighlight && <span className="rounded bg-zinc-200 px-1.5 py-0.5 text-zinc-500">Işık</span>}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Görsel yüklendi ama henüz üretim başlamadı */}
+                {currentStudio && (!currentStudio.variants || currentStudio.variants.length === 0) && !generating && (
+                  <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-gradient-to-b from-zinc-50 to-white px-8 py-16 text-center">
+                    <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-100 to-amber-50 shadow-sm">
+                      <img src={mediaUrl(currentStudio.source_image)} alt="" className="h-16 w-16 rounded-xl object-cover" />
+                    </div>
+                    <h3 className="mt-5 text-base font-extrabold text-zinc-800">Görseliniz Hazır!</h3>
+                    <p className="mt-2 max-w-sm text-sm leading-relaxed text-zinc-500">
+                      Lütfen sol paneldeki <strong className="text-zinc-700">platform, arka plan stili</strong> ve <strong className="text-zinc-700">kategori</strong> seçeneklerini belirleyin ve ardından <strong className="text-[#E64A2E]">✶ Görsel Oluştur</strong> butonuna basın.
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-2.5">
+                      <span className="text-amber-500">💡</span>
+                      <p className="text-[11px] text-amber-700">Seçtiğiniz platform ve stil seçenekleri, AI&apos;ın ürettiği görsellerin kalitesini doğrudan etkiler.</p>
+                    </div>
                   </div>
                 )}
 
-                <div className="mt-3 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+                {/* Üretim devam ediyor — placeholder kartları */}
+                {generating && (
+                  <div className="mt-3 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <article key={i} className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+                        <div className="relative bg-gradient-to-b from-zinc-100 to-zinc-50">
+                          <div className="flex aspect-[4/5] flex-col items-center justify-center gap-3">
+                            <div className="relative">
+                              <div className="h-12 w-12 animate-spin rounded-full border-[3px] border-zinc-200 border-t-[#F14B2A]" />
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-sm">🎨</span>
+                              </div>
+                            </div>
+                            <div className="text-center px-4">
+                              <p className="text-xs font-bold text-zinc-600 animate-pulse">Görsel üretiliyor...</p>
+                              <p className="mt-1 text-[10px] text-zinc-400">{job ? `${job.completed}/${job.total} tamamlandı` : "Hazırlanıyor"}</p>
+                            </div>
+                          </div>
+                          {/* Shimmer effect */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" style={{ animationDuration: '2s' }} />
+                        </div>
+                        <div className="p-2.5">
+                          <div className="h-3 w-20 rounded bg-zinc-100 animate-pulse" />
+                          <div className="mt-2 h-4 w-32 rounded bg-zinc-100 animate-pulse" />
+                          <div className="mt-1.5 h-3 w-24 rounded bg-zinc-100 animate-pulse" />
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                )}
+
+                {/* Hazır varyant kartları */}
+                <div className={`mt-3 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3 ${generating && currentStudio?.variants?.length === 0 ? 'hidden' : ''}`}>
                   {currentStudio?.variants?.map((variant) => {
                     const selected = selectedVariant?.id === variant.id;
                     return (
@@ -1121,9 +2068,12 @@ export default function ProductImageStudio() {
                             <button
                               type="button"
                               onClick={() => {
-                                handleVariantSelect(variant.id);
-                                promptTextareaRef.current?.focus();
-                                promptTextareaRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                                setCanvasVariant({
+                                  id: variant.id,
+                                  name: variant.name || "Varyant",
+                                  imageUrl: mediaUrl(variant.preview_url || currentStudio?.source_image || ""),
+                                  isAd: false,
+                                });
                               }}
                               className="rounded-lg border border-zinc-200 py-1.5 text-center text-xs font-semibold text-zinc-600 transition hover:bg-zinc-50"
                             >
@@ -1268,13 +2218,16 @@ export default function ProductImageStudio() {
                             <button
                               type="button"
                               onClick={() => {
-                                handleAdVariantSelect(variant.id);
-                                promptTextareaRef.current?.focus();
-                                promptTextareaRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                                setCanvasVariant({
+                                  id: variant.id,
+                                  name: variant.name || "Reklam Kreatiifi",
+                                  imageUrl: mediaUrl(variant.preview_url || currentStudio?.source_image || ""),
+                                  isAd: true,
+                                });
                               }}
                               className="rounded-lg border border-zinc-200 py-1.5 text-center text-xs font-semibold text-zinc-600 transition hover:bg-zinc-50"
                             >
-                              Düzenle
+                              ✏️ Düzenle
                             </button>
                             <button
                               type="button"
@@ -1307,6 +2260,76 @@ export default function ProductImageStudio() {
             <div className="px-4 py-4">
               {/* ÖNİZLEME */}
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">ÖNİZLEME</p>
+
+              {/* ── Marka Seçici ── */}
+              {isCreationMode && (
+                <div className="mt-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowBrandSelector(!showBrandSelector)}
+                    className="flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-left transition hover:border-[#F14B2A]"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {(() => {
+                        const brand = companies.find(c => c.id === (selectedBrandId || activeCompany?.id));
+                        return brand ? (
+                          <>
+                            {brand.logo_url ? (
+                              <img src={brand.logo_url.startsWith('http') ? brand.logo_url : mediaUrl(brand.logo_url)} alt={brand.name} className="h-8 w-8 rounded-lg object-cover border border-zinc-100" />
+                            ) : (
+                              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#F14B2A] to-[#D93E1F] text-[10px] font-extrabold text-white">
+                                {brand.name.substring(0, 2).toUpperCase()}
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="truncate text-xs font-bold text-zinc-900">{brand.name}</p>
+                              <p className="truncate text-[9px] text-zinc-400">{brand.sector || "Marka"}</p>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 text-sm">🏷️</div>
+                            <span className="text-xs font-semibold text-zinc-500">Marka Seç</span>
+                          </>
+                        );
+                      })()}
+                    </div>
+                    <svg className={`h-4 w-4 text-zinc-400 transition ${showBrandSelector ? "rotate-180" : ""}`} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6l4 4 4-4" /></svg>
+                  </button>
+
+                  {showBrandSelector && (
+                    <div className="mt-1 max-h-48 overflow-y-auto rounded-xl border border-zinc-200 bg-white shadow-lg">
+                      {companies.map((brand) => {
+                        const isActive = brand.id === (selectedBrandId || activeCompany?.id);
+                        return (
+                          <button
+                            key={brand.id}
+                            type="button"
+                            onClick={() => { setSelectedBrandId(brand.id); setShowBrandSelector(false); showToast(`Marka seçildi: ${brand.name}`); }}
+                            className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition hover:bg-orange-50 ${isActive ? "bg-orange-50/60" : ""}`}
+                          >
+                            {brand.logo_url ? (
+                              <img src={brand.logo_url.startsWith('http') ? brand.logo_url : mediaUrl(brand.logo_url)} alt={brand.name} className="h-8 w-8 rounded-lg object-cover border border-zinc-100" />
+                            ) : (
+                              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#F14B2A] to-[#D93E1F] text-[10px] font-extrabold text-white">
+                                {brand.name.substring(0, 2).toUpperCase()}
+                              </div>
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-xs font-bold text-zinc-900">{brand.name}</p>
+                              {brand.sector && <p className="truncate text-[9px] text-zinc-400">{brand.sector}</p>}
+                            </div>
+                            {isActive && (
+                              <svg className="h-4 w-4 shrink-0 text-[#F14B2A]" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 8l3.5 3.5L13 5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="mt-2 overflow-hidden rounded-xl border border-zinc-200 bg-white">
                 {activeTab === "reklam-studyosu" ? (
                   selectedAdVariant ? (
@@ -1316,7 +2339,13 @@ export default function ProductImageStudio() {
                       className={`w-full ${selectedAdVariant.width > selectedAdVariant.height ? "aspect-[16/8]" : selectedAdVariant.height > 1500 ? "aspect-[4/5]" : "aspect-square"}`}
                     />
                   ) : (
-                    <div className="flex aspect-[4/5] items-center justify-center text-xs text-zinc-400">Reklam varyantı seçin</div>
+                    <div className="flex aspect-[4/5] flex-col items-center justify-center gap-3 bg-gradient-to-b from-zinc-50 to-white px-6 text-center">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-50">
+                        <span className="text-2xl">🎯</span>
+                      </div>
+                      <p className="text-xs font-semibold text-zinc-600">İstediğiniz seçenekleri seçiniz</p>
+                      <p className="text-[10px] leading-4 text-zinc-400">Sol paneldeki ayarları yapıp görsel üretme adımını tamamlayınız</p>
+                    </div>
                   )
                 ) : selectedVariant ? (
                   <img
@@ -1325,9 +2354,98 @@ export default function ProductImageStudio() {
                     className="aspect-[4/5] w-full object-cover"
                   />
                 ) : (
-                  <div className="flex aspect-[4/5] items-center justify-center text-xs text-zinc-400">Varyant seçin</div>
+                  <div className="flex aspect-[4/5] flex-col items-center justify-center gap-3 bg-gradient-to-b from-zinc-50 to-white px-6 text-center">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-50">
+                      <span className="text-2xl">🎨</span>
+                    </div>
+                    <p className="text-xs font-semibold text-zinc-600">İstediğiniz seçenekleri seçiniz</p>
+                    <p className="text-[10px] leading-4 text-zinc-400">Sol paneldeki platform, kategori ve arka plan seçeneklerini belirleyip görsel üretme adımını tamamlayınız</p>
+                  </div>
                 )}
               </div>
+
+              {/* ── Yeni Ürün Görseli Üret (Gemini AI) ── */}
+              {currentStudio?.source_image && activeTab === "urun-gorseli-studyosu" && (
+                <div className="mt-3">
+                  {/* Marka Seçici — Existing Mode için */}
+                  {!isCreationMode && (
+                    <div className="mb-2">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-zinc-400 mb-1">Marka Seç</p>
+                      <button
+                        type="button"
+                        onClick={() => setShowBrandSelector(!showBrandSelector)}
+                        className="flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white px-3 py-2 text-left transition hover:border-[#F14B2A]"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          {(() => {
+                            const brand = companies.find(c => c.id === (selectedBrandId || activeCompany?.id));
+                            return brand ? (
+                              <>
+                                {brand.logo_url ? (
+                                  <img src={brand.logo_url.startsWith('http') ? brand.logo_url : mediaUrl(brand.logo_url)} alt={brand.name} className="h-7 w-7 rounded-lg object-cover border border-zinc-100" />
+                                ) : (
+                                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#F14B2A] to-[#D93E1F] text-[9px] font-extrabold text-white">
+                                    {brand.name.substring(0, 2).toUpperCase()}
+                                  </div>
+                                )}
+                                <span className="truncate text-xs font-bold text-zinc-800">{brand.name}</span>
+                              </>
+                            ) : (
+                              <span className="text-[11px] font-semibold text-zinc-500">Marka seç...</span>
+                            );
+                          })()}
+                        </div>
+                        <svg className={`h-3.5 w-3.5 text-zinc-400 transition ${showBrandSelector ? "rotate-180" : ""}`} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6l4 4 4-4" /></svg>
+                      </button>
+
+                      {showBrandSelector && (
+                        <div className="mt-1 max-h-40 overflow-y-auto rounded-xl border border-zinc-200 bg-white shadow-lg">
+                          {companies.map((brand) => {
+                            const isActive = brand.id === (selectedBrandId || activeCompany?.id);
+                            return (
+                              <button
+                                key={brand.id}
+                                type="button"
+                                onClick={() => { setSelectedBrandId(brand.id); setShowBrandSelector(false); showToast(`Marka seçildi: ${brand.name}`); }}
+                                className={`flex w-full items-center gap-2 px-3 py-2 text-left transition hover:bg-orange-50 ${isActive ? "bg-orange-50/60" : ""}`}
+                              >
+                                {brand.logo_url ? (
+                                  <img src={brand.logo_url.startsWith('http') ? brand.logo_url : mediaUrl(brand.logo_url)} alt={brand.name} className="h-7 w-7 rounded-lg object-cover border border-zinc-100" />
+                                ) : (
+                                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#F14B2A] to-[#D93E1F] text-[9px] font-extrabold text-white">
+                                    {brand.name.substring(0, 2).toUpperCase()}
+                                  </div>
+                                )}
+                                <span className="truncate text-xs font-bold text-zinc-800 flex-1">{brand.name}</span>
+                                {isActive && <svg className="h-3.5 w-3.5 shrink-0 text-[#F14B2A]" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 8l3.5 3.5L13 5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleGenerateNewImage}
+                    disabled={generatingNew || !currentStudio?.source_image}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#4285F4] to-[#1A73E8] px-4 py-2.5 text-xs font-bold text-white shadow-md transition hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {generatingNew ? (
+                      <>
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        Gemini ile üretiliyor...
+                      </>
+                    ) : (
+                      <>✦ Markaya Uygun Yeni Görsel Üret</>  
+                    )}
+                  </button>
+                  <p className="mt-1 text-center text-[9px] text-zinc-400">
+                    Gemini 2.5 Flash · {companies.find(c => c.id === (selectedBrandId || activeCompany?.id))?.name || "Aktif marka"} için
+                  </p>
+                </div>
+              )}
 
               {/* Thumbnail strip — 3 cols */}
               <div className="mt-3 grid grid-cols-3 gap-2">
@@ -1509,15 +2627,17 @@ export default function ProductImageStudio() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (activeTab === "reklam-studyosu" && selectedAdVariant) {
-                      handleAdVariantSelect(selectedAdVariant.id);
-                    } else if (selectedVariant) {
-                      handleVariantSelect(selectedVariant.id);
-                    }
-                    promptTextareaRef.current?.focus();
-                    promptTextareaRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    const variant = activeTab === "reklam-studyosu" ? selectedAdVariant : selectedVariant;
+                    if (!variant) return;
+                    setCanvasVariant({
+                      id: variant.id,
+                      name: variant.name || "Varyant",
+                      imageUrl: mediaUrl(variant.preview_url || currentStudio?.source_image || ""),
+                      isAd: activeTab === "reklam-studyosu",
+                    });
                   }}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white py-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50"
+                  disabled={!selectedVariant && !selectedAdVariant}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white py-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-40"
                 >
                   ✏️ Düzenle
                 </button>

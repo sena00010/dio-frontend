@@ -22,6 +22,14 @@ import {
   SparklesIcon,
   ClockIcon,
   PhotoIcon,
+  ChevronDownIcon,
+  ChartPieIcon,
+  BoltIcon,
+  ArrowTrendingUpIcon,
+  KeyIcon,
+  DocumentTextIcon,
+  WrenchScrewdriverIcon,
+  LinkIcon,
 } from "@heroicons/react/24/outline";
 
 /* ── Nav item icon map ────────────────────── */
@@ -34,6 +42,14 @@ const NAV_ICONS: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement
   zamanlayici: ClockIcon,
   sosyal: ShareIcon,
   seo: MagnifyingGlassIcon,
+  "seo-genel-bakis": ChartPieIcon,
+  "seo-aksiyonlar": BoltIcon,
+  "seo-siralamalar": ArrowTrendingUpIcon,
+  "seo-kelimeler": KeyIcon,
+  "seo-icerik": DocumentTextIcon,
+  "seo-teknik": WrenchScrewdriverIcon,
+  "seo-backlink": LinkIcon,
+  "seo-ai": SparklesIcon,
   reklam: StarIcon,
   performans: ChartBarIcon,
   "yapay-zeka": CpuChipIcon,
@@ -57,6 +73,7 @@ export default function Home() {
   const [studioPostId, setStudioPostId] = useState<number | undefined>();
   const [kreatifTopics, setKreatifTopics] = useState<string[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
 
   const setActive = useCallback((key: ScreenKey) => {
     setActiveRaw(key);
@@ -145,37 +162,76 @@ export default function Home() {
               <div className="space-y-[2px]">
                 {group.items.map((item) => {
                   const selected = item.key === active;
+                  const hasChildren = item.children && item.children.length > 0;
+                  const isExpanded = expandedMenus[item.key] || item.children?.some(c => c.key === active);
                   return (
-                    <button
-                      key={item.key}
-                      onClick={() => handleNavClick(item.key)}
-                      className={`flex w-full items-center gap-3.5 rounded-xl px-3 py-2.5 text-left text-[14px] transition-all duration-150 ${
-                        selected 
-                          ? "bg-[#FFF5F3] text-[#E73932] font-semibold" 
-                          : "text-[#6B7280] hover:bg-zinc-50 hover:text-zinc-900 font-medium"
-                      }`}
-                    >
-                      {(() => { 
-                         const Icon = NAV_ICONS[item.key];
-                         return Icon ? (
-                           <Icon className={`w-[20px] h-[20px] flex-shrink-0 ${selected ? "text-[#E73932]" : "text-[#9CA3AF]"}`} />
-                         ) : (
-                           <span className={`w-[20px] h-[20px] flex items-center justify-center text-[12px] font-bold flex-shrink-0 ${selected ? "text-[#E73932]" : "text-[#9CA3AF]"}`}>{item.icon as string}</span>
-                         );
-                      })()}
-                      <span>{item.label}</span>
-                      {item.badge && (
-                          <span
-                            className={
-                              item.badge.variant === "new"
-                                ? "ml-auto rounded-full bg-[#D1FAE5] px-2 py-[2px] text-[10px] font-bold text-[#059669]"
-                                : "ml-auto flex h-[22px] w-[22px] items-center justify-center rounded-full bg-[#E73932] text-[10px] font-bold text-white shadow-sm"
-                            }
-                          >
-                            {item.badge.text}
-                          </span>
+                    <div key={item.key}>
+                      <button
+                        onClick={() => {
+                          if (hasChildren) {
+                            setExpandedMenus(prev => ({ ...prev, [item.key]: !prev[item.key] }));
+                          }
+                          handleNavClick(item.key);
+                        }}
+                        className={`flex w-full items-center gap-3.5 rounded-xl px-3 py-2.5 text-left text-[14px] transition-all duration-150 ${
+                          selected 
+                            ? "bg-[#FFF5F3] text-[#E73932] font-semibold" 
+                            : "text-[#6B7280] hover:bg-zinc-50 hover:text-zinc-900 font-medium"
+                        }`}
+                      >
+                        {(() => { 
+                           const Icon = NAV_ICONS[item.key];
+                           return Icon ? (
+                             <Icon className={`w-[20px] h-[20px] flex-shrink-0 ${selected ? "text-[#E73932]" : "text-[#9CA3AF]"}`} />
+                           ) : (
+                             <span className={`w-[20px] h-[20px] flex items-center justify-center text-[12px] font-bold flex-shrink-0 ${selected ? "text-[#E73932]" : "text-[#9CA3AF]"}`}>{item.icon as string}</span>
+                           );
+                        })()}
+                        <span>{item.label}</span>
+                        {item.badge && (
+                            <span
+                              className={
+                                item.badge.variant === "new"
+                                  ? "ml-auto rounded-full bg-[#D1FAE5] px-2 py-[2px] text-[10px] font-bold text-[#059669]"
+                                  : "ml-auto flex h-[22px] w-[22px] items-center justify-center rounded-full bg-[#E73932] text-[10px] font-bold text-white shadow-sm"
+                              }
+                            >
+                              {item.badge.text}
+                            </span>
+                        )}
+                        {hasChildren && (
+                          <ChevronDownIcon className={`ml-auto h-4 w-4 text-zinc-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
+                        )}
+                      </button>
+                      {hasChildren && isExpanded && (
+                        <div className="ml-7 mt-0.5 space-y-[2px] border-l-2 border-zinc-100 pl-3">
+                          {item.children!.map((child) => {
+                            const childSelected = child.key === active;
+                            return (
+                              <button
+                                key={child.key}
+                                onClick={() => handleNavClick(child.key)}
+                                className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] transition-all duration-150 ${
+                                  childSelected
+                                    ? "bg-[#FFF5F3] text-[#E73932] font-semibold"
+                                    : "text-[#6B7280] hover:bg-zinc-50 hover:text-zinc-900 font-medium"
+                                }`}
+                              >
+                                {(() => {
+                                  const ChildIcon = NAV_ICONS[child.key];
+                                  return ChildIcon ? (
+                                    <ChildIcon className={`w-[16px] h-[16px] flex-shrink-0 ${childSelected ? "text-[#E73932]" : "text-[#9CA3AF]"}`} />
+                                  ) : (
+                                    <span className={`w-[16px] h-[16px] flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${childSelected ? "text-[#E73932]" : "text-[#9CA3AF]"}`}>{child.icon as string}</span>
+                                  );
+                                })()}
+                                <span>{child.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
                       )}
-                    </button>
+                    </div>
                   );
                 })}
               </div>
@@ -257,37 +313,76 @@ export default function Home() {
                 <div className="space-y-[4px]">
                   {group.items.map((item) => {
                     const selected = item.key === active;
+                    const hasChildren = item.children && item.children.length > 0;
+                    const isExpanded = expandedMenus[item.key] || item.children?.some(c => c.key === active);
                     return (
-                      <button
-                        key={item.key}
-                        onClick={() => handleNavClick(item.key)}
-                        className={`group flex w-full items-center gap-3.5 rounded-[12px] px-3 py-[9px] text-left text-[14.5px] transition-all duration-150 ${
-                          selected
-                            ? "bg-[#FFF5F3] text-[#E73932] font-semibold"
-                            : "text-[#6B7280] hover:bg-zinc-50 hover:text-[#111827] font-medium"
-                        }`}
-                      >
-                        {(() => { 
-                           const Icon = NAV_ICONS[item.key];
-                           return Icon ? (
-                             <Icon className={`w-[20px] h-[20px] flex-shrink-0 transition-transform group-hover:scale-110 duration-200 ${selected ? "text-[#E73932]" : "text-[#9CA3AF] group-hover:text-[#6B7280]"}`} />
-                           ) : (
-                             <span className={`w-[20px] h-[20px] flex items-center justify-center text-[13px] font-bold flex-shrink-0 transition-transform group-hover:scale-110 duration-200 ${selected ? "text-[#E73932]" : "text-[#9CA3AF] group-hover:text-[#6B7280]"}`}>{item.icon as string}</span>
-                           );
-                        })()}
-                        <span>{item.label}</span>
-                        {item.badge && (
-                          <span
-                            className={
-                              item.badge.variant === "new"
-                                ? "ml-auto rounded-full bg-[#D1FAE5] px-[7px] py-[2px] text-[10px] font-bold text-[#059669]"
-                                : "ml-auto flex h-[22px] w-[22px] items-center justify-center rounded-full bg-[#E73932] text-[11px] font-bold text-white shadow-sm"
+                      <div key={item.key}>
+                        <button
+                          onClick={() => {
+                            if (hasChildren) {
+                              setExpandedMenus(prev => ({ ...prev, [item.key]: !prev[item.key] }));
                             }
-                          >
-                            {item.badge.text}
-                          </span>
+                            handleNavClick(item.key);
+                          }}
+                          className={`group flex w-full items-center gap-3.5 rounded-[12px] px-3 py-[9px] text-left text-[14.5px] transition-all duration-150 ${
+                            selected
+                              ? "bg-[#FFF5F3] text-[#E73932] font-semibold"
+                              : "text-[#6B7280] hover:bg-zinc-50 hover:text-[#111827] font-medium"
+                          }`}
+                        >
+                          {(() => { 
+                             const Icon = NAV_ICONS[item.key];
+                             return Icon ? (
+                               <Icon className={`w-[20px] h-[20px] flex-shrink-0 transition-transform group-hover:scale-110 duration-200 ${selected ? "text-[#E73932]" : "text-[#9CA3AF] group-hover:text-[#6B7280]"}`} />
+                             ) : (
+                               <span className={`w-[20px] h-[20px] flex items-center justify-center text-[13px] font-bold flex-shrink-0 transition-transform group-hover:scale-110 duration-200 ${selected ? "text-[#E73932]" : "text-[#9CA3AF] group-hover:text-[#6B7280]"}`}>{item.icon as string}</span>
+                             );
+                          })()}
+                          <span>{item.label}</span>
+                          {item.badge && (
+                            <span
+                              className={
+                                item.badge.variant === "new"
+                                  ? "ml-auto rounded-full bg-[#D1FAE5] px-[7px] py-[2px] text-[10px] font-bold text-[#059669]"
+                                  : "ml-auto flex h-[22px] w-[22px] items-center justify-center rounded-full bg-[#E73932] text-[11px] font-bold text-white shadow-sm"
+                              }
+                            >
+                              {item.badge.text}
+                            </span>
+                          )}
+                          {hasChildren && (
+                            <ChevronDownIcon className={`ml-auto h-4 w-4 text-zinc-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
+                          )}
+                        </button>
+                        {hasChildren && isExpanded && (
+                          <div className="ml-8 mt-0.5 space-y-[2px] border-l-2 border-zinc-100 pl-3">
+                            {item.children!.map((child) => {
+                              const childSelected = child.key === active;
+                              return (
+                                <button
+                                  key={child.key}
+                                  onClick={() => handleNavClick(child.key)}
+                                  className={`group flex w-full items-center gap-2.5 rounded-[10px] px-2.5 py-[7px] text-left text-[13.5px] transition-all duration-150 ${
+                                    childSelected
+                                      ? "bg-[#FFF5F3] text-[#E73932] font-semibold"
+                                      : "text-[#6B7280] hover:bg-zinc-50 hover:text-[#111827] font-medium"
+                                  }`}
+                                >
+                                  {(() => {
+                                    const ChildIcon = NAV_ICONS[child.key];
+                                    return ChildIcon ? (
+                                      <ChildIcon className={`w-[16px] h-[16px] flex-shrink-0 transition-transform group-hover:scale-110 duration-200 ${childSelected ? "text-[#E73932]" : "text-[#9CA3AF] group-hover:text-[#6B7280]"}`} />
+                                    ) : (
+                                      <span className={`w-[16px] h-[16px] flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${childSelected ? "text-[#E73932]" : "text-[#9CA3AF]"}`}>{child.icon as string}</span>
+                                    );
+                                  })()}
+                                  <span>{child.label}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
                         )}
-                      </button>
+                      </div>
                     );
                   })}
                 </div>

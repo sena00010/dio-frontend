@@ -29,7 +29,16 @@ export const navigationGroups: NavGroup[] = [
     label: "SEO & Analiz",
     icon: "📊",
     items: [
-      { key: "seo", label: "SEO Analiz", icon: "SEO" },
+      { key: "seo", label: "SEO Analiz", icon: "SEO", children: [
+        { key: "seo-genel-bakis", label: "Genel Bakış", icon: "📊" },
+        { key: "seo-aksiyonlar", label: "Aksiyonlar", icon: "⚡" },
+        { key: "seo-siralamalar", label: "Sıralamalar", icon: "📈" },
+        { key: "seo-kelimeler", label: "Kelimeler", icon: "🔑" },
+        { key: "seo-icerik", label: "İçerik Üretimi", icon: "✍️" },
+        { key: "seo-teknik", label: "Teknik", icon: "⚙️" },
+        { key: "seo-backlink", label: "Backlink", icon: "🔗" },
+        { key: "seo-ai", label: "AI Görünürlük", icon: "🤖" },
+      ] },
       { key: "reklam", label: "Reklam Yönetimi", icon: "RY" },
       { key: "performans", label: "Performans", icon: "PF" },
       { key: "yapay-zeka", label: "Yapay Zeka", icon: "YZ" },
