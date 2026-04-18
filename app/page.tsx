@@ -74,6 +74,8 @@ export default function Home() {
   const [kreatifTopics, setKreatifTopics] = useState<string[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
+  const [brandDetailId, setBrandDetailId] = useState<number | undefined>();
+  const [initialTopic, setInitialTopic] = useState<string>("");
 
   const setActive = useCallback((key: ScreenKey) => {
     setActiveRaw(key);
@@ -105,10 +107,10 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-foreground flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-[#FAFAFA] text-foreground flex flex-col md:flex-row">
       
       {/* ═══ Mobile Top Bar ═══ */}
-      <div className="lg:hidden flex items-center justify-between bg-white border-b border-zinc-200 px-4 py-3 sticky top-0 z-30 shadow-sm shadow-zinc-100">
+      <div className="md:hidden flex items-center justify-between bg-white border-b border-zinc-200 px-4 py-3 sticky top-0 z-30 shadow-sm shadow-zinc-100">
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setMobileMenuOpen(true)}
@@ -128,12 +130,12 @@ export default function Home() {
       {/* ═══ Mobile Drawer Menu ═══ */}
       {mobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden transition-opacity" 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden transition-opacity" 
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
       
-      <div className={`fixed inset-y-0 left-0 bg-white w-[280px] shadow-2xl z-50 lg:hidden transform transition-transform duration-300 ease-in-out flex flex-col ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <div className={`fixed inset-y-0 left-0 bg-white w-[280px] shadow-2xl z-50 md:hidden transform transition-transform duration-300 ease-in-out flex flex-col ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex flex-col border-b border-zinc-100">
           <div className="flex items-center justify-between px-5 pt-6 pb-5">
              <div className="flex items-center gap-3">
@@ -288,9 +290,9 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="flex-1 flex max-w-[1600px] mx-auto w-full lg:overflow-hidden">
+      <div className="flex-1 flex max-w-[1600px] mx-auto w-full md:overflow-hidden">
         {/* ═══ Desktop Sidebar Panel ═══ */}
-        <aside className="sidebar-panel hidden lg:flex flex-col w-[260px] h-screen bg-white flex-shrink-0">
+        <aside className="sidebar-panel hidden md:flex flex-col w-[260px] h-screen bg-white flex-shrink-0">
           
           {/* Logo Section */}
           <div className="flex items-center gap-3 px-6 pt-7 pb-6 border-b border-[#EAEAEA]">
@@ -458,8 +460,8 @@ export default function Home() {
         </aside>
 
         {/* ═══ Main content ═══════════════════ */}
-        <main className="flex-1 w-full max-w-full overflow-hidden lg:overflow-y-auto h-screen bg-white">
-          <div className="min-h-[calc(100vh-3.5rem)] lg:min-h-0 lg:h-full p-4 md:p-6 lg:p-8 w-full max-w-full overflow-x-auto overflow-y-auto relative z-10">
+        <main className="flex-1 w-full max-w-full overflow-hidden md:overflow-y-auto h-screen bg-white">
+          <div className="min-h-[calc(100vh-3.5rem)] md:min-h-0 md:h-full p-4 md:p-6 w-full max-w-full overflow-x-auto overflow-y-auto relative z-10">
             <ScreenRenderer
               screen={active}
               onNavigate={(key) => setActive(key)}
@@ -472,6 +474,15 @@ export default function Home() {
               onKreatifNavigate={(topics: string[]) => {
                 setKreatifTopics(topics);
                 setActive("kreatif-olustur");
+              }}
+              brandDetailId={brandDetailId}
+              onBrandDetailNavigate={(id: number) => {
+                setBrandDetailId(id);
+                setActive("marka-detay");
+              }}
+              initialTopic={initialTopic}
+              onSetInitialTopic={(topic: string) => {
+                setInitialTopic(topic);
               }}
             />
           </div>

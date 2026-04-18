@@ -17,6 +17,8 @@ const KreatifOlusturScreen = dynamic(() => import("./KreatifOlustur"), { ssr: fa
 const ZamanlayiciScreen = dynamic(() => import("./ZamanlayiciScreen"), { ssr: false });
 const ProductImageStudio = dynamic(() => import("./ProductImageStudio"), { ssr: false });
 const SeoGenelBakis = dynamic(() => import("./SeoGenelBakis"), { ssr: false });
+const SeoMetricsCard = dynamic(() => import("./SeoMetricsCard"), { ssr: false });
+const BrandDetail = dynamic(() => import("./BrandDetail"), { ssr: false });
 
 // Recharts — lazy import to avoid SSR issues
 const {
@@ -31,6 +33,191 @@ const {
 } = require("recharts");
 
 function DashboardScreen() {
+  const { activeCompany } = useAuth();
+
+  // URL parametresinden platform tespiti (OAuth redirect sonrası)
+  const getInitialPlatform = (): "meta" | "google" => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("gads_connected") === "true") return "google";
+      if (params.get("meta_connected") === "true") return "meta";
+    }
+    return "meta";
+  };
+  const [adPlatform, setAdPlatform] = useState<"meta" | "google">(getInitialPlatform);
+
+  // ── Meta state ──
+  const [isMetaConnected, setIsMetaConnected] = useState(false);
+  const [metaLoading, setMetaLoading] = useState(true);
+  const [metaInsights, setMetaInsights] = useState<{
+    spend: number; revenue: number; roas: number; conversions: number;
+  } | null>(null);
+  const [metaCampaigns, setMetaCampaigns] = useState<Array<{
+    id: string; name: string; status: string; daily_budget: number; spend: number; roas: number;
+  }>>([]);
+
+  // ── Google Ads state ──
+  const [isGadsConnected, setIsGadsConnected] = useState(false);
+  const [gadsLoading, setGadsLoading] = useState(true);
+  const [gadsError, setGadsError] = useState<string | null>(null);
+  const [gadsInsights, setGadsInsights] = useState<{
+    spend: number; clicks: number; impressions: number; conversions: number; cpc: number; ctr: number;
+  } | null>(null);
+  const [gadsCampaigns, setGadsCampaigns] = useState<Array<{
+    id: string; name: string; status: string; spend: number; clicks: number; impressions: number; conversions: number;
+  }>>([]);
+
+  // ── Meta veri çekme ──
+  useEffect(() => {
+    if (!activeCompany) return;
+    setMetaLoading(true);
+    api.get(`/api/meta/status?company_id=${activeCompany.id}`)
+      .then(({ data }) => {
+        if (data.connected) {
+          setIsMetaConnected(true);
+          return api.get(`/api/meta/dashboard?company_id=${activeCompany.id}`);
+        } else { setIsMetaConnected(false); setMetaLoading(false); return null; }
+      })
+      .then((res) => {
+        if (res && res.data) {
+          if (res.data.insights) setMetaInsights(res.data.insights);
+          if (res.data.campaigns) setMetaCampaigns(res.data.campaigns);
+        }
+        setMetaLoading(false);
+      })
+      .catch(() => { setIsMetaConnected(false); setMetaLoading(false); });
+  }, [activeCompany]);
+
+  // ── Google Ads veri çekme ──
+  useEffect(() => {
+    if (!activeCompany) return;
+    setGadsLoading(true);
+    setGadsError(null);
+    api.get(`/api/google-ads/status?company_id=${activeCompany.id}`)
+      .then(({ data }) => {
+        if (data.connected) {
+          setIsGadsConnected(true);
+          return api.get(`/api/google-ads/dashboard?company_id=${activeCompany.id}`);
+        } else { setIsGadsConnected(false); setGadsLoading(false); return null; }
+      })
+      .then((res) => {
+        if (res && res.data) {
+          if (res.data.insights) setGadsInsights(res.data.insights);
+          if (res.data.campaigns) setGadsCampaigns(res.data.campaigns);
+          // Hata mesajlarını yakala
+          const errMsg = res.data.insights_error || res.data.campaigns_error || res.data.error;
+          if (errMsg && !res.data.insights) {
+            if (errMsg.includes("DEVELOPER_TOKEN_NOT_APPROVED")) {
+              setGadsError("Developer token henüz onaylanmadı. Google Ads API erişimi için Basic/Standard başvuru yapılmalı.");
+            } else {
+              setGadsError(errMsg);
+            }
+          }
+        }
+        setGadsLoading(false);
+      })
+      .catch(() => { setIsGadsConnected(false); setGadsLoading(false); });
+  }, [activeCompany]);
+
+  // ── Disconnect handlers ──
+  const handleMetaDisconnect = () => {
+    if (!activeCompany) return;
+    if (!confirm("Meta Ads bağlantısını kaldırmak istediğinize emin misiniz?")) return;
+    api.delete(`/api/meta/disconnect?company_id=${activeCompany.id}`)
+      .then(() => { setIsMetaConnected(false); setMetaInsights(null); setMetaCampaigns([]); })
+      .catch(() => {});
+  };
+  const handleGadsDisconnect = () => {
+    if (!activeCompany) return;
+    if (!confirm("Google Ads bağlantısını kaldırmak istediğinize emin misiniz?")) return;
+    api.delete(`/api/google-ads/disconnect?company_id=${activeCompany.id}`)
+      .then(() => { setIsGadsConnected(false); setGadsInsights(null); setGadsCampaigns([]); })
+      .catch(() => {});
+  };
+
+  // ── Connect handlers ──
+  const handleMetaConnect = () => {
+    if (!activeCompany) return;
+    api.get(`/api/meta/auth/login?company_id=${activeCompany.id}`)
+      .then(({ data }) => { if (data.url) window.location.href = data.url; }).catch(() => {});
+  };
+  const handleGadsConnect = () => {
+    if (!activeCompany) return;
+    api.get(`/api/google-ads/auth/login?company_id=${activeCompany.id}`)
+      .then(({ data }) => { if (data.url) window.location.href = data.url; }).catch(() => {});
+  };
+
+  const fmtMoney = (n: number) => {
+    if (n >= 1000000) return "₺" + (n / 1000000).toFixed(1) + "M";
+    if (n >= 1000) return "₺" + n.toLocaleString("tr-TR", { maximumFractionDigits: 0 });
+    return "₺" + n.toFixed(2);
+  };
+  const fmtNum = (n: number) => n.toLocaleString("tr-TR");
+
+  const statusMap: Record<string, { label: string; tone: "ok" | "warn" }> = {
+    ACTIVE: { label: "Aktif", tone: "ok" },
+    PAUSED: { label: "Duraklatıldı", tone: "warn" },
+    ENABLED: { label: "Aktif", tone: "ok" },
+  };
+
+  // ── Aktif platform verileri ──
+  const isConnected = adPlatform === "meta" ? isMetaConnected : isGadsConnected;
+  const isLoading = adPlatform === "meta" ? metaLoading : gadsLoading;
+  const handleDisconnect = adPlatform === "meta" ? handleMetaDisconnect : handleGadsDisconnect;
+  const handleConnect = adPlatform === "meta" ? handleMetaConnect : handleGadsConnect;
+  const platformLabel = adPlatform === "meta" ? "Meta Ads" : "Google Ads";
+  const platformColor = adPlatform === "meta" ? "#1877F2" : "#4285F4";
+
+  // Aktif platforma göre metrik kartları
+  const getMetricCards = () => {
+    if (adPlatform === "meta" && metaInsights) {
+      return [
+        { title: "Toplam Harcama", value: fmtMoney(metaInsights.spend), delta: "Son 30 gün" },
+        { title: "Toplam Gelir", value: fmtMoney(metaInsights.revenue), delta: "Son 30 gün" },
+        { title: "ROAS", value: metaInsights.roas.toFixed(1) + "x", delta: "Son 30 gün" },
+      ];
+    }
+    if (adPlatform === "google" && gadsInsights) {
+      return [
+        { title: "Toplam Harcama", value: fmtMoney(gadsInsights.spend), delta: "Son 30 gün" },
+        { title: "Tıklama", value: fmtNum(gadsInsights.clicks), delta: "Son 30 gün" },
+        { title: "Dönüşüm", value: gadsInsights.conversions.toFixed(0), delta: "Son 30 gün" },
+      ];
+    }
+    return null;
+  };
+
+  const metricCards = getMetricCards();
+
+  // Platform Bağlan Empty State
+  const AdPlatformEmptyState = ({ variant = "card" }: { variant?: "card" | "full" }) => {
+    const isFullWidth = variant === "full";
+    return (
+      <div className={`rounded-2xl border-2 border-dashed border-zinc-200 ${isFullWidth ? "p-8 md:p-12" : "p-6 md:p-8"} flex flex-col items-center justify-center text-center`}>
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl mb-4" style={{ background: `${platformColor}12` }}>
+          {adPlatform === "meta" ? (
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z" fill="#1877F2"/></svg>
+          ) : (
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          )}
+        </div>
+        <h3 className={`font-semibold text-zinc-800 ${isFullWidth ? "text-lg" : "text-base"}`}>
+          {isFullWidth ? `${platformLabel} hesabınızı bağlayarak kampanya verilerinizi görün` : `${platformLabel} hesabınızı bağlayın`}
+        </h3>
+        <p className={`mt-2 text-zinc-500 max-w-sm leading-relaxed ${isFullWidth ? "text-sm" : "text-xs"}`}>
+          {platformLabel} hesabınızı bağlayarak reklam performansınızı gerçek zamanlı takip edin.
+        </p>
+        <button
+          onClick={handleConnect}
+          className={`mt-5 inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:opacity-90`}
+          style={{ background: platformColor }}
+        >
+          {platformLabel} ile Bağlan
+        </button>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -38,39 +225,142 @@ function DashboardScreen() {
           <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
           <p className="subtle text-sm">Dijital pazarlama performansınızı takip edin</p>
         </div>
-        <button className="rounded-lg border bg-white px-3 py-2 text-sm font-medium">Son 30 Gün</button>
+        <div className="flex items-center gap-3">
+          {/* ── Platform Dropdown ── */}
+          <div className="relative">
+            <select
+              value={adPlatform}
+              onChange={(e) => setAdPlatform(e.target.value as "meta" | "google")}
+              className="appearance-none rounded-xl border border-zinc-200 bg-white pl-10 pr-8 py-2.5 text-sm font-medium text-zinc-800 shadow-sm transition hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
+            >
+              <option value="meta">Meta Ads</option>
+              <option value="google">Google Ads</option>
+            </select>
+            <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
+              {adPlatform === "meta" ? (
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z" fill="#1877F2"/></svg>
+              ) : (
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+              )}
+            </div>
+            <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="#71717a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+          </div>
+          {/* ── Son 30 Gün Badge ── */}
+          <div className="hidden sm:flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-4 py-2.5 text-white shadow-lg shadow-slate-900/20">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/10">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[11px] font-medium text-white/60 leading-none">Analiz Dönemi</span>
+              <span className="text-sm font-semibold leading-tight">Son 30 Gün</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        {[
-          { title: "Toplam Harcama", value: "₺125,400", delta: "+12.5% geçen aya göre" },
-          { title: "Toplam Gelir", value: "₺489,200", delta: "+18.2% geçen aya göre" },
-          { title: "ROAS", value: "3.9x", delta: "+0.4 geçen aya göre" },
-          { title: "Organik Trafik", value: "45,230", delta: "+8.3% geçen aya göre" },
-        ].map((item) => (
-          <article className="card p-4" key={item.title}>
-            <p className="subtle text-xs">{item.title}</p>
-            <p className="mt-1 text-2xl sm:text-3xl lg:text-4xl font-semibold leading-tight truncate">{item.value}</p>
-            <p className="mt-1 text-xs font-medium text-emerald-600">{item.delta}</p>
-          </article>
-        ))}
-      </section>
+      {/* ── Bağlantı Durum Barı + Metrik Kartları ── */}
+      {isConnected && metricCards ? (
+        <>
+          <div className="flex items-center justify-between rounded-xl border px-4 py-2.5" style={{
+            background: `linear-gradient(135deg, ${platformColor}08, ${platformColor}14)`,
+            borderColor: `${platformColor}25`,
+          }}>
+            <div className="flex items-center gap-2">
+              {adPlatform === "meta" ? (
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z" fill="#1877F2"/></svg>
+              ) : (
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+              )}
+              <span className="text-sm font-medium" style={{ color: platformColor }}>{platformLabel} Bağlı</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Aktif</span>
+            </div>
+            <button onClick={handleDisconnect} className="rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-medium text-rose-600 transition hover:bg-rose-50">Bağlantıyı Kes</button>
+          </div>
+          <section className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+            {metricCards.map((item) => (
+              <article className="card p-4" key={item.title}>
+                <p className="subtle text-xs">{item.title}</p>
+                <p className="mt-1 text-2xl sm:text-3xl lg:text-4xl font-semibold leading-tight truncate">{item.value}</p>
+                <p className="mt-1 text-xs font-medium text-emerald-600">{item.delta}</p>
+              </article>
+            ))}
+          </section>
+        </>
+      ) : isConnected && !isLoading && (adPlatform === "google" && gadsError) ? (
+        <>
+          {/* Bağlı ama veri çekilemiyor */}
+          <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-2.5">
+            <div className="flex items-center gap-2">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+              <span className="text-sm font-medium text-amber-800">Google Ads Bağlı</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700"><span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Onay Bekliyor</span>
+            </div>
+            <button onClick={handleDisconnect} className="rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-medium text-rose-600 transition hover:bg-rose-50">Bağlantıyı Kes</button>
+          </div>
+          <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-5">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-amber-900">Google Ads API Erişimi Bekliyor</h3>
+                <p className="mt-1 text-xs text-amber-700 leading-relaxed">{gadsError}</p>
+                <p className="mt-2 text-xs text-amber-600">Google Ads hesabınız başarıyla bağlandı. Developer token onaylandıktan sonra veriler otomatik olarak görünecektir.</p>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : isLoading ? (
+        <section className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+          {["Toplam Harcama", "Tıklama / Gelir", "Dönüşüm / ROAS"].map((title) => (
+            <article className="card p-4 animate-pulse" key={title}>
+              <p className="subtle text-xs">{title}</p>
+              <div className="mt-2 h-8 bg-zinc-100 rounded-lg w-2/3" />
+              <div className="mt-2 h-3 bg-zinc-50 rounded w-1/3" />
+            </article>
+          ))}
+        </section>
+      ) : (
+        <AdPlatformEmptyState variant="card" />
+      )}
 
-      <section className="grid gap-4 xl:grid-cols-3">
-        <SectionCard title="Reklam">
-          <ul className="space-y-2 text-sm">
-            <li className="flex justify-between"><span>Harcama</span><strong>₺45,200</strong></li>
-            <li className="flex justify-between"><span>ROAS</span><strong className="text-emerald-600">4.2x</strong></li>
-            <li className="flex justify-between"><span>Dönüşüm</span><strong>1,240</strong></li>
-          </ul>
-        </SectionCard>
-        <SectionCard title="SEO">
-          <ul className="space-y-2 text-sm">
-            <li className="flex justify-between"><span>Organik Trafik</span><strong>45,230</strong></li>
-            <li className="flex justify-between"><span>Anahtar Kelime</span><strong>1,847</strong></li>
-            <li className="flex justify-between"><span>İlk Sayfa</span><strong className="text-emerald-600">342</strong></li>
-          </ul>
-        </SectionCard>
+      {/* ── SEO Metrikleri ── */}
+      <SeoMetricsCard />
+
+      {/* ── Alt Kartlar ── */}
+      <section className="grid gap-4 xl:grid-cols-2">
+        {isConnected && (adPlatform === "meta" ? metaInsights : gadsInsights) ? (
+          <SectionCard title="Reklam">
+            <ul className="space-y-2 text-sm">
+              {adPlatform === "meta" && metaInsights ? (
+                <>
+                  <li className="flex justify-between"><span>Harcama</span><strong>{fmtMoney(metaInsights.spend)}</strong></li>
+                  <li className="flex justify-between"><span>ROAS</span><strong className="text-emerald-600">{metaInsights.roas.toFixed(1)}x</strong></li>
+                  <li className="flex justify-between"><span>Dönüşüm</span><strong>{metaInsights.conversions.toLocaleString("tr-TR")}</strong></li>
+                </>
+              ) : gadsInsights ? (
+                <>
+                  <li className="flex justify-between"><span>Harcama</span><strong>{fmtMoney(gadsInsights.spend)}</strong></li>
+                  <li className="flex justify-between"><span>CPC</span><strong className="text-blue-600">{fmtMoney(gadsInsights.cpc)}</strong></li>
+                  <li className="flex justify-between"><span>CTR</span><strong className="text-emerald-600">{gadsInsights.ctr.toFixed(2)}%</strong></li>
+                  <li className="flex justify-between"><span>Gösterim</span><strong>{fmtNum(gadsInsights.impressions)}</strong></li>
+                </>
+              ) : null}
+            </ul>
+          </SectionCard>
+        ) : isLoading ? (
+          <div className="card rounded-xl p-4 animate-pulse">
+            <div className="h-5 bg-zinc-100 rounded w-1/4 mb-4" />
+            <div className="space-y-3"><div className="h-4 bg-zinc-50 rounded" /><div className="h-4 bg-zinc-50 rounded" /><div className="h-4 bg-zinc-50 rounded" /></div>
+          </div>
+        ) : (
+          <div className="card rounded-xl overflow-hidden">
+            <div className="px-4 pt-4 pb-2"><h3 className="text-base font-semibold text-zinc-900">Reklam</h3></div>
+            <div className="px-4 pb-4"><AdPlatformEmptyState variant="card" /></div>
+          </div>
+        )}
         <SectionCard title="Sosyal Medya">
           <ul className="space-y-2 text-sm">
             <li className="flex justify-between"><span>Takipçi</span><strong>28,450</strong></li>
@@ -80,41 +370,49 @@ function DashboardScreen() {
         </SectionCard>
       </section>
 
-      <SectionCard title="Son Kampanyalar" action="Tümünü Gör">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-sm">
-            <thead className="subtle text-left">
-              <tr>
-                <th className="py-2">Kampanya</th>
-                <th>Platform</th>
-                <th>Bütçe</th>
-                <th>ROAS</th>
-                <th>Durum</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                ["Yaz Kampanyası 2024", "Meta Ads", "₺15,000", "4.5x", "Aktif"],
-                ["Google Arama Reklamı", "Google Ads", "₺22,500", "3.8x", "Aktif"],
-                ["LinkedIn Lead Gen", "LinkedIn", "₺8,000", "2.1x", "Duraklatıldı"],
-                ["TikTok Marka Bilinirliği", "TikTok", "₺5,200", "5.2x", "Aktif"],
-              ].map((row) => (
-                <tr className="border-t" key={row[0]}>
-                  <td className="py-2">{row[0]}</td>
-                  <td>{row[1]}</td>
-                  <td>{row[2]}</td>
-                  <td className={row[3] === "2.1x" ? "font-semibold text-amber-600" : "font-semibold text-emerald-600"}>
-                    {row[3]}
-                  </td>
-                  <td>
-                    <StatusPill label={row[4]} tone={row[4] === "Aktif" ? "ok" : "warn"} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* ── Son Kampanyalar ── */}
+      {isConnected && ((adPlatform === "meta" && metaCampaigns.length > 0) || (adPlatform === "google" && gadsCampaigns.length > 0)) ? (
+        <SectionCard title="Son Kampanyalar" action="Tümünü Gör">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[760px] text-sm">
+              <thead className="subtle text-left">
+                <tr><th className="py-2">Kampanya</th><th>Platform</th><th>Harcama</th><th>{adPlatform === "meta" ? "ROAS" : "Tıklama"}</th><th>Durum</th></tr>
+              </thead>
+              <tbody>
+                {adPlatform === "meta" ? metaCampaigns.map((c) => {
+                  const st = statusMap[c.status] || { label: c.status, tone: "warn" as const };
+                  return (
+                    <tr className="border-t" key={c.id}>
+                      <td className="py-2">{c.name}</td><td>Meta Ads</td><td>{fmtMoney(c.spend || c.daily_budget)}</td>
+                      <td className={c.roas < 2 ? "font-semibold text-amber-600" : "font-semibold text-emerald-600"}>{c.roas.toFixed(1)}x</td>
+                      <td><StatusPill label={st.label} tone={st.tone} /></td>
+                    </tr>
+                  );
+                }) : gadsCampaigns.map((c) => {
+                  const st = statusMap[c.status] || { label: c.status, tone: "warn" as const };
+                  return (
+                    <tr className="border-t" key={c.id}>
+                      <td className="py-2">{c.name}</td><td>Google Ads</td><td>{fmtMoney(c.spend)}</td>
+                      <td className="font-semibold">{fmtNum(c.clicks)}</td>
+                      <td><StatusPill label={st.label} tone={st.tone} /></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </SectionCard>
+      ) : isLoading ? (
+        <div className="card rounded-xl p-4 animate-pulse">
+          <div className="h-5 bg-zinc-100 rounded w-1/3 mb-4" />
+          <div className="space-y-3"><div className="h-4 bg-zinc-50 rounded" /><div className="h-4 bg-zinc-50 rounded" /><div className="h-4 bg-zinc-50 rounded" /><div className="h-4 bg-zinc-50 rounded" /></div>
         </div>
-      </SectionCard>
+      ) : (
+        <div className="card rounded-xl overflow-hidden">
+          <div className="px-4 pt-4 pb-2"><h3 className="text-base font-semibold text-zinc-900">Son Kampanyalar</h3></div>
+          <div className="px-4 pb-4"><AdPlatformEmptyState variant="full" /></div>
+        </div>
+      )}
     </div>
   );
 }

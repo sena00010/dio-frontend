@@ -45,14 +45,20 @@ export function SectionCard({
   children,
 }: {
   title: string;
-  action?: string;
+  action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <section className="card p-4">
       <div className="mb-3 flex items-center justify-between gap-2">
         <h2 className="text-base font-semibold">{title}</h2>
-        {action ? <button className="text-sm text-rose-600">{action}</button> : null}
+        {action ? (
+          typeof action === "string" ? (
+            <button className="text-sm text-rose-600">{action}</button>
+          ) : (
+            action
+          )
+        ) : null}
       </div>
       {children}
     </section>

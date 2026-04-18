@@ -23,6 +23,7 @@ export type ScreenKey =
   | "urun-gorseli-studyosu"
   | "kreatif-olustur"
   | "profil"
+  | "marka-detay"
   | "ayarlar";
 
 export type NavItem = {

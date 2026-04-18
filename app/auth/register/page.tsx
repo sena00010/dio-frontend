@@ -19,6 +19,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
 
   function updateField(key: string, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -26,6 +27,10 @@ export default function RegisterPage() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (!privacyAccepted) {
+      setError("Devam etmek için Gizlilik Sözleşmesi'ni kabul etmelisiniz.");
+      return;
+    }
     setError("");
     setLoading(true);
 
@@ -188,10 +193,32 @@ export default function RegisterPage() {
             />
           </div>
 
+          {/* Gizlilik Sözleşmesi Onayı */}
+          <div className="flex items-start gap-2.5 mt-1">
+            <input
+              id="reg-privacy"
+              type="checkbox"
+              checked={privacyAccepted}
+              onChange={(e) => setPrivacyAccepted(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-brand focus:ring-brand/30 cursor-pointer accent-[#E73932]"
+            />
+            <label htmlFor="reg-privacy" className="text-xs text-muted leading-relaxed cursor-pointer select-none">
+              <a
+                href="https://www.dijitalisortagi.com/gizlilik-sozlesmesi"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-brand hover:text-brand-dark underline underline-offset-2 transition-colors"
+              >
+                Gizlilik Sözleşmesi
+              </a>
+              &apos;ni okudum ve kabul ediyorum.
+            </label>
+          </div>
+
           <button
             type="submit"
             className="auth-btn auth-btn-primary mt-2"
-            disabled={loading}
+            disabled={loading || !privacyAccepted}
           >
             {loading ? <span className="spinner" /> : "Kayıt Ol"}
           </button>

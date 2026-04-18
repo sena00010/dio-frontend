@@ -81,9 +81,11 @@ const CAMPAIGN_TYPES = [
 export default function NewContentWizard({
   onBack,
   onApproved,
+  initialTopic,
 }: {
   onBack: () => void;
   onApproved: (postId: number) => void;
+  initialTopic?: string;
 }) {
   const { companies, activeCompany } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -95,7 +97,7 @@ export default function NewContentWizard({
   const selectedCompany = companies.find((c) => c.id === selectedCompanyId);
 
   // Form state
-  const [topic, setTopic] = useState("");
+  const [topic, setTopic] = useState(initialTopic || "");
   const [platform, setPlatform] = useState("");
   const [campaignType, setCampaignType] = useState("");
   const [count, setCount] = useState(3);
