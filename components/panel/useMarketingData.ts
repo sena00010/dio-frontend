@@ -46,10 +46,12 @@ export function useMarketingData() {
 
   // ── TikTok state ──
   const [isTikTokConnected, setIsTikTokConnected] = useState(false);
-  const [tiktokLoading, setTiktokLoading] = useState(true);
+  const [tiktokLoading, setTiktokLoading] = useState(false);
+  const [tiktokError, setTiktokError] = useState<string | null>(null);
   const [tiktokInsights, setTiktokInsights] = useState<{
     spend: number; clicks: number; conversions: number; cpa: number; conversion_rate: number;
   } | null>(null);
+  const [tiktokDebug, setTiktokDebug] = useState<any>(null);
 
   // ── LinkedIn state ──
   const [isLinkedInConnected, setIsLinkedInConnected] = useState(false);
@@ -167,16 +169,26 @@ export function useMarketingData() {
   useEffect(() => {
     if (!activeCompany) return;
     setTiktokLoading(true);
+    setTiktokError(null);
     api.get(`/api/tiktok/status?company_id=${activeCompany.id}`)
       .then(({ data }) => {
         if (data.connected) {
           setIsTikTokConnected(true);
+          // Ayrıyeten debug bilgisini de çek
+          api.get(`/api/tiktok/debug?company_id=${activeCompany.id}`).then((res) => {
+             setTiktokDebug(res.data);
+          }).catch(() => {});
+          
           return api.get(`/api/tiktok/dashboard?company_id=${activeCompany.id}`);
         } else { setIsTikTokConnected(false); setTiktokLoading(false); return null; }
       })
       .then((res) => {
-        if (res && res.data && res.data.insights) {
-          setTiktokInsights(res.data.insights);
+        if (res && res.data) {
+          if (res.data.insights) {
+            setTiktokInsights(res.data.insights);
+          } else if (res.data.error) {
+            setTiktokError(res.data.error);
+          }
         }
         setTiktokLoading(false);
       })
@@ -264,7 +276,7 @@ export function useMarketingData() {
     adPlatform, setAdPlatform,
     isMetaConnected, setIsMetaConnected, metaLoading, setMetaLoading, metaInsights, setMetaInsights, metaCampaigns, setMetaCampaigns, metaAdAccounts, selectedMetaAccount,
     isGadsConnected, setIsGadsConnected, gadsLoading, setGadsLoading, gadsError, gadsInsights, setGadsInsights, gadsCampaigns, setGadsCampaigns,
-    isTikTokConnected, setIsTikTokConnected, tiktokLoading, setTiktokLoading, tiktokInsights, setTiktokInsights,
+    isTikTokConnected, setIsTikTokConnected, tiktokLoading, setTiktokLoading, tiktokError, tiktokInsights, setTiktokInsights, tiktokDebug,
     isLinkedInConnected, setIsLinkedInConnected, linkedinLoading, setLinkedinLoading, linkedinInsights, setLinkedinInsights, linkedinCampaigns, setLinkedinCampaigns, linkedinSocialData,
     linkedinAdAccounts, selectedLinkedinAccount, linkedinDebug,
     campaignFilter, setCampaignFilter,

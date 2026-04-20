@@ -122,7 +122,7 @@ function DashboardScreen() {
     adPlatform, setAdPlatform,
     isMetaConnected, setIsMetaConnected, metaLoading, metaInsights, setMetaInsights, metaCampaigns, setMetaCampaigns, metaAdAccounts, selectedMetaAccount,
     isGadsConnected, setIsGadsConnected, gadsLoading, gadsError, gadsInsights, setGadsInsights, gadsCampaigns, setGadsCampaigns,
-    isTikTokConnected, setIsTikTokConnected, tiktokLoading, tiktokInsights, setTiktokInsights,
+    isTikTokConnected, setIsTikTokConnected, tiktokLoading, tiktokError, tiktokInsights, setTiktokInsights, tiktokDebug,
     isLinkedInConnected, setIsLinkedInConnected, linkedinLoading, linkedinInsights, setLinkedinInsights, linkedinCampaigns, setLinkedinCampaigns, linkedinSocialData,
     linkedinAdAccounts, selectedLinkedinAccount, linkedinDebug,
     campaignFilter, setCampaignFilter,
@@ -178,6 +178,11 @@ function DashboardScreen() {
   const handleLinkedInConnect = () => {
     if (!activeCompany) return;
     api.get(`/api/linkedin/auth/login?company_id=${activeCompany.id}`)
+      .then(({ data }) => { if (data.url) window.location.href = data.url; }).catch(() => {});
+  };
+  const handleTikTokConnect = () => {
+    if (!activeCompany) return;
+    api.get(`/api/tiktok/auth/login?company_id=${activeCompany.id}`)
       .then(({ data }) => { if (data.url) window.location.href = data.url; }).catch(() => {});
   };
 
@@ -236,7 +241,7 @@ function DashboardScreen() {
     if (adPlatform === "meta") return handleMetaConnect;
     if (adPlatform === "google") return handleGadsConnect;
     if (adPlatform === "linkedin") return handleLinkedInConnect;
-    // TikTok için OAuth henüz eklenmediğinden boş
+    if (adPlatform === "tiktok") return handleTikTokConnect;
     return () => {};
   };
 
@@ -334,7 +339,7 @@ function DashboardScreen() {
         <p className={`mt-2 text-zinc-500 max-w-sm leading-relaxed ${isFullWidth ? "text-sm" : "text-xs"}`}>
           {platformLabel} hesabınızı bağlayarak reklam performansınızı gerçek zamanlı takip edin.
         </p>
-        {(adPlatform === "meta" || adPlatform === "google" || adPlatform === "linkedin") && (
+        {(adPlatform === "meta" || adPlatform === "google" || adPlatform === "linkedin" || adPlatform === "tiktok") && (
           <button
             onClick={handleConnect}
             className="mt-5 inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:opacity-90"
@@ -342,9 +347,6 @@ function DashboardScreen() {
           >
             {platformLabel} ile Bağlan
           </button>
-        )}
-        {adPlatform === "tiktok" && (
-          <p className="mt-3 text-xs text-zinc-400 italic">OAuth entegrasyonu yakında eklenecek. Token'ları veritabanına manuel ekleyebilirsiniz.</p>
         )}
       </div>
     );
@@ -451,7 +453,7 @@ function DashboardScreen() {
           {/* Bağlı ama veri çekilemiyor */}
           <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-2.5">
             <div className="flex items-center gap-2">
-              <PlatformIcon platform="google" size={18} />
+               <PlatformIcon platform="google" size={18} />
               <span className="text-sm font-medium text-amber-800">Google Ads Bağlı</span>
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700"><span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Onay Bekliyor</span>
             </div>
@@ -469,6 +471,31 @@ function DashboardScreen() {
               </div>
             </div>
           </div>
+        </>
+      ) : isConnected && !isLoading && (adPlatform === "tiktok" && tiktokError) ? (
+        <>
+          <div className="flex items-center justify-between rounded-xl border border-rose-200 bg-gradient-to-r from-rose-50 to-red-50 px-4 py-2.5 mb-4">
+            <div className="flex items-center gap-2">
+              <PlatformIcon platform="tiktok" size={18} />
+              <span className="text-sm font-medium text-rose-800">TikTok Ads Bağlı Fakat Veri Çekilemiyor</span>
+            </div>
+            <button onClick={handleDisconnect} className="rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-medium text-rose-600 transition hover:bg-rose-50">Bağlantıyı Kes</button>
+          </div>
+          <div className="rounded-xl border border-rose-200 bg-rose-50/50 p-5 mb-4">
+            <h3 className="text-sm font-semibold text-rose-900 mb-2">Hata Detayı:</h3>
+            <p className="text-xs text-rose-700 leading-relaxed">{tiktokError}</p>
+          </div>
+          {tiktokDebug && (
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-5 overflow-auto max-h-[500px]">
+              <h3 className="text-sm font-bold text-zinc-800 mb-3 flex items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                TikTok API Ham Log Çıktısı (Debug)
+              </h3>
+              <pre className="text-[10px] text-zinc-600 font-mono whitespace-pre-wrap select-all">
+                {JSON.stringify(tiktokDebug, null, 2)}
+              </pre>
+            </div>
+          )}
         </>
       ) : isLoading ? (
         <section className="grid grid-cols-2 gap-3 xl:grid-cols-3">
