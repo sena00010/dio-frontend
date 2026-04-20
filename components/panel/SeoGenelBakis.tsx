@@ -216,6 +216,19 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
     }
   };
 
+  const handleDisconnect = async () => {
+    if (!activeCompany?.id) return;
+    if (!confirm("SEO entegrasyonunun bağlantısını kesmek istediğinize emin misiniz?")) return;
+    try {
+      await api.delete(`/api/seo/integration/disconnect?company_id=${activeCompany.id}`);
+      setConnected(false);
+      setProjects([]);
+      setOverview(null);
+    } catch (e) {
+      alert("Bağlantı kesilirken bir hata oluştu.");
+    }
+  };
+
   // Bağlantı yoksa CTA göster
   if (connected === false) {
     return (
@@ -324,6 +337,9 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
             className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-600 transition hover:bg-zinc-50 disabled:opacity-50"
           >
             {syncing ? <span className="h-3 w-3 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-600" /> : "↻"} Tara
+          </button>
+          <button onClick={handleDisconnect} className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 shadow-sm transition hover:bg-red-50">
+            Bağlantıyı Kes
           </button>
           <button className="rounded-lg bg-[#E73932] px-4 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#D32F2F]">
             ● Rapor

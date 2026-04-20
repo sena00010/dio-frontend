@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PanelTitle, SectionCard, StatusPill } from "./ui";
 import type { ScreenKey } from "./types";
 import api from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import NewContentWizard from "./NewContentWizard";
 import dynamic from "next/dynamic";
-import { PhotoIcon, BuildingOffice2Icon, SparklesIcon, ShareIcon, PaintBrushIcon, ComputerDesktopIcon, AdjustmentsHorizontalIcon, LinkIcon, LanguageIcon, TagIcon, BuildingLibraryIcon, UserGroupIcon, IdentificationIcon, EyeIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { PhotoIcon, BuildingOffice2Icon, SparklesIcon, ShareIcon, PaintBrushIcon, ComputerDesktopIcon, AdjustmentsHorizontalIcon, LinkIcon, LanguageIcon, TagIcon, BuildingLibraryIcon, UserGroupIcon, IdentificationIcon, EyeIcon, MagnifyingGlassIcon, UsersIcon } from "@heroicons/react/24/outline";
 import { CustomSelect, SearchableFontSelect, GenderToggle, SocialMediaManager } from "./AdvancedInputs";
+import { useMarketingData } from "./useMarketingData";
 
 const ImageStudio = dynamic(() => import("./ImageStudio"), { ssr: false });
 const ContentCalendar = dynamic(() => import("./ContentCalendar"), { ssr: false });
@@ -19,6 +20,7 @@ const ProductImageStudio = dynamic(() => import("./ProductImageStudio"), { ssr: 
 const SeoGenelBakis = dynamic(() => import("./SeoGenelBakis"), { ssr: false });
 const SeoMetricsCard = dynamic(() => import("./SeoMetricsCard"), { ssr: false });
 const BrandDetail = dynamic(() => import("./BrandDetail"), { ssr: false });
+import BrandProfileDetail from "./BrandProfileDetail";
 
 // Recharts — lazy import to avoid SSR issues
 const {
@@ -32,92 +34,105 @@ const {
   Legend,
 } = require("recharts");
 
+function DatePickerDropdown({
+  datePreset, setDatePreset,
+  customDates, setCustomDates,
+  datePickerOpen, setDatePickerOpen,
+  datePickerRef
+}: any) {
+  return (
+    <div className="relative" ref={datePickerRef}>
+      {/* TETİKLEYİCİ BUTON */}
+      <div 
+        onClick={() => setDatePickerOpen(!datePickerOpen)}
+        className="cursor-pointer flex flex-col sm:flex-row items-center gap-2.5 rounded-xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 pl-4 pr-3 py-2 text-white shadow-lg shadow-slate-900/20 hover:ring-2 hover:ring-slate-700 transition-all"
+      >
+        <div className="hidden sm:flex h-7 w-7 items-center justify-center rounded-lg bg-white/10 shrink-0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+        </div>
+        <div className="flex flex-col pr-4 text-center sm:text-left">
+          <span className="text-[11px] font-medium text-white/60 leading-none mb-1 hidden sm:block">Analiz Dönemi</span>
+          <span className="text-sm font-semibold leading-tight">
+            {datePreset === "custom" ? (customDates.start && customDates.end ? `${customDates.start} - ${customDates.end}` : "Özel Tarih Seçimi") : `Son ${datePreset} Gün`}
+          </span>
+        </div>
+        <div className="pointer-events-none hidden sm:block">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </div>
+      </div>
+
+      {/* AÇILIR MENÜ */}
+      {datePickerOpen && (
+        <div className="absolute right-0 top-full z-50 mt-2 w-72 rounded-xl bg-white border border-zinc-200 shadow-xl overflow-hidden" style={{ animation: 'fade-in 0.15s ease-out' }}>
+          <div className="p-1.5 flex flex-col gap-0.5">
+            {[7, 30, 90].map(days => (
+              <button
+                key={days}
+                onClick={() => { setDatePreset(days.toString()); setDatePickerOpen(false); }}
+                className={`text-left px-3 py-2 text-sm font-medium rounded-lg transition-colors ${datePreset === days.toString() ? 'bg-blue-50 text-blue-600' : 'text-zinc-700 hover:bg-zinc-100'}`}
+              >
+                Son {days} Gün
+              </button>
+            ))}
+            <button
+              onClick={() => setDatePreset("custom")}
+              className={`text-left px-3 py-2 text-sm font-medium rounded-lg transition-colors ${datePreset === "custom" ? 'bg-indigo-50 text-indigo-600' : 'text-zinc-700 hover:bg-zinc-100'}`}
+            >
+              Spesifik Tarih Seçin
+            </button>
+          </div>
+          {datePreset === "custom" && (
+            <div className="p-3 bg-zinc-50 border-t border-zinc-100 flex flex-col gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-zinc-600">Başlangıç Tarihi</label>
+                <input 
+                  type="date"
+                  value={customDates.start}
+                  onChange={(e) => setCustomDates((p: any) => ({ ...p, start: e.target.value }))}
+                  className="rounded-lg border border-zinc-300 py-1.5 px-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-zinc-600">Bitiş Tarihi</label>
+                <input 
+                  type="date"
+                  value={customDates.end}
+                  onChange={(e) => setCustomDates((p: any) => ({ ...p, end: e.target.value }))}
+                  className="rounded-lg border border-zinc-300 py-1.5 px-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                />
+              </div>
+              <button 
+                onClick={() => setDatePickerOpen(false)}
+                disabled={!customDates.start || !customDates.end}
+                className="mt-1 w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 disabled:cursor-not-allowed text-white py-2 rounded-lg text-sm font-medium transition"
+              >
+                Verileri Getir
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function DashboardScreen() {
   const { activeCompany } = useAuth();
-
-  // URL parametresinden platform tespiti (OAuth redirect sonrası)
-  const getInitialPlatform = (): "meta" | "google" => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("gads_connected") === "true") return "google";
-      if (params.get("meta_connected") === "true") return "meta";
-    }
-    return "meta";
-  };
-  const [adPlatform, setAdPlatform] = useState<"meta" | "google">(getInitialPlatform);
-
-  // ── Meta state ──
-  const [isMetaConnected, setIsMetaConnected] = useState(false);
-  const [metaLoading, setMetaLoading] = useState(true);
-  const [metaInsights, setMetaInsights] = useState<{
-    spend: number; revenue: number; roas: number; conversions: number;
-  } | null>(null);
-  const [metaCampaigns, setMetaCampaigns] = useState<Array<{
-    id: string; name: string; status: string; daily_budget: number; spend: number; roas: number;
-  }>>([]);
-
-  // ── Google Ads state ──
-  const [isGadsConnected, setIsGadsConnected] = useState(false);
-  const [gadsLoading, setGadsLoading] = useState(true);
-  const [gadsError, setGadsError] = useState<string | null>(null);
-  const [gadsInsights, setGadsInsights] = useState<{
-    spend: number; clicks: number; impressions: number; conversions: number; cpc: number; ctr: number;
-  } | null>(null);
-  const [gadsCampaigns, setGadsCampaigns] = useState<Array<{
-    id: string; name: string; status: string; spend: number; clicks: number; impressions: number; conversions: number;
-  }>>([]);
-
-  // ── Meta veri çekme ──
-  useEffect(() => {
-    if (!activeCompany) return;
-    setMetaLoading(true);
-    api.get(`/api/meta/status?company_id=${activeCompany.id}`)
-      .then(({ data }) => {
-        if (data.connected) {
-          setIsMetaConnected(true);
-          return api.get(`/api/meta/dashboard?company_id=${activeCompany.id}`);
-        } else { setIsMetaConnected(false); setMetaLoading(false); return null; }
-      })
-      .then((res) => {
-        if (res && res.data) {
-          if (res.data.insights) setMetaInsights(res.data.insights);
-          if (res.data.campaigns) setMetaCampaigns(res.data.campaigns);
-        }
-        setMetaLoading(false);
-      })
-      .catch(() => { setIsMetaConnected(false); setMetaLoading(false); });
-  }, [activeCompany]);
-
-  // ── Google Ads veri çekme ──
-  useEffect(() => {
-    if (!activeCompany) return;
-    setGadsLoading(true);
-    setGadsError(null);
-    api.get(`/api/google-ads/status?company_id=${activeCompany.id}`)
-      .then(({ data }) => {
-        if (data.connected) {
-          setIsGadsConnected(true);
-          return api.get(`/api/google-ads/dashboard?company_id=${activeCompany.id}`);
-        } else { setIsGadsConnected(false); setGadsLoading(false); return null; }
-      })
-      .then((res) => {
-        if (res && res.data) {
-          if (res.data.insights) setGadsInsights(res.data.insights);
-          if (res.data.campaigns) setGadsCampaigns(res.data.campaigns);
-          // Hata mesajlarını yakala
-          const errMsg = res.data.insights_error || res.data.campaigns_error || res.data.error;
-          if (errMsg && !res.data.insights) {
-            if (errMsg.includes("DEVELOPER_TOKEN_NOT_APPROVED")) {
-              setGadsError("Developer token henüz onaylanmadı. Google Ads API erişimi için Basic/Standard başvuru yapılmalı.");
-            } else {
-              setGadsError(errMsg);
-            }
-          }
-        }
-        setGadsLoading(false);
-      })
-      .catch(() => { setIsGadsConnected(false); setGadsLoading(false); });
-  }, [activeCompany]);
+  const {
+    adPlatform, setAdPlatform,
+    isMetaConnected, setIsMetaConnected, metaLoading, metaInsights, setMetaInsights, metaCampaigns, setMetaCampaigns, metaAdAccounts, selectedMetaAccount,
+    isGadsConnected, setIsGadsConnected, gadsLoading, gadsError, gadsInsights, setGadsInsights, gadsCampaigns, setGadsCampaigns,
+    isTikTokConnected, setIsTikTokConnected, tiktokLoading, tiktokInsights, setTiktokInsights,
+    isLinkedInConnected, setIsLinkedInConnected, linkedinLoading, linkedinInsights, setLinkedinInsights, linkedinCampaigns, setLinkedinCampaigns, linkedinSocialData,
+    linkedinAdAccounts, selectedLinkedinAccount, linkedinDebug,
+    campaignFilter, setCampaignFilter,
+    datePreset, setDatePreset,
+    customDates, setCustomDates,
+    datePickerOpen, setDatePickerOpen,
+    datePickerRef,
+    omniStats, omniLoading,
+    handleMetaAccountChange, handleLinkedinAccountChange
+  } = useMarketingData();
 
   // ── Disconnect handlers ──
   const handleMetaDisconnect = () => {
@@ -134,6 +149,20 @@ function DashboardScreen() {
       .then(() => { setIsGadsConnected(false); setGadsInsights(null); setGadsCampaigns([]); })
       .catch(() => {});
   };
+  const handleTikTokDisconnect = () => {
+    if (!activeCompany) return;
+    if (!confirm("TikTok Ads bağlantısını kaldırmak istediğinize emin misiniz?")) return;
+    api.delete(`/api/tiktok/disconnect?company_id=${activeCompany.id}`)
+      .then(() => { setIsTikTokConnected(false); setTiktokInsights(null); })
+      .catch(() => {});
+  };
+  const handleLinkedInDisconnect = () => {
+    if (!activeCompany) return;
+    if (!confirm("LinkedIn Ads bağlantısını kaldırmak istediğinize emin misiniz?")) return;
+    api.delete(`/api/linkedin/disconnect?company_id=${activeCompany.id}`)
+      .then(() => { setIsLinkedInConnected(false); setLinkedinInsights(null); })
+      .catch(() => {});
+  };
 
   // ── Connect handlers ──
   const handleMetaConnect = () => {
@@ -146,42 +175,119 @@ function DashboardScreen() {
     api.get(`/api/google-ads/auth/login?company_id=${activeCompany.id}`)
       .then(({ data }) => { if (data.url) window.location.href = data.url; }).catch(() => {});
   };
+  const handleLinkedInConnect = () => {
+    if (!activeCompany) return;
+    api.get(`/api/linkedin/auth/login?company_id=${activeCompany.id}`)
+      .then(({ data }) => { if (data.url) window.location.href = data.url; }).catch(() => {});
+  };
 
   const fmtMoney = (n: number) => {
     if (n >= 1000000) return "₺" + (n / 1000000).toFixed(1) + "M";
     if (n >= 1000) return "₺" + n.toLocaleString("tr-TR", { maximumFractionDigits: 0 });
     return "₺" + n.toFixed(2);
   };
-  const fmtNum = (n: number) => n.toLocaleString("tr-TR");
+  const fmtNum = (n: number | undefined | null) => (n ?? 0).toLocaleString("tr-TR");
 
-  const statusMap: Record<string, { label: string; tone: "ok" | "warn" }> = {
+  const statusMap: Record<string, { label: string; tone: "ok" | "warn" | "muted" | "bad" }> = {
     ACTIVE: { label: "Aktif", tone: "ok" },
-    PAUSED: { label: "Duraklatıldı", tone: "warn" },
     ENABLED: { label: "Aktif", tone: "ok" },
+    PAUSED: { label: "Duraklatıldı", tone: "warn" },
+    COMPLETED: { label: "Tamamlandı", tone: "muted" },
+    DRAFT: { label: "Taslak", tone: "muted" },
+    REMOVED: { label: "Kaldırıldı", tone: "bad" },
+    CANCELED: { label: "İptal Edildi", tone: "bad" },
+    ARCHIVED: { label: "Arşivlendi", tone: "muted" },
+  };
+
+  // ── Platform bilgi haritası ──
+  const platformInfo: Record<string, { label: string; color: string }> = {
+    all: { label: "Tüm Platformlar", color: "#6366f1" },
+    meta: { label: "Meta Ads", color: "#1877F2" },
+    google: { label: "Google Ads", color: "#4285F4" },
+    tiktok: { label: "TikTok Ads", color: "#000000" },
+    linkedin: { label: "LinkedIn Ads", color: "#0A66C2" },
   };
 
   // ── Aktif platform verileri ──
-  const isConnected = adPlatform === "meta" ? isMetaConnected : isGadsConnected;
-  const isLoading = adPlatform === "meta" ? metaLoading : gadsLoading;
-  const handleDisconnect = adPlatform === "meta" ? handleMetaDisconnect : handleGadsDisconnect;
-  const handleConnect = adPlatform === "meta" ? handleMetaConnect : handleGadsConnect;
-  const platformLabel = adPlatform === "meta" ? "Meta Ads" : "Google Ads";
-  const platformColor = adPlatform === "meta" ? "#1877F2" : "#4285F4";
+  const getIsConnected = () => {
+    if (adPlatform === "all") return isMetaConnected || isGadsConnected || isTikTokConnected || isLinkedInConnected;
+    if (adPlatform === "meta") return isMetaConnected;
+    if (adPlatform === "google") return isGadsConnected;
+    if (adPlatform === "tiktok") return isTikTokConnected;
+    if (adPlatform === "linkedin") return isLinkedInConnected;
+    return false;
+  };
+  const getIsLoading = () => {
+    if (adPlatform === "all") return omniLoading;
+    if (adPlatform === "meta") return metaLoading;
+    if (adPlatform === "google") return gadsLoading;
+    if (adPlatform === "tiktok") return tiktokLoading;
+    if (adPlatform === "linkedin") return linkedinLoading;
+    return false;
+  };
+  const getHandleDisconnect = () => {
+    if (adPlatform === "meta") return handleMetaDisconnect;
+    if (adPlatform === "google") return handleGadsDisconnect;
+    if (adPlatform === "tiktok") return handleTikTokDisconnect;
+    if (adPlatform === "linkedin") return handleLinkedInDisconnect;
+    return () => {};
+  };
+  const getHandleConnect = () => {
+    if (adPlatform === "meta") return handleMetaConnect;
+    if (adPlatform === "google") return handleGadsConnect;
+    if (adPlatform === "linkedin") return handleLinkedInConnect;
+    // TikTok için OAuth henüz eklenmediğinden boş
+    return () => {};
+  };
+
+  const isConnected = getIsConnected();
+  const isLoading = getIsLoading();
+  const handleDisconnect = getHandleDisconnect();
+  const handleConnect = getHandleConnect();
+  const platformLabel = platformInfo[adPlatform]?.label || "Platform";
+  const platformColor = platformInfo[adPlatform]?.color || "#6366f1";
 
   // Aktif platforma göre metrik kartları
   const getMetricCards = () => {
+    const dLabel = datePreset === "custom" && customDates.start && customDates.end 
+      ? `${customDates.start} ~ ${customDates.end}` 
+      : `Son ${datePreset} gün`;
+
+    // ── ALL: Omnichannel toplamlar ──
+    if (adPlatform === "all" && omniStats?.totals) {
+      const t = omniStats.totals;
+      return [
+        { title: "Toplam Harcama", value: fmtMoney(t.spend), delta: `Tüm Platformlar • ${dLabel}` },
+        { title: "Toplam Tıklama", value: fmtNum(t.clicks), delta: `Tüm Platformlar • ${dLabel}` },
+        { title: "Toplam Dönüşüm", value: t.conversions.toFixed(0), delta: `Tüm Platformlar • ${dLabel}` },
+      ];
+    }
     if (adPlatform === "meta" && metaInsights) {
       return [
-        { title: "Toplam Harcama", value: fmtMoney(metaInsights.spend), delta: "Son 30 gün" },
-        { title: "Toplam Gelir", value: fmtMoney(metaInsights.revenue), delta: "Son 30 gün" },
-        { title: "ROAS", value: metaInsights.roas.toFixed(1) + "x", delta: "Son 30 gün" },
+        { title: "Toplam Harcama", value: fmtMoney(metaInsights.spend), delta: dLabel },
+        { title: "Toplam Gelir", value: fmtMoney(metaInsights.revenue), delta: dLabel },
+        { title: "ROAS", value: metaInsights.roas.toFixed(1) + "x", delta: dLabel },
       ];
     }
     if (adPlatform === "google" && gadsInsights) {
       return [
-        { title: "Toplam Harcama", value: fmtMoney(gadsInsights.spend), delta: "Son 30 gün" },
-        { title: "Tıklama", value: fmtNum(gadsInsights.clicks), delta: "Son 30 gün" },
-        { title: "Dönüşüm", value: gadsInsights.conversions.toFixed(0), delta: "Son 30 gün" },
+        { title: "Toplam Harcama", value: fmtMoney(gadsInsights.spend), delta: dLabel },
+        { title: "Tıklama", value: fmtNum(gadsInsights.clicks), delta: dLabel },
+        { title: "Dönüşüm", value: gadsInsights.conversions.toFixed(0), delta: dLabel },
+      ];
+    }
+    if (adPlatform === "tiktok" && tiktokInsights) {
+      return [
+        { title: "Toplam Harcama", value: fmtMoney(tiktokInsights.spend), delta: dLabel },
+        { title: "Tıklama", value: fmtNum(tiktokInsights.clicks), delta: dLabel },
+        { title: "Dönüşüm", value: tiktokInsights.conversions.toFixed(0), delta: dLabel },
+      ];
+    }
+    if (adPlatform === "linkedin" && linkedinInsights) {
+      return [
+        { title: "Toplam Harcama", value: fmtMoney(linkedinInsights.spend), delta: dLabel },
+        { title: "Tıklama", value: fmtNum(linkedinInsights.clicks), delta: dLabel },
+        { title: "Dönüşüm", value: linkedinInsights.conversions.toFixed(0), delta: dLabel },
       ];
     }
     return null;
@@ -189,17 +295,38 @@ function DashboardScreen() {
 
   const metricCards = getMetricCards();
 
+  // Platform icon SVG helper
+  const PlatformIcon = ({ platform, size = 28 }: { platform: string; size?: number }) => {
+    if (platform === "meta") return <svg viewBox="0 0 24 24" width={size} height={size} fill="none"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z" fill="#1877F2"/></svg>;
+    if (platform === "google") return <svg viewBox="0 0 24 24" width={size} height={size} fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>;
+    if (platform === "tiktok") return <svg viewBox="0 0 24 24" width={size} height={size} fill="none"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.34-6.34V9.4a8.16 8.16 0 004.76 1.52V7.5a4.85 4.85 0 01-1-.81z" fill="#000000"/></svg>;
+    if (platform === "linkedin") return <svg viewBox="0 0 24 24" width={size} height={size} fill="none"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" fill="#0A66C2"/></svg>;
+    // all - omnichannel icon
+    return <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>;
+  };
+
   // Platform Bağlan Empty State
   const AdPlatformEmptyState = ({ variant = "card" }: { variant?: "card" | "full" }) => {
     const isFullWidth = variant === "full";
+    if (adPlatform === "all") {
+      return (
+        <div className={`rounded-2xl border-2 border-dashed border-zinc-200 ${isFullWidth ? "p-8 md:p-12" : "p-6 md:p-8"} flex flex-col items-center justify-center text-center`}>
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl mb-4 bg-indigo-50">
+            <PlatformIcon platform="all" size={28} />
+          </div>
+          <h3 className={`font-semibold text-zinc-800 ${isFullWidth ? "text-lg" : "text-base"}`}>
+            Henüz hiçbir reklam platformu bağlı değil
+          </h3>
+          <p className={`mt-2 text-zinc-500 max-w-sm leading-relaxed ${isFullWidth ? "text-sm" : "text-xs"}`}>
+            Meta, Google, TikTok veya LinkedIn hesaplarınızı bağlayarak reklam performansınızı takip edin.
+          </p>
+        </div>
+      );
+    }
     return (
       <div className={`rounded-2xl border-2 border-dashed border-zinc-200 ${isFullWidth ? "p-8 md:p-12" : "p-6 md:p-8"} flex flex-col items-center justify-center text-center`}>
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl mb-4" style={{ background: `${platformColor}12` }}>
-          {adPlatform === "meta" ? (
-            <svg viewBox="0 0 24 24" width="28" height="28" fill="none"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z" fill="#1877F2"/></svg>
-          ) : (
-            <svg viewBox="0 0 24 24" width="26" height="26" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-          )}
+          <PlatformIcon platform={adPlatform} size={28} />
         </div>
         <h3 className={`font-semibold text-zinc-800 ${isFullWidth ? "text-lg" : "text-base"}`}>
           {isFullWidth ? `${platformLabel} hesabınızı bağlayarak kampanya verilerinizi görün` : `${platformLabel} hesabınızı bağlayın`}
@@ -207,13 +334,18 @@ function DashboardScreen() {
         <p className={`mt-2 text-zinc-500 max-w-sm leading-relaxed ${isFullWidth ? "text-sm" : "text-xs"}`}>
           {platformLabel} hesabınızı bağlayarak reklam performansınızı gerçek zamanlı takip edin.
         </p>
-        <button
-          onClick={handleConnect}
-          className={`mt-5 inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:opacity-90`}
-          style={{ background: platformColor }}
-        >
-          {platformLabel} ile Bağlan
-        </button>
+        {(adPlatform === "meta" || adPlatform === "google" || adPlatform === "linkedin") && (
+          <button
+            onClick={handleConnect}
+            className="mt-5 inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:opacity-90"
+            style={{ background: platformColor }}
+          >
+            {platformLabel} ile Bağlan
+          </button>
+        )}
+        {adPlatform === "tiktok" && (
+          <p className="mt-3 text-xs text-zinc-400 italic">OAuth entegrasyonu yakında eklenecek. Token'ları veritabanına manuel ekleyebilirsiniz.</p>
+        )}
       </div>
     );
   };
@@ -225,37 +357,35 @@ function DashboardScreen() {
           <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
           <p className="subtle text-sm">Dijital pazarlama performansınızı takip edin</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {/* ── Platform Dropdown ── */}
           <div className="relative">
             <select
               value={adPlatform}
-              onChange={(e) => setAdPlatform(e.target.value as "meta" | "google")}
+              onChange={(e) => setAdPlatform(e.target.value as any)}
               className="appearance-none rounded-xl border border-zinc-200 bg-white pl-10 pr-8 py-2.5 text-sm font-medium text-zinc-800 shadow-sm transition hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
             >
+              <option value="all">Tüm Platformlar</option>
               <option value="meta">Meta Ads</option>
               <option value="google">Google Ads</option>
+              <option value="tiktok">TikTok Ads</option>
+              <option value="linkedin">LinkedIn Ads</option>
             </select>
             <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
-              {adPlatform === "meta" ? (
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z" fill="#1877F2"/></svg>
-              ) : (
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-              )}
+              <PlatformIcon platform={adPlatform} size={16} />
             </div>
             <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="#71717a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
           </div>
-          {/* ── Son 30 Gün Badge ── */}
-          <div className="hidden sm:flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-4 py-2.5 text-white shadow-lg shadow-slate-900/20">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/10">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[11px] font-medium text-white/60 leading-none">Analiz Dönemi</span>
-              <span className="text-sm font-semibold leading-tight">Son 30 Gün</span>
-            </div>
+          {/* ── Dönem Seçici ── */}
+          <div className="z-50">
+            <DatePickerDropdown 
+              datePreset={datePreset} setDatePreset={setDatePreset} 
+              customDates={customDates} setCustomDates={setCustomDates} 
+              datePickerOpen={datePickerOpen} setDatePickerOpen={setDatePickerOpen} 
+              datePickerRef={datePickerRef} 
+            />
           </div>
         </div>
       </div>
@@ -268,15 +398,43 @@ function DashboardScreen() {
             borderColor: `${platformColor}25`,
           }}>
             <div className="flex items-center gap-2">
-              {adPlatform === "meta" ? (
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z" fill="#1877F2"/></svg>
-              ) : (
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-              )}
-              <span className="text-sm font-medium" style={{ color: platformColor }}>{platformLabel} Bağlı</span>
+              <PlatformIcon platform={adPlatform} size={18} />
+              <span className="text-sm font-medium" style={{ color: platformColor }}>{platformLabel} {adPlatform === "all" ? "" : "Bağlı"}</span>
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Aktif</span>
             </div>
-            <button onClick={handleDisconnect} className="rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-medium text-rose-600 transition hover:bg-rose-50">Bağlantıyı Kes</button>
+            <div className="flex items-center gap-2">
+              {/* Meta Ad Hesabı Seçici */}
+              {adPlatform === "meta" && metaAdAccounts.length > 1 && (
+                <select
+                  value={selectedMetaAccount}
+                  onChange={(e) => handleMetaAccountChange(e.target.value)}
+                  className="appearance-none rounded-lg border border-zinc-200 bg-white pl-3 pr-7 py-1.5 text-xs font-medium text-zinc-700 shadow-sm transition hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer max-w-[220px] truncate"
+                >
+                  {metaAdAccounts.map((acc) => (
+                    <option key={acc.account_id} value={acc.account_id}>
+                      {acc.name || `Hesap ${acc.account_id}`} ({acc.status})
+                    </option>
+                  ))}
+                </select>
+              )}
+              {/* LinkedIn Ad Hesabı Seçici */}
+              {adPlatform === "linkedin" && linkedinAdAccounts.length > 1 && (
+                <select
+                  value={selectedLinkedinAccount}
+                  onChange={(e) => handleLinkedinAccountChange(e.target.value)}
+                  className="appearance-none rounded-lg border border-zinc-200 bg-white pl-3 pr-7 py-1.5 text-xs font-medium text-zinc-700 shadow-sm transition hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer max-w-[220px] truncate"
+                >
+                  {linkedinAdAccounts.map((acc) => (
+                    <option key={acc.urn} value={acc.urn}>
+                      {acc.name} ({acc.serving === "RUNNABLE" ? "Aktif" : acc.serving})
+                    </option>
+                  ))}
+                </select>
+              )}
+              {adPlatform !== "all" && (
+                <button onClick={handleDisconnect} className="rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-medium text-rose-600 transition hover:bg-rose-50">Bağlantıyı Kes</button>
+              )}
+            </div>
           </div>
           <section className="grid grid-cols-2 gap-3 xl:grid-cols-3">
             {metricCards.map((item) => (
@@ -293,7 +451,7 @@ function DashboardScreen() {
           {/* Bağlı ama veri çekilemiyor */}
           <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-2.5">
             <div className="flex items-center gap-2">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+              <PlatformIcon platform="google" size={18} />
               <span className="text-sm font-medium text-amber-800">Google Ads Bağlı</span>
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700"><span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Onay Bekliyor</span>
             </div>
@@ -331,21 +489,42 @@ function DashboardScreen() {
 
       {/* ── Alt Kartlar ── */}
       <section className="grid gap-4 xl:grid-cols-2">
-        {isConnected && (adPlatform === "meta" ? metaInsights : gadsInsights) ? (
+        {isConnected && metricCards ? (
           <SectionCard title="Reklam">
             <ul className="space-y-2 text-sm">
-              {adPlatform === "meta" && metaInsights ? (
+              {adPlatform === "all" && omniStats?.totals ? (
+                <>
+                  <li className="flex justify-between"><span>Toplam Harcama</span><strong>{fmtMoney(omniStats.totals.spend)}</strong></li>
+                  <li className="flex justify-between"><span>Toplam Tıklama</span><strong>{fmtNum(omniStats.totals.clicks)}</strong></li>
+                  <li className="flex justify-between"><span>Toplam Dönüşüm</span><strong>{omniStats.totals.conversions.toFixed(0)}</strong></li>
+                  {omniStats.totals.roas > 0 && <li className="flex justify-between"><span>Ort. ROAS</span><strong className="text-emerald-600">{omniStats.totals.roas.toFixed(1)}x</strong></li>}
+                </>
+              ) : adPlatform === "meta" && metaInsights ? (
                 <>
                   <li className="flex justify-between"><span>Harcama</span><strong>{fmtMoney(metaInsights.spend)}</strong></li>
                   <li className="flex justify-between"><span>ROAS</span><strong className="text-emerald-600">{metaInsights.roas.toFixed(1)}x</strong></li>
                   <li className="flex justify-between"><span>Dönüşüm</span><strong>{metaInsights.conversions.toLocaleString("tr-TR")}</strong></li>
                 </>
-              ) : gadsInsights ? (
+              ) : adPlatform === "google" && gadsInsights ? (
                 <>
                   <li className="flex justify-between"><span>Harcama</span><strong>{fmtMoney(gadsInsights.spend)}</strong></li>
                   <li className="flex justify-between"><span>CPC</span><strong className="text-blue-600">{fmtMoney(gadsInsights.cpc)}</strong></li>
                   <li className="flex justify-between"><span>CTR</span><strong className="text-emerald-600">{gadsInsights.ctr.toFixed(2)}%</strong></li>
                   <li className="flex justify-between"><span>Gösterim</span><strong>{fmtNum(gadsInsights.impressions)}</strong></li>
+                </>
+              ) : adPlatform === "tiktok" && tiktokInsights ? (
+                <>
+                  <li className="flex justify-between"><span>Harcama</span><strong>{fmtMoney(tiktokInsights.spend)}</strong></li>
+                  <li className="flex justify-between"><span>Tıklama</span><strong>{fmtNum(tiktokInsights.clicks)}</strong></li>
+                  <li className="flex justify-between"><span>CPA</span><strong className="text-blue-600">{fmtMoney(tiktokInsights.cpa)}</strong></li>
+                  <li className="flex justify-between"><span>Dönüşüm Oranı</span><strong className="text-emerald-600">{(tiktokInsights.conversion_rate * 100).toFixed(2)}%</strong></li>
+                </>
+              ) : adPlatform === "linkedin" && linkedinInsights ? (
+                <>
+                  <li className="flex justify-between"><span>Harcama</span><strong>{fmtMoney(linkedinInsights.spend)}</strong></li>
+                  <li className="flex justify-between"><span>Tıklama</span><strong>{fmtNum(linkedinInsights.clicks)}</strong></li>
+                  <li className="flex justify-between"><span>Gösterim</span><strong>{fmtNum(linkedinInsights.impressions)}</strong></li>
+                  <li className="flex justify-between"><span>Dönüşüm</span><strong>{linkedinInsights.conversions.toFixed(0)}</strong></li>
                 </>
               ) : null}
             </ul>
@@ -358,28 +537,116 @@ function DashboardScreen() {
         ) : (
           <div className="card rounded-xl overflow-hidden">
             <div className="px-4 pt-4 pb-2"><h3 className="text-base font-semibold text-zinc-900">Reklam</h3></div>
-            <div className="px-4 pb-4"><AdPlatformEmptyState variant="card" /></div>
+            <div className="px-4 pb-4">
+              {isConnected ? (
+                <div className="flex flex-col items-center justify-center py-6 text-center">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl mb-3" style={{ background: `${platformColor}12` }}>
+                    <PlatformIcon platform={adPlatform} size={20} />
+                  </div>
+                  <p className="text-sm font-medium text-zinc-700">Reklam verisi henüz mevcut değil</p>
+                  <p className="mt-1 text-xs text-zinc-400">Aktif reklam kampanyalarınız olduğunda veriler burada görünecektir.</p>
+                </div>
+              ) : (
+                <AdPlatformEmptyState variant="card" />
+              )}
+            </div>
           </div>
         )}
         <SectionCard title="Sosyal Medya">
-          <ul className="space-y-2 text-sm">
-            <li className="flex justify-between"><span>Takipçi</span><strong>28,450</strong></li>
-            <li className="flex justify-between"><span>Etkileşim</span><strong className="text-emerald-600">4.8%</strong></li>
-            <li className="flex justify-between"><span>Paylaşım</span><strong>156</strong></li>
-          </ul>
+          {isConnected ? (
+            linkedinSocialData ? (
+              <div className="space-y-3">
+                {/* Takipçi & Engagement */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50">
+                      <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                    <div>
+                      <p className="text-xs text-zinc-500">Takipçi</p>
+                      <p className="text-lg font-bold text-zinc-900">{fmtNum(linkedinSocialData.followers)}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-zinc-500">Etkileşim</p>
+                    <p className="text-lg font-bold text-emerald-600">{linkedinSocialData.engagement.toFixed(1)}%</p>
+                  </div>
+                </div>
+                {/* Sayfa Görüntülenme */}
+                <div className="rounded-lg bg-zinc-50 p-3">
+                  <p className="text-xs font-medium text-zinc-500 mb-2">Sayfa Görüntülenme</p>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div>
+                      <p className="text-base font-bold text-zinc-900">{fmtNum(linkedinSocialData.total_views)}</p>
+                      <p className="text-[10px] text-zinc-400">Toplam</p>
+                    </div>
+                    <div>
+                      <p className="text-base font-bold text-zinc-900">{fmtNum(linkedinSocialData.desktop_views)}</p>
+                      <p className="text-[10px] text-zinc-400">Masaüstü</p>
+                    </div>
+                    <div>
+                      <p className="text-base font-bold text-zinc-900">{fmtNum(linkedinSocialData.mobile_views)}</p>
+                      <p className="text-[10px] text-zinc-400">Mobil</p>
+                    </div>
+                  </div>
+                </div>
+                {/* Alt Detaylar */}
+                <div className="flex justify-between text-xs text-zinc-500">
+                  <span>Genel Bakış: <strong className="text-zinc-700">{fmtNum(linkedinSocialData.overview_views)}</strong></span>
+                  <span>Hakkımızda: <strong className="text-zinc-700">{fmtNum(linkedinSocialData.about_views)}</strong></span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex justify-center py-4">
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+              </div>
+            )
+          ) : (
+            <div className="flex flex-col items-center justify-center py-6 text-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl mb-3" style={{ background: `${platformColor}12` }}>
+                <PlatformIcon platform={adPlatform} size={20} />
+              </div>
+              <p className="text-sm text-zinc-500">{platformLabel} hesabınıza bağlanmadan bu verileri göremezsiniz.</p>
+            </div>
+          )}
         </SectionCard>
       </section>
 
+      {/* ── LinkedIn Sosyal Debug ── */}
+      {/* 
+      {adPlatform === "linkedin" && isConnected && linkedinDebug && (
+        <div className="card p-4 mt-4">
+          <h3 className="text-base font-semibold text-zinc-900 mb-3">🔍 LinkedIn Sosyal API Debug</h3>
+          <pre className="bg-zinc-900 text-green-400 p-4 rounded-lg text-xs overflow-auto max-h-[600px] whitespace-pre-wrap">
+            {JSON.stringify(linkedinDebug, null, 2)}
+          </pre>
+        </div>
+      )}
+      */}
+
       {/* ── Son Kampanyalar ── */}
-      {isConnected && ((adPlatform === "meta" && metaCampaigns.length > 0) || (adPlatform === "google" && gadsCampaigns.length > 0)) ? (
+      {isConnected && ((adPlatform === "meta" && metaCampaigns.length > 0) || (adPlatform === "google" && gadsCampaigns.length > 0) || (adPlatform === "linkedin" && linkedinCampaigns.length > 0)) ? (
         <SectionCard title="Son Kampanyalar" action="Tümünü Gör">
+          <div className="flex justify-end mb-4 px-1">
+            <select
+              value={campaignFilter}
+              onChange={(e) => setCampaignFilter(e.target.value)}
+              className="appearance-none rounded-lg border border-zinc-200 bg-zinc-50 pl-3 pr-8 py-1.5 text-xs font-medium text-zinc-700 shadow-sm transition hover:border-zinc-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
+            >
+              <option value="all">Tüm Durumlar</option>
+              <option value="Aktif">Aktif</option>
+              <option value="Tamamlandı">Tamamlandı</option>
+              <option value="Duraklatıldı">Duraklatıldı</option>
+              <option value="Taslak">Taslak</option>
+            </select>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-sm">
               <thead className="subtle text-left">
                 <tr><th className="py-2">Kampanya</th><th>Platform</th><th>Harcama</th><th>{adPlatform === "meta" ? "ROAS" : "Tıklama"}</th><th>Durum</th></tr>
               </thead>
               <tbody>
-                {adPlatform === "meta" ? metaCampaigns.map((c) => {
+                {adPlatform === "meta" ? metaCampaigns.filter(c => campaignFilter === "all" || statusMap[c.status]?.label === campaignFilter).map((c) => {
                   const st = statusMap[c.status] || { label: c.status, tone: "warn" as const };
                   return (
                     <tr className="border-t" key={c.id}>
@@ -388,11 +655,20 @@ function DashboardScreen() {
                       <td><StatusPill label={st.label} tone={st.tone} /></td>
                     </tr>
                   );
-                }) : gadsCampaigns.map((c) => {
+                }) : adPlatform === "google" ? gadsCampaigns.filter(c => campaignFilter === "all" || statusMap[c.status]?.label === campaignFilter).map((c) => {
                   const st = statusMap[c.status] || { label: c.status, tone: "warn" as const };
                   return (
                     <tr className="border-t" key={c.id}>
                       <td className="py-2">{c.name}</td><td>Google Ads</td><td>{fmtMoney(c.spend)}</td>
+                      <td className="font-semibold">{fmtNum(c.clicks)}</td>
+                      <td><StatusPill label={st.label} tone={st.tone} /></td>
+                    </tr>
+                  );
+                }) : linkedinCampaigns.filter(c => campaignFilter === "all" || statusMap[c.status]?.label === campaignFilter).map((c) => {
+                  const st = statusMap[c.status] || { label: c.status, tone: "warn" as const };
+                  return (
+                    <tr className="border-t" key={c.id}>
+                      <td className="py-2">{c.name}</td><td>LinkedIn Ads</td><td>{fmtMoney(c.spend)}</td>
                       <td className="font-semibold">{fmtNum(c.clicks)}</td>
                       <td><StatusPill label={st.label} tone={st.tone} /></td>
                     </tr>
@@ -410,7 +686,24 @@ function DashboardScreen() {
       ) : (
         <div className="card rounded-xl overflow-hidden">
           <div className="px-4 pt-4 pb-2"><h3 className="text-base font-semibold text-zinc-900">Son Kampanyalar</h3></div>
-          <div className="px-4 pb-4"><AdPlatformEmptyState variant="full" /></div>
+          <div className="px-4 pb-4">
+            {isConnected ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl mb-3" style={{ background: `${platformColor}12` }}>
+                  <PlatformIcon platform={adPlatform} size={24} />
+                </div>
+                <p className="text-sm font-medium text-zinc-700">Henüz kampanya verisi bulunamadı</p>
+                <p className="mt-1 text-xs text-zinc-400">Aktif kampanyalarınız olduğunda veriler burada görünecektir.</p>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl mb-3" style={{ background: `${platformColor}12` }}>
+                  <PlatformIcon platform={adPlatform} size={24} />
+                </div>
+                <p className="text-sm text-zinc-500">{platformLabel} hesabınıza bağlanmadan kampanya verilerini göremezsiniz.</p>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -418,30 +711,68 @@ function DashboardScreen() {
 }
 
 function ReklamScreen() {
+  const {
+    metaInsights, metaCampaigns, gadsInsights, gadsCampaigns, linkedinInsights, linkedinCampaigns, tiktokInsights,
+    datePreset, setDatePreset, customDates, setCustomDates, datePickerOpen, setDatePickerOpen, datePickerRef
+  } = useMarketingData();
+  const [activeTab, setActiveTab] = useState("Meta Ads");
+
+  const platforms = ["Meta Ads", "Google Ads", "LinkedIn Ads", "TikTok Ads"];
+
+  const getInsights = () => {
+    if (activeTab === "Meta Ads") return metaInsights;
+    if (activeTab === "Google Ads") return gadsInsights;
+    if (activeTab === "LinkedIn Ads") return linkedinInsights;
+    if (activeTab === "TikTok Ads") return tiktokInsights;
+    return null;
+  };
+
+  const getCampaigns = () => {
+    if (activeTab === "Meta Ads") return metaCampaigns || [];
+    if (activeTab === "Google Ads") return gadsCampaigns || [];
+    if (activeTab === "LinkedIn Ads") return linkedinCampaigns || [];
+    return [];
+  };
+
+  const insights: any = getInsights();
+  const campaigns: any[] = getCampaigns();
+
+  const fmtMoney = (val?: number) => val != null ? new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(val) : "₺0,00";
+  const fmtNum = (val?: number) => val != null ? new Intl.NumberFormat('tr-TR').format(val) : "0";
+
   return (
     <div className="space-y-4">
       <PanelTitle title="Reklam Yönetimi" description="Tüm reklam kampanyalarınızı yönetin" />
-      <div className="inline-flex rounded-lg bg-zinc-100 p-1">
-        {["Meta Ads", "Google Ads", "LinkedIn Ads", "TikTok Ads"].map((tab, i) => (
-          <button
-            className={`rounded-md px-3 py-1.5 text-sm transition ${i === 0 ? "bg-white font-medium text-foreground shadow-sm" : "text-zinc-600 hover:text-foreground"}`}
-            key={tab}
-            type="button"
-          >
-            {tab}
-          </button>
-        ))}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="inline-flex rounded-lg bg-zinc-100 p-1">
+          {platforms.map((tab) => (
+            <button
+              className={`rounded-md px-3 py-1.5 text-sm transition ${activeTab === tab ? "bg-white font-medium text-foreground shadow-sm" : "text-zinc-600 hover:text-foreground"}`}
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              type="button"
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+        <div className="z-50">
+          <DatePickerDropdown 
+            datePreset={datePreset} setDatePreset={setDatePreset} 
+            customDates={customDates} setCustomDates={setCustomDates} 
+            datePickerOpen={datePickerOpen} setDatePickerOpen={setDatePickerOpen} 
+            datePickerRef={datePickerRef} 
+          />
+        </div>
       </div>
+      
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
-          { title: "Harcama", value: "₺45,200", accent: "" },
-          { title: "Gösterim", value: "1.2M", accent: "" },
-          { title: "Tıklama", value: "34,500", accent: "" },
-          { title: "CTR", value: "2.87%", accent: "" },
-          { title: "CPC", value: "₺1.31", accent: "" },
-          { title: "Dönüşüm", value: "1,240", accent: "" },
-          { title: "CPA", value: "₺36.45", accent: "" },
-          { title: "ROAS", value: "4.2x", accent: "text-emerald-600" },
+          { title: "Harcama", value: fmtMoney(insights?.spend), accent: "" },
+          { title: "Gösterim", value: fmtNum(insights?.impressions || 0), accent: "" },
+          { title: "Tıklama", value: fmtNum(insights?.clicks || 0), accent: "" },
+          { title: "Dönüşüm", value: fmtNum(insights?.conversions || 0), accent: "" },
+          { title: "ROAS", value: insights?.roas ? `${insights.roas.toFixed(2)}x` : "-", accent: "text-emerald-600" },
         ].map((item) => (
           <article className="card p-4" key={item.title}>
             <p className="subtle text-xs">{item.title}</p>
@@ -449,44 +780,55 @@ function ReklamScreen() {
           </article>
         ))}
       </section>
-      <SectionCard title="">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-sm">
-            <thead className="subtle text-left">
-              <tr>
-                <th className="py-2">Kampanya Adı</th>
-                <th>Platform</th>
-                <th>Bütçe</th>
-                <th>Harcama</th>
-                <th>Tıklama</th>
-                <th>Dönüşüm</th>
-                <th>ROAS</th>
-                <th>Durum</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                ["Yaz İndirimi Kampanyası", "Meta Ads", "₺20,000", "₺18,400", "12,300", "456", "4.8x", "Aktif"],
-                ["Google Arama - Marka", "Google", "₺25,000", "₺22,100", "15,200", "520", "3.9x", "Aktif"],
-                ["LinkedIn B2B Lead", "LinkedIn", "₺10,000", "₺4,700", "3,200", "142", "2.1x", "Duraklatıldı"],
-                ["TikTok Marka Bilinirliği", "TikTok", "₺8,000", "₺5,200", "3,800", "122", "5.2x", "Aktif"],
-              ].map((row) => (
-                <tr className="border-t" key={row[0]}>
-                  {row.slice(0, 6).map((cell) => (
-                    <td className="py-2" key={`${row[0]}-${cell}`}>
-                      {cell}
-                    </td>
-                  ))}
-                  <td className="font-semibold text-emerald-600">{row[6]}</td>
-                  <td>
-                    <StatusPill label={row[7]} tone={row[7] === "Aktif" ? "ok" : "warn"} />
-                  </td>
+      
+      {campaigns && campaigns.length > 0 ? (
+        <SectionCard title="Kampanyalar">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[760px] text-sm">
+              <thead className="subtle text-left">
+                <tr>
+                  <th className="py-2">Kampanya Adı</th>
+                  <th>Platform</th>
+                  <th>Bütçe</th>
+                  <th>Harcama</th>
+                  <th>Tıklama</th>
+                  <th>Dönüşüm</th>
+                  <th>ROAS</th>
+                  <th>Durum</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {campaigns.map((c: any) => {
+                  const spend = c.spend || 0;
+                  const budget = c.daily_budget || 0;
+                  const roas = c.roas || 0;
+                  const clicks = c.clicks || 0;
+                  const conv = c.conversions || 0;
+                  return (
+                    <tr className="border-t" key={c.id || c.name}>
+                      <td className="py-2">{c.name}</td>
+                      <td>{activeTab}</td>
+                      <td>{budget ? fmtMoney(budget) : "-"}</td>
+                      <td>{fmtMoney(spend)}</td>
+                      <td>{fmtNum(clicks)}</td>
+                      <td>{fmtNum(conv)}</td>
+                      <td className="font-semibold text-emerald-600">{roas ? `${roas.toFixed(1)}x` : "-"}</td>
+                      <td>
+                        <StatusPill label={c.status} tone={c.status === "ACTIVE" || c.status === "Aktif" ? "ok" : "warn"} />
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </SectionCard>
+      ) : (
+        <div className="card p-8 flex flex-col items-center justify-center text-center">
+            <p className="text-sm font-medium text-zinc-700">Henüz kampanya verisi bulunamadı</p>
+            <p className="mt-1 text-xs text-zinc-400">{activeTab} hesabınız bağlı olmayabilir veya aktif kampanya yok.</p>
         </div>
-      </SectionCard>
+      )}
     </div>
   );
 }
@@ -982,6 +1324,17 @@ function SosyalScreen() {
 }
 
 function PerformansScreen() {
+  const {
+    omniStats, datePreset, setDatePreset, customDates, setCustomDates, datePickerOpen, setDatePickerOpen, datePickerRef
+  } = useMarketingData();
+
+  const fmtMoney = (val?: number) => val != null ? new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(val) : "₺0,00";
+
+  const t = omniStats?.totals;
+  const revenue = t && t.spend && t.roas ? t.spend * t.roas : 0;
+  
+  const totalSpend = t?.spend || 0;
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -989,7 +1342,15 @@ function PerformansScreen() {
           <h1 className="text-2xl font-semibold tracking-tight">Performans ve Raporlama</h1>
           <p className="subtle text-sm">Tüm kanalların performansını tek panelden izleyin</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
+          <div className="z-50">
+            <DatePickerDropdown 
+              datePreset={datePreset} setDatePreset={setDatePreset} 
+              customDates={customDates} setCustomDates={setCustomDates} 
+              datePickerOpen={datePickerOpen} setDatePickerOpen={setDatePickerOpen} 
+              datePickerRef={datePickerRef} 
+            />
+          </div>
           <button className="rounded-lg border bg-white px-3 py-2 text-sm font-medium">Rapor İndir</button>
           <button className="rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white">Yeni Rapor Oluştur</button>
         </div>
@@ -997,39 +1358,42 @@ function PerformansScreen() {
 
       <section className="grid grid-cols-2 gap-3 xl:grid-cols-5">
         {[
-          { title: "Toplam Harcama", value: "₺125,400", delta: "-12.5% bu ay", tone: "text-rose-600" },
-          { title: "Toplam Gelir", value: "₺489,200", delta: "+24.3% bu ay", tone: "text-emerald-600" },
-          { title: "ROAS", value: "3.9x", delta: "+0.4 bu ay", tone: "text-emerald-600" },
-          { title: "CPA", value: "₺36.45", delta: "-8.2% bu ay", tone: "text-emerald-600" },
-          { title: "CTR", value: "2.87%", delta: "+0.3% bu ay", tone: "text-emerald-600" },
+          { title: "Toplam Harcama", value: fmtMoney(t?.spend || 0), delta: "", tone: "text-rose-600" },
+          { title: "Toplam Gelir", value: fmtMoney(revenue), delta: "", tone: "text-emerald-600" },
+          { title: "ROAS", value: t?.roas ? `${t.roas.toFixed(2)}x` : "-", delta: "", tone: "text-emerald-600" },
+          { title: "Tıklama", value: t?.clicks?.toLocaleString('tr-TR') || "0", delta: "", tone: "text-emerald-600" },
+          { title: "Dönüşüm", value: t?.conversions?.toLocaleString('tr-TR') || "0", delta: "", tone: "text-emerald-600" },
         ].map((item) => (
           <article className="card p-4" key={item.title}>
             <p className="subtle text-xs">{item.title}</p>
             <p className="mt-1 text-xl sm:text-2xl lg:text-3xl font-semibold leading-tight truncate">{item.value}</p>
-            <p className={`mt-1 text-xs font-medium ${item.tone}`}>{item.delta}</p>
+            {item.delta && <p className={`mt-1 text-xs font-medium ${item.tone}`}>{item.delta}</p>}
           </article>
         ))}
       </section>
 
       <div className="grid gap-4 xl:grid-cols-3">
-        <SectionCard title="Reklam Platformları" action="Aktif">
+        <SectionCard title="Reklam Platformları Harcamaları" action="Aktif">
           <div className="space-y-3 text-sm">
-            {[
-              { label: "Meta Ads", value: "₺18,200", w: "w-3/5", color: "bg-rose-500" },
-              { label: "Google Ads", value: "₺15,400", w: "w-1/2", color: "bg-blue-500" },
-              { label: "LinkedIn Ads", value: "₺8,600", w: "w-1/3", color: "bg-emerald-500" },
-              { label: "TikTok Ads", value: "₺3,000", w: "w-1/6", color: "bg-amber-500" },
-            ].map((p) => (
-              <div key={p.label}>
-                <div className="mb-1 flex items-center justify-between">
-                  <span>{p.label}</span>
-                  <strong>{p.value}</strong>
+            {omniStats?.platforms?.map((p: any) => {
+              const platformColors: Record<string, string> = { "meta": "bg-rose-500", "google": "bg-blue-500", "linkedin": "bg-emerald-500", "tiktok": "bg-amber-500" };
+              const platformLabels: Record<string, string> = { "meta": "Meta Ads", "google": "Google Ads", "linkedin": "LinkedIn Ads", "tiktok": "TikTok Ads" };
+              const ratio = totalSpend > 0 ? (p.spend / totalSpend) * 100 : 0;
+              return (
+                <div key={p.platform}>
+                  <div className="mb-1 flex items-center justify-between">
+                    <span>{platformLabels[p.platform] || p.platform}</span>
+                    <strong>{fmtMoney(p.spend)}</strong>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-zinc-100">
+                    <div className={`h-1.5 rounded-full ${platformColors[p.platform] || "bg-indigo-500"}`} style={{ width: `${ratio}%` }} />
+                  </div>
                 </div>
-                <div className="h-1.5 rounded-full bg-zinc-100">
-                  <div className={`h-1.5 rounded-full ${p.w} ${p.color}`} />
-                </div>
-              </div>
-            ))}
+              );
+            })}
+            {(!omniStats || omniStats.platforms.length === 0) && (
+              <p className="text-xs text-zinc-500 text-center py-4">Veri bulunamadı.</p>
+            )}
           </div>
         </SectionCard>
 
@@ -1912,6 +2276,47 @@ function ProfilScreen() {
   // Edit mode (null = create new, number = editing existing)
   const [editingBrandId, setEditingBrandId] = useState<number | null>(null);
 
+  // Detail View Competitors Management
+  const [detailCompetitors, setDetailCompetitors] = useState<{id?: number, name: string, website: string}[]>([]);
+  const [newDetailCompName, setNewDetailCompName] = useState("");
+  const [newDetailCompWeb, setNewDetailCompWeb] = useState("");
+
+  const handleAddCompetitor = async () => {
+    if (!newDetailCompName.trim() || !editingBrandId) return;
+    try {
+      await api.post(`/api/protected/companies/${editingBrandId}/competitors`, [{ name: newDetailCompName, website: newDetailCompWeb }]);
+      setNewDetailCompName(""); setNewDetailCompWeb("");
+      await refreshCompanies();
+      const { data } = await api.get(`/api/protected/companies/${editingBrandId}/competitors`);
+      setDetailCompetitors(data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeleteCompetitor = async (compId: number) => {
+    if (!editingBrandId) return;
+    try {
+      await api.delete(`/api/protected/companies/${editingBrandId}/competitors/${compId}`);
+      await refreshCompanies();
+      const { data } = await api.get(`/api/protected/companies/${editingBrandId}/competitors`);
+      setDetailCompetitors(data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    if (editingBrandId && companies) {
+      const br = companies.find((c: any) => c.id === editingBrandId);
+      if (br) setDetailCompetitors(br.competitors || []);
+    } else {
+      setDetailCompetitors([]);
+      setNewDetailCompName("");
+      setNewDetailCompWeb("");
+    }
+  }, [editingBrandId, companies]);
+
   const resetForm = () => {
     setFName(""); setFSector(""); setFWebsite(""); setFLang("tr");
     setFDescription(""); setFTarget(""); setFSlogan(""); setFForbidden(""); setFTone("");
@@ -2082,6 +2487,39 @@ function ProfilScreen() {
 
   const fullName = user ? [user.first_name, user.last_name].filter(Boolean).join(" ") : "Kullanıcı";
   const initials = user ? [user.first_name?.[0], user.last_name?.[0]].filter(Boolean).join("").toUpperCase() : "U";
+
+  if (detailBrand) {
+    return (
+      <BrandProfileDetail 
+        brand={detailBrand} 
+        onBack={() => setDetailBrand(null)}
+        onEdit={() => {
+          const parsedTA2 = (() => { try { return JSON.parse(detailBrand.target_audience || "{}"); } catch { return {}; } })();
+          const parsedColors2: string[] = (() => { try { return JSON.parse(detailBrand.brand_colors || "[]"); } catch { return []; } })();
+          const parsedSocials2 = (() => { try { return JSON.parse(detailBrand.social_media || "{}"); } catch { return {}; } })();
+          setFName(detailBrand.name || "");
+          setFSector(detailBrand.sector || "");
+          setFWebsite(detailBrand.website || "");
+          setFLang(detailBrand.content_language || "tr");
+          setFDescription(detailBrand.description || "");
+          setFTarget(parsedTA2.text || "");
+          setFSlogan(detailBrand.slogan || "");
+          setFForbidden(detailBrand.forbidden_words || "");
+          setFTone(detailBrand.tone_of_voice || "");
+          setFColors(parsedColors2);
+          setFBrandType(detailBrand.brand_type || "");
+          setFBrandFont(detailBrand.brand_font || "Inter");
+          setFTargetGenders(parsedTA2.genders || []);
+          setFTargetAges(parsedTA2.ages || []);
+          setFSocials({ instagram: parsedSocials2.instagram || "", twitter: parsedSocials2.twitter || "", linkedin: parsedSocials2.linkedin || "", youtube: parsedSocials2.youtube || "", tiktok: parsedSocials2.tiktok || "" });
+          if (detailBrand.logo_url) setFLogoPreview(`${process.env.NEXT_PUBLIC_API_URL}${detailBrand.logo_url}`);
+          setEditingBrandId(detailBrand.id);
+          setDetailBrand(null);
+          setShowForm(true);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -2404,6 +2842,48 @@ function ProfilScreen() {
                     )}
                   </div>
                 </div>
+                {/* ── RAKİP YÖNETİMİ ── */}
+                <div className="border-t border-zinc-100 pt-6">
+                  <p className={sectionTitleCls + " border-none"}><UsersIcon className="w-5 h-5 text-brand" /> Rakip Yönetimi</p>
+                  {editingBrandId ? (
+                    <>
+                      <p className="mb-4 text-xs text-muted -mt-3">Aşağıya eklediğiniz rakipler doğrudan AI analizine dahil edilir.</p>
+                      
+                      <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <input className={inputCls} placeholder="Rakip Adı (Örn: Apple)" value={newDetailCompName} onChange={e => setNewDetailCompName(e.target.value)} />
+                        <div className="flex gap-2">
+                          <input className={inputCls + " flex-1"} placeholder="Web sitesi (Opsiyonel)" value={newDetailCompWeb} onChange={e => setNewDetailCompWeb(e.target.value)} />
+                          <button type="button" onClick={handleAddCompetitor} disabled={!newDetailCompName.trim()} className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50">Ekle</button>
+                        </div>
+                      </div>
+
+                      {detailCompetitors && detailCompetitors.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                          {detailCompetitors.map((comp, idx) => (
+                            <div key={comp.id || idx} className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 p-3 shadow-sm transition hover:border-zinc-300">
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-sm font-semibold text-foreground truncate">{comp.name}</span>
+                                {comp.website && <span className="text-[11px] text-brand truncate">{comp.website}</span>}
+                              </div>
+                              {comp.id && (
+                                <button type="button" onClick={() => handleDeleteCompetitor(comp.id!)} className="ml-2 text-red-500 hover:text-red-700 text-xs font-semibold px-2 py-1 bg-red-50 rounded-md border border-red-100 hover:bg-red-100 transition">
+                                  Sil
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-muted">Henüz rakip eklenmemiş. Rakip ekleyerek yapay zekanın sizi daha iyi anlamasını sağlayabilirsiniz.</p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-xs text-muted -mt-2 bg-slate-50 p-3 rounded-lg border border-dashed border-slate-200">
+                      Rakiplerinizi eklemek ve yapay zeka analizi başlatmak için önce detayları kaydedip markanızı oluşturun. Ardından Markayı Düzenle penceresinden rakiplerinizi tanımlayabilirsiniz.
+                    </p>
+                  )}
+                </div>
+
               </div>
 
               {/* Modal Footer */}
@@ -2426,104 +2906,7 @@ function ProfilScreen() {
         </div>
       )}
 
-      {/* ═══════ Brand Detail / Edit Modal ═══════ */}
-      {detailBrand && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-md p-4 animate-in fade-in duration-200">
-          <div className="mx-auto w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-2xl bg-white shadow-2xl flex flex-col">
-            {/* Header */}
-            <div className="relative bg-gradient-to-r from-rose-50 to-orange-50 px-6 py-8 border-b border-rose-100 flex-shrink-0">
-              <button onClick={() => setDetailBrand(null)} className="absolute top-4 right-4 h-8 w-8 flex items-center justify-center rounded-full bg-white/50 text-rose-900/60 hover:bg-white hover:text-rose-900 transition-colors shadow-sm">✕</button>
-              <div className="flex items-center gap-5">
-                {detailBrand.logo_url ? (
-                  <img src={`${process.env.NEXT_PUBLIC_API_URL}${detailBrand.logo_url}`} alt={detailBrand.name} className="h-20 w-20 rounded-2xl border-4 border-white shadow-md object-contain" />
-                ) : (
-                  <div className="flex h-20 w-20 items-center justify-center rounded-2xl border-4 border-white shadow-md bg-gradient-to-br from-rose-100 to-rose-200 text-2xl font-bold text-rose-700">{detailBrand.name[0]?.toUpperCase()}</div>
-                )}
-                <div>
-                  <h2 className="text-2xl font-bold text-slate-800 tracking-tight">{detailBrand.name}</h2>
-                  <div className="mt-1 flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center rounded-md bg-white/80 px-2.5 py-0.5 text-xs font-medium text-rose-700 shadow-sm border border-rose-100">{SECTOR_LABELS[detailBrand.sector] || detailBrand.sector || "Sektör Belirtilmemiş"}</span>
-                    {detailBrand.website && (
-                      <a href={detailBrand.website.startsWith('http') ? detailBrand.website : `https://${detailBrand.website}`} target="_blank" rel="noreferrer" className="text-xs font-medium text-blue-700 hover:underline flex items-center gap-1 bg-white/60 px-2 py-0.5 rounded-md border border-blue-100 shadow-sm">
-                        🌍 {detailBrand.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
-              <div className="grid gap-5 md:grid-cols-2">
-                {detailBrand.slogan && (
-                  <div className="md:col-span-2 rounded-xl bg-white p-4 shadow-sm border border-slate-100 relative pt-5">
-                    <div className="absolute -top-3 left-4 bg-white px-2 py-0.5 text-[10px] font-bold text-indigo-500 tracking-wider rounded border border-indigo-100 shadow-sm">SLOGAN</div>
-                    <p className="text-sm font-medium italic text-slate-700 leading-relaxed">&quot;{detailBrand.slogan}&quot;</p>
-                  </div>
-                )}
-                <div className="rounded-xl bg-white p-4 shadow-sm border border-slate-100 relative pt-5">
-                  <div className="absolute -top-3 left-4 bg-white px-2 py-0.5 text-[10px] font-bold text-sky-500 tracking-wider rounded border border-sky-100 shadow-sm">AÇIKLAMA</div>
-                  <p className="text-sm text-slate-600 leading-relaxed">{detailBrand.description || "Açıklama girilmemiş."}</p>
-                </div>
-                <div className="rounded-xl bg-white p-4 shadow-sm border border-slate-100 relative pt-5">
-                  <div className="absolute -top-3 left-4 bg-white px-2 py-0.5 text-[10px] font-bold text-amber-500 tracking-wider rounded border border-amber-100 shadow-sm">MARKA ÖZELLİKLERİ</div>
-                  <div className="space-y-2.5 text-sm">
-                    <div className="flex justify-between"><span className="text-slate-500 text-xs">İçerik Dili</span><span className="font-bold text-xs uppercase bg-slate-100 px-2 py-0.5 rounded">{detailBrand.content_language || "—"}</span></div>
-                    <div className="flex justify-between"><span className="text-slate-500 text-xs">Üslup</span><span className="font-medium text-xs capitalize bg-amber-50 text-amber-800 px-2 py-0.5 rounded">{detailBrand.tone_of_voice || "—"}</span></div>
-                    {(() => { try { const cols: string[] = JSON.parse(detailBrand.brand_colors || "[]"); if (!cols.length) return null; return (<div className="pt-1"><span className="text-[10px] uppercase text-slate-400 font-semibold mb-2 block">Marka Renkleri</span><div className="flex gap-2">{cols.map((c,i)=>(<div key={i} className="h-7 w-7 rounded-full shadow-sm ring-1 ring-inset ring-black/10" style={{backgroundColor:c}} title={c.toUpperCase()}/>))}</div></div>); } catch { return null; } })()}
-                  </div>
-                </div>
-                <div className="rounded-xl bg-white p-4 shadow-sm border border-slate-100 relative pt-5">
-                  <div className="absolute -top-3 left-4 bg-white px-2 py-0.5 text-[10px] font-bold text-emerald-500 tracking-wider rounded border border-emerald-100 shadow-sm">HEDEF KİTLE</div>
-                  {(() => { try { const ta = JSON.parse(detailBrand.target_audience||"{}"); if (!ta.text && !(ta.genders?.length) && !(ta.ages?.length)) return <p className="text-xs text-muted">Belirtilmemiş</p>; return (<div className="space-y-2 text-sm">{ta.text && <p className="text-slate-600">{ta.text}</p>}{ta.genders?.length > 0 && <div className="flex flex-wrap gap-1">{ta.genders.map((g:string,i:number)=>(<span key={i} className="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-md ring-1 ring-blue-100">{g}</span>))}</div>}{ta.ages?.length > 0 && <div className="flex flex-wrap gap-1">{ta.ages.map((a:string,i:number)=>(<span key={i} className="bg-emerald-50 text-emerald-700 text-xs px-2 py-0.5 rounded-md ring-1 ring-emerald-100">{a}</span>))}</div>}</div>); } catch { return <p className="text-xs text-muted">{detailBrand.target_audience||"Belirtilmemiş"}</p>; } })()}
-                </div>
-                <div className="rounded-xl bg-white p-4 shadow-sm border border-slate-100 relative pt-5">
-                  <div className="absolute -top-3 left-4 bg-white px-2 py-0.5 text-[10px] font-bold text-rose-500 tracking-wider rounded border border-rose-100 shadow-sm">YASAKLI KELİMELER</div>
-                  <div className="flex flex-wrap gap-1.5">{detailBrand.forbidden_words ? detailBrand.forbidden_words.split(',').map(w=>w.trim()).filter(Boolean).map((word,i)=>(<span key={i} className="bg-rose-50 text-rose-700 text-xs px-2 py-1 rounded-md ring-1 ring-rose-200">{word}</span>)) : <span className="text-xs text-muted">Belirtilmemiş</span>}</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="bg-slate-50 px-6 py-4 flex justify-between border-t border-slate-100 flex-shrink-0">
-              <button
-                onClick={() => {
-                  const parsedTA2 = (() => { try { return JSON.parse(detailBrand.target_audience || "{}"); } catch { return {}; } })();
-                  const parsedColors2: string[] = (() => { try { return JSON.parse(detailBrand.brand_colors || "[]"); } catch { return []; } })();
-                  const parsedSocials2 = (() => { try { return JSON.parse(detailBrand.social_media || "{}"); } catch { return {}; } })();
-                  setFName(detailBrand.name || "");
-                  setFSector(detailBrand.sector || "");
-                  setFWebsite(detailBrand.website || "");
-                  setFLang(detailBrand.content_language || "tr");
-                  setFDescription(detailBrand.description || "");
-                  setFTarget(parsedTA2.text || "");
-                  setFSlogan(detailBrand.slogan || "");
-                  setFForbidden(detailBrand.forbidden_words || "");
-                  setFTone(detailBrand.tone_of_voice || "");
-                  setFColors(parsedColors2);
-                  setFBrandType(detailBrand.brand_type || "");
-                  setFBrandFont(detailBrand.brand_font || "Inter");
-                  setFTargetGenders(parsedTA2.genders || []);
-                  setFTargetAges(parsedTA2.ages || []);
-                  setFSocials({ instagram: parsedSocials2.instagram || "", twitter: parsedSocials2.twitter || "", linkedin: parsedSocials2.linkedin || "", youtube: parsedSocials2.youtube || "", tiktok: parsedSocials2.tiktok || "" });
-                  if (detailBrand.logo_url) setFLogoPreview(`${process.env.NEXT_PUBLIC_API_URL}${detailBrand.logo_url}`);
-                  setEditingBrandId(detailBrand.id);
-                  setDetailBrand(null);
-                  setShowForm(true);
-                }}
-                className="inline-flex items-center gap-2 rounded-xl bg-brand px-6 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand/20 transition hover:shadow-md"
-              >
-                <IdentificationIcon className="w-4 h-4" />
-                Düzenle
-              </button>
-              <button onClick={() => setDetailBrand(null)} className="rounded-xl bg-white border border-slate-200 px-8 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-100">
-                Kapat
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -2535,6 +2918,10 @@ export function ScreenRenderer({
   onStudioNavigate,
   kreatifTopics,
   onKreatifNavigate,
+  brandDetailId,
+  onBrandDetailNavigate,
+  initialTopic,
+  onSetInitialTopic,
 }: {
   screen: ScreenKey;
   onNavigate?: (key: ScreenKey) => void;
@@ -2542,6 +2929,10 @@ export function ScreenRenderer({
   onStudioNavigate?: (postId: number) => void;
   kreatifTopics?: string[];
   onKreatifNavigate?: (topics: string[]) => void;
+  brandDetailId?: number;
+  onBrandDetailNavigate?: (id: number) => void;
+  initialTopic?: string;
+  onSetInitialTopic?: (topic: string) => void;
 }) {
   if (screen === "dashboard") return <DashboardScreen />;
   if (screen === "icerik") return <IcerikScreen onNewContent={() => onNavigate?.("yeni-icerik")} onOpenStudio={(postId) => onStudioNavigate?.(postId)} />;
@@ -2550,6 +2941,7 @@ export function ScreenRenderer({
       <NewContentWizard
         onBack={() => onNavigate?.("icerik")}
         onApproved={(postId) => onStudioNavigate?.(postId)}
+        initialTopic={initialTopic}
       />
     );
   if (screen === "studio" && studioPostId)
@@ -2600,6 +2992,7 @@ export function ScreenRenderer({
         onStudioNavigate={(postId) => onStudioNavigate?.(postId)}
       />
     );
+  if (screen === "marka-detay" && brandDetailId) return <ProfilScreen />;
   if (screen === "profil") return <ProfilScreen />;
   return <SettingsScreen />;
 }

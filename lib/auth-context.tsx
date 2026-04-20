@@ -38,6 +38,7 @@ export interface Company {
   brand_type?: string;
   brand_font?: string;
   current_step: number;
+  competitors?: { id?: number; name: string; website: string }[];
 }
 
 interface AuthState {

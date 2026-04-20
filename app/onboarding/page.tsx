@@ -115,7 +115,8 @@ const STEPS = [
   { num: 4, label: "Neden Seçerler" },
   { num: 5, label: "Nasıl Konuşur" },
   { num: 6, label: "Müşteri Tipi" },
-  { num: 7, label: "Tasarım" },
+  { num: 7, label: "Rakipler" },
+  { num: 8, label: "Tasarım" },
 ];
 
 interface ToneExampleData {
@@ -155,7 +156,12 @@ export default function OnboardingPage() {
   const [toneExamples, setToneExamples] = useState<ToneExampleData[]>([]);
   // Step 6 — Müşteri Tipi (çoklu)
   const [customerType, setCustomerType] = useState<string[]>([]);
-  // Step 7 — Tasarım (Platformlar, Renkler, Logo)
+  // Step 7 — Rakipler
+  const [competitors, setCompetitors] = useState<{name: string, website: string}[]>([]);
+  const [newCompetitorName, setNewCompetitorName] = useState("");
+  const [newCompetitorWeb, setNewCompetitorWeb] = useState("");
+  const [suggestingCompetitors, setSuggestingCompetitors] = useState(false);
+  // Step 8 — Tasarım (Platformlar, Renkler, Logo)
   const [platforms, setPlatforms] = useState<string[]>([]);
   const [brandColors, setBrandColors] = useState<string[]>(["#e6272f", "#1c1f26"]);
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -277,7 +283,8 @@ export default function OnboardingPage() {
     if (step === 4 && competitiveEdge.length === 0) { setError("En az bir rekabet avantajı seçin"); return; }
     if (step === 5 && !toneOfVoice) { setError("Bir marka tonu seçin"); return; }
     if (step === 6 && customerType.length === 0) { setError("En az bir müşteri tipi seçin"); return; }
-    const next = Math.min(step + 1, 7);
+    // if (step === 7) // optional: warn if competitors empty, but user can skip
+    const next = Math.min(step + 1, 8);
     saveStepToBackend(step);
     setStep(next);
   }
@@ -367,8 +374,8 @@ export default function OnboardingPage() {
 
   async function handleSubmit() {
     console.log("🚀 handleSubmit ÇAĞRILDI - step:", step);
-    if (step !== 7) {
-      console.log("❌ handleSubmit ENGELLENDI - step 7 değil, step:", step);
+    if (step !== 8) {
+      console.log("❌ handleSubmit ENGELLENDI - step 8 değil, step:", step);
       return;
     }
     setError("");
@@ -390,7 +397,7 @@ export default function OnboardingPage() {
       formData.append("product_categories", productCategories);
       formData.append("competitive_edge", JSON.stringify(competitiveEdge));
       formData.append("tone_of_voice", toneOfVoice);
-      formData.append("current_step", "7");
+      formData.append("current_step", "8");
       if (logoFile) {
         formData.append("logo", logoFile);
         console.log("📎 Logo dosyası eklendi:", logoFile.name);
@@ -400,18 +407,25 @@ export default function OnboardingPage() {
       } else {
         console.log("⚠️ Logo yok - dosya da URL de yok");
       }
-      await api.post("/api/companies/onboarding", formData, { headers: { "Content-Type": "multipart/form-data" } });
+      const res = await api.post("/api/companies/onboarding", formData, { headers: { "Content-Type": "multipart/form-data" } });
+      
+      const companyId = res.data?.company?.id;
+      if (companyId && competitors.length > 0) {
+        await api.post(`/api/protected/companies/${companyId}/competitors`, competitors);
+        console.log("✅ Rakipler backend'e kaydedildi.");
+      }
+
       console.log("✅ Backend kayıt başarılı!");
       localStorage.setItem("onboarding_completed", "true");
-      localStorage.setItem("current_step", "7");
+      localStorage.setItem("current_step", "8");
       await refreshUser();
-      console.log("🎨 Kreatif Stüdyo'ya yönlendiriliyor...");
+      console.log("📊 SEO Genel Bakış'a yönlendiriliyor...");
       // beforeunload uyarısını kaldır
       if (beforeUnloadRef.current) {
         window.removeEventListener("beforeunload", beforeUnloadRef.current);
       }
       window.onbeforeunload = null;
-      window.location.href = "/#kreatif-studyo";
+      window.location.href = "/#seo-genel-bakis";
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { error?: string } } };
       console.error("❌ Kayıt hatası:", axiosErr.response?.data);
@@ -730,14 +744,97 @@ export default function OnboardingPage() {
     );
   }
 
-  // ─── Step 7: Tasarım (Logo önce, Platformlar, Renkler) ───
+  // ─── Step 7: Rakipler ─────────────────
   function renderStep7() {
+    return (
+      <div className="animate-fade-in-up space-y-5">
+        <div className="mb-2 text-center">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted mb-2">ADIM 7 / 8</p>
+          <h2 className="text-xl font-bold text-foreground">Rakipleriniz</h2>
+          <p className="text-sm text-muted mt-1">Sektörünüzden ilham alacağınız rakipleri ekleyin veya AI'dan öneri alın</p>
+        </div>
+
+        <div className="flex items-center justify-end">
+          <button
+            type="button"
+            disabled={suggestingCompetitors || !sector}
+            onClick={async () => {
+              if (!sector) { setError("Öneri için sektör seçmelisiniz (1. veya 2. adımı kontrol edin)"); return; }
+              setSuggestingCompetitors(true); setError("");
+              try {
+                const { data } = await api.post("/api/protected/suggest-competitors", {
+                  name,
+                  website,
+                  sector
+                });
+                if (data && data.length > 0) {
+                  // Mevcut rakiplere ekle (aynı website/isim varsa eksiğini tamamlayabilirsin veya duplicate engellersin)
+                  const existingSet = new Set(competitors.map(c => c.website || c.name));
+                  const toAdd = data.filter((c: any) => !existingSet.has(c.website || c.name));
+                  setCompetitors(prev => [...prev, ...toAdd]);
+                }
+              } catch { setError("Rakip önerisi alınamadı."); } finally { setSuggestingCompetitors(false); }
+            }}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm shadow-emerald-500/25 transition-all hover:shadow-md disabled:opacity-50"
+          >
+            {suggestingCompetitors ? (
+              <><span className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />Aranıyor...</>
+            ) : (
+              <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>AI ile Rakip Önerisi Al</>
+            )}
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          {competitors.map((comp, idx) => (
+            <div key={idx} className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white p-3 pr-4 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-100 text-zinc-500"><BuildingStorefrontIcon className="h-5 w-5" /></div>
+                <div>
+                  <p className="text-sm font-bold text-foreground">{comp.name}</p>
+                  {comp.website && <p className="text-xs text-brand">{comp.website}</p>}
+                </div>
+              </div>
+              <button type="button" onClick={() => setCompetitors(competitors.filter((_, i) => i !== idx))} className="text-red-500 hover:text-red-700">
+                 Sil
+              </button>
+            </div>
+          ))}
+
+          {competitors.length === 0 && (
+            <div className="rounded-xl border border-dashed border-zinc-300 p-6 text-center">
+              <p className="text-sm text-zinc-500">Henüz rakip eklemediniz.</p>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+          <h4 className="mb-3 text-xs font-bold uppercase text-zinc-500">Manuel Rakip Ekle</h4>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <input className="auth-input !text-sm" placeholder="Firma Adı (Örn: Apple)" value={newCompetitorName} onChange={e => setNewCompetitorName(e.target.value)} />
+            <div className="flex gap-2">
+              <input className="auth-input !text-sm" placeholder="Web Sitesi (Opsiyonel)" value={newCompetitorWeb} onChange={e => setNewCompetitorWeb(e.target.value)} />
+              <button type="button" onClick={() => {
+                if (newCompetitorName.trim()) {
+                   setCompetitors([...competitors, { name: newCompetitorName, website: newCompetitorWeb }]);
+                   setNewCompetitorName(""); setNewCompetitorWeb("");
+                }
+              }} className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-bold text-white hover:bg-zinc-800">Ekle</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Step 8: Tasarım (Logo önce, Platformlar, Renkler) ───
+  function renderStep8() {
     const hasAILogo = externalLogoUrl && !logoFile;
 
     return (
       <div className="animate-fade-in-up space-y-6">
         <div className="mb-2 text-center">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted mb-2">ADIM 7 / 7 — SON ADIM</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted mb-2">ADIM 8 / 8 — SON ADIM</p>
           <h2 className="text-xl font-bold text-foreground">Logo & Tasarım</h2>
           <p className="text-sm text-muted mt-1">Logonuzu onaylayın, platformları ve renkleri ayarlayın</p>
         </div>
@@ -844,7 +941,7 @@ export default function OnboardingPage() {
   }
 
   // ─── Main render ──────────────────────
-  const stepRenderers = [renderStep1, renderStep2, renderStep3, renderStep4, renderStep5, renderStep6, renderStep7];
+  const stepRenderers = [renderStep1, renderStep2, renderStep3, renderStep4, renderStep5, renderStep6, renderStep7, renderStep8];
   const currentStepRenderer = stepRenderers[step - 1];
 
   if (authLoading || !user) return <FullPageSpinner message="Kontrol ediliyor…" />;
@@ -932,11 +1029,11 @@ export default function OnboardingPage() {
         <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-zinc-200 flex-shrink-0">
           <div className="flex flex-col">
             <h1 className="text-[16px] font-bold text-zinc-900">Marka Profili Oluştur</h1>
-            <p className="text-[11px] text-zinc-400 mt-0.5">Marka profili oluşturalım — 7 adım, ~5 dakika</p>
+            <p className="text-[11px] text-zinc-400 mt-0.5">Marka profili oluşturalım — 8 adım, ~5 dakika</p>
           </div>
           <div className="flex items-center gap-2">
             <span className="flex h-2 w-2 rounded-full bg-green-500" />
-            <span className="text-[12px] font-semibold text-zinc-600">Adım {step}/7</span>
+            <span className="text-[12px] font-semibold text-zinc-600">Adım {step}/8</span>
           </div>
         </div>
 
@@ -1015,11 +1112,11 @@ export default function OnboardingPage() {
                 Geri
               </button>
             )}
-            {step < 7 ? (
+            {step < 8 ? (
               <button type="button" onClick={nextStep}
                 className="flex items-center gap-1.5 rounded-xl bg-[#E73932] px-5 py-2 text-[12px] font-semibold text-white shadow-sm shadow-[#E73932]/20 transition hover:bg-[#d03030] hover:shadow-md"
               >
-                Devam — {STEPS[step]?.label || "Ne Satarsınız?"} →
+                Devam — {STEPS[step]?.label || "Tasarım"} →
               </button>
             ) : (
               <button type="button" onClick={handleSubmit} disabled={loading}
