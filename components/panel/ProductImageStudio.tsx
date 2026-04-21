@@ -972,8 +972,9 @@ export default function ProductImageStudio() {
           </div>
         </div>
 
-        <div className="grid gap-0 2xl:grid-cols-[260px_minmax(0,1fr)_300px]">
-          <aside className="border-b border-zinc-100 2xl:border-b-0 2xl:border-r bg-[#FAFAF9] flex flex-col overflow-y-auto" style={{ maxHeight: "calc(100vh - 120px)" }}>
+        <div className="grid gap-0 xl:grid-cols-[280px_minmax(0,1fr)_300px] 2xl:grid-cols-[320px_minmax(0,1fr)_340px]">
+          <aside className="border-b border-zinc-100 p-4 lg:p-5 xl:border-b-0 xl:border-r bg-[#FAFAF9] flex flex-col overflow-y-auto" style={{ maxHeight: "calc(100vh - 120px)" }}>
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-zinc-400 mb-4">Urun Fotografi</p>
 
             {isCreationMode ? (
               /* ═══════════════════════════════════════════════
@@ -1851,7 +1852,7 @@ export default function ProductImageStudio() {
             />
           </aside>
 
-          <section className="border-b border-zinc-100 p-3 lg:p-4 2xl:border-b-0 2xl:border-r">
+          <section className="border-b border-zinc-100 p-4 lg:p-5 xl:border-b-0 xl:border-r">
             {activeTab === "urun-gorseli-studyosu" ? (
               <>
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -2246,13 +2247,11 @@ export default function ProductImageStudio() {
             )}
           </section>
 
-          <aside className="overflow-y-auto bg-white 2xl:block 2xl:min-w-0" style={{ maxHeight: "calc(100vh - 120px)" }}>
+          <aside className="overflow-y-auto bg-white xl:block xl:min-w-0" style={{ maxHeight: "calc(100vh - 120px)" }}>
             {/* Header */}
             <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3">
-              <h3 className="text-[15px] font-extrabold text-zinc-900 truncate">
-                {activeTab === "reklam-studyosu"
-                  ? selectedAdVariant?.name || "Reklam Önizleme"
-                  : selectedVariant?.name || "Beyaz Stüdyo A"}
+              <h3 className="text-[15px] xl:text-[20px] font-extrabold text-zinc-900 truncate">
+                {activeTab === "reklam-studyosu" ? selectedAdVariant?.name || "Reklam Önizleme" : selectedVariant?.name || "Önizleme"}
               </h3>
               <button type="button" className="ml-2 shrink-0 text-lg leading-none text-zinc-300 hover:text-zinc-500">×</button>
             </div>
@@ -2531,6 +2530,31 @@ export default function ProductImageStudio() {
                   ))}
                 </dl>
               </div>
+
+            {/* SON ÇALIŞMALAR */}
+            {!!studios.length && (
+              <div className="mt-8 mb-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">Son Çalışmalar</p>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                  {studios.map((studio) => (
+                    <button
+                      key={studio.id}
+                      type="button"
+                      onClick={() => setCurrentStudio(studio)}
+                      className={`flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left transition ${
+                        currentStudio?.id === studio.id ? "border-[#FBC7B9] bg-[#FFF3EF]" : "border-zinc-200 bg-white"
+                      }`}
+                    >
+                      <img src={mediaUrl(studio.source_image)} alt={studio.title} className="h-14 w-14 rounded-xl object-cover" />
+                      <div className="min-w-0 text-left">
+                        <p className="truncate text-sm font-bold text-zinc-900">{studio.title}</p>
+                        <p className="truncate text-xs text-zinc-500">{statusText(studio.status)}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
               {/* KATEGORİ BAZLI SKOR DETAYI */}
               {(activeTab === "urun-gorseli-studyosu" && selectedVariant?.design_notes) && (() => {

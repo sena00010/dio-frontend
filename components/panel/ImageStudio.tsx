@@ -199,7 +199,7 @@ export default function ImageStudio({ postId, onBack, onComplete }: { postId: nu
   const [autoGenTriggered, setAutoGenTriggered] = useState(false);
   const [layers, setLayers] = useState<DesignLayer[]>([]);
   const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
-  const [logoEnabled, setLogoEnabled] = useState(true);
+  const [logoEnabled, setLogoEnabled] = useState(false);
   const [logoX, setLogoX] = useState(16);
   const [logoY, setLogoY] = useState(16);
   const [logoWidth, setLogoWidth] = useState(56);
@@ -284,12 +284,15 @@ export default function ImageStudio({ postId, onBack, onComplete }: { postId: nu
           opacity: l.opacity ?? 1,
         }));
         if (!parsed.length) {
-          parsed = [{ id: "headline", type: "headline", text: p.title, x: 5, y: 65, max_width: 80, font_family: p.suggested_font || "Montserrat", font_size: 32, font_weight: 800, color: "#ffffff", text_align: "left", line_height: 1.15, rotation: 0, text_shadow: true }];
-          if (p.content) parsed.push({ id: "desc", type: "description", text: p.content.length > 120 ? p.content.substring(0,120)+"…" : p.content, x: 5, y: 82, max_width: 70, font_family: "Inter", font_size: 13, font_weight: 400, color: "#ffffffcc", text_align: "left", line_height: 1.4, rotation: 0, text_shadow: true });
+          // design_layers boşsa, hiç otomatik katman ekleme.
+          // Kullanıcı isterse stüdyodan kendisi metin/başlık ekleyebilir.
         }
         // Çakışma önleme — katmanları sıralayıp gap ekle
-        parsed = resolveLayerCollisions(parsed);
-        loadAllLayerFonts(parsed); setLayers(parsed); setSelectedLayerId(parsed[0]?.id || null);
+        if (parsed.length) {
+          parsed = resolveLayerCollisions(parsed);
+          loadAllLayerFonts(parsed);
+        }
+        setLayers(parsed); setSelectedLayerId(parsed[0]?.id || null);
         // AI Vision logo pozisyonunu kontrol et
         let lpData: LogoPositionData | null = null;
         if (p.logo_position) { try { lpData = JSON.parse(p.logo_position); } catch {/* */} }
@@ -347,8 +350,8 @@ export default function ImageStudio({ postId, onBack, onComplete }: { postId: nu
       let lpData: LogoPositionData | null = null;
       if (data.logo_position) { lpData = data.logo_position as LogoPositionData; }
       else if (data.post?.logo_position) { try { lpData = JSON.parse(data.post.logo_position); } catch {/* */} }
-      if (data.post?.design_layers) { try { let nl: DesignLayer[] = JSON.parse(data.post.design_layers); if (Array.isArray(nl) && nl.length) { nl = nl.map(l => ({ ...l, rotation: 0, text_shadow: l.text_shadow !== false, line_height: l.line_height || (l.type === "headline" ? 1.15 : 1.4) })); nl = resolveLayerCollisions(nl); setLayers(nl); setSelectedLayerId(nl[0]?.id||null); loadAllLayerFonts(nl); const lp = smartLogoPosition(nl, lpData, data.post.suggested_layout); setLogoX(lp.x); setLogoY(lp.y); if (lpData?.max_width) setLogoWidth(Math.round((lpData.max_width / 100) * 600)); setActivePanel("layers"); } } catch {/* */} }
-      else if (lpData) { const lp = smartLogoPosition([], lpData); setLogoX(lp.x); setLogoY(lp.y); if (lpData.max_width) setLogoWidth(Math.round((lpData.max_width / 100) * 600)); }
+      if (data.post?.design_layers) { try { let nl: DesignLayer[] = JSON.parse(data.post.design_layers); if (Array.isArray(nl) && nl.length) { nl = nl.map(l => ({ ...l, rotation: 0, text_shadow: l.text_shadow !== false, line_height: l.line_height || (l.type === "headline" ? 1.15 : 1.4) })); nl = resolveLayerCollisions(nl); setLayers(nl); setSelectedLayerId(nl[0]?.id||null); loadAllLayerFonts(nl); const lp = smartLogoPosition(nl, lpData, data.post.suggested_layout); setLogoX(lp.x); setLogoY(lp.y); if (lpData?.max_width) setLogoWidth(Math.round((lpData.max_width / 100) * 600)); setActivePanel("layers"); } else { setLayers([]); setSelectedLayerId(null); } } catch {/* */} }
+      else { setLayers([]); setSelectedLayerId(null); if (lpData) { const lp = smartLogoPosition([], lpData); setLogoX(lp.x); setLogoY(lp.y); if (lpData.max_width) setLogoWidth(Math.round((lpData.max_width / 100) * 600)); } }
     } catch (e: unknown) { const m = e && typeof e === "object" && "response" in e ? (e as {response?:{data?:{error?:string}}}).response?.data?.error : "Hata"; setError(m || "Hata"); } finally { setGenerating(false); }
   }, [postId, imageStyle, customPrompt, uploadedRefUrl, uploadPrompt]);
 

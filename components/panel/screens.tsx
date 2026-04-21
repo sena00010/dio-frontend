@@ -2975,7 +2975,7 @@ export function ScreenRenderer({
     return (
       <ImageStudio
         postId={studioPostId}
-        onBack={() => onNavigate?.("icerik")}
+        onBack={() => onNavigate?.("yeni-icerik")}
         onComplete={() => onNavigate?.("dashboard")}
       />
     );

@@ -70,7 +70,7 @@ export function useAuth() {
 }
 
 // ─── Public paths (no auth required) ────────────────────
-const PUBLIC_PATHS = ["/auth/login", "/auth/register"];
+const PUBLIC_PATHS = ["/auth/login", "/auth/register", "/admin"];
 
 // ─── Provider ───────────────────────────────────────────
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -175,6 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (isPublic) {
+        if (pathname.startsWith("/admin")) return;
         // Login/register sayfasında giriş yapmış kullanıcı
         const done = localStorage.getItem("onboarding_completed") === "true";
         if (done) router.push("/");
