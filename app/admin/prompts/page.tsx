@@ -7,6 +7,7 @@ import {
   CheckBadgeIcon,
   ArrowPathIcon,
   LanguageIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 
 interface Prompt {
@@ -23,6 +24,55 @@ interface Prompt {
   updated_by: string;
 }
 
+// Her prompt_key için uygulamada nerede kullanıldığını açıklayan harita
+const PROMPT_USAGE_MAP: { [key: string]: { page: string; icon: string; detail: string } } = {
+  // Ürün Görsel Stüdyosu
+  product_studio_main: {
+    page: "Ürün Görseli Stüdyosu",
+    icon: "📸",
+    detail: "Kullanıcı ürün fotoğrafı yükleyip 'Platform Görsellerini Üret' butonuna bastığında, her varyant (Beyaz, Krem, Koyu, Soft) için bu prompt render edilir ve seçilen AI modeline gönderilir.",
+  },
+  product_studio_edit: {
+    page: "Ürün Görseli Stüdyosu → Görsel Edit API",
+    icon: "✂️",
+    detail: "OpenAI Image Edit API'ye gönderilen prompt. Ürün fotoğrafının arka planını değiştirmek için kullanılır. Buradaki model seçimi hangi API'nin çağrılacağını belirler.",
+  },
+  product_image_reference_analyzer: {
+    page: "Ürün Görseli Stüdyosu → Görsel Analiz",
+    icon: "🔍",
+    detail: "Yüklenen ürün fotoğrafını analiz edip 'referenceSummary' oluşturur. Bu özet, diğer promptlara {{.referenceSummary}} değişkeni olarak aktarılır.",
+  },
+  // Reklam Stüdyosu
+  creative_ad_main: {
+    page: "Reklam Stüdyosu → Ana Kreatif",
+    icon: "🎨",
+    detail: "Story, Banner gibi platformlara özel reklam görseli üretimi. Kullanıcı 'Reklam Oluştur' dediğinde bu prompt kullanılır.",
+  },
+  // Kreatif İçerik
+  creative_variant_generator: {
+    page: "Kreatif Stüdyo → Varyant Üretici",
+    icon: "✨",
+    detail: "Sosyal medya paylaşımları için farklı açılardan içerik varyantları üretir.",
+  },
+  // Konu Önerileri
+  ai_idea_generator: {
+    page: "İçerik Yönetimi → Konu Önerileri",
+    icon: "💡",
+    detail: "Marka ve kampanya tipine göre sosyal medya konu önerileri üretir.",
+  },
+  ai_topic_suggestion: {
+    page: "İçerik Yönetimi → Konu Önerileri",
+    icon: "📝",
+    detail: "Markaya özel sosyal medya konu önerileri üretir.",
+  },
+  // Marka
+  brand_description: {
+    page: "Firma ve Markalar → Marka Açıklaması",
+    icon: "🏢",
+    detail: "Marka bilgileri ve website içeriğinden otomatik marka açıklaması oluşturur.",
+  },
+};
+
 const VARIABLE_DESCRIPTIONS: { [key: string]: string } = {
   companyName: "Şirketin/Markanın Adı",
   companySector: "Markanın Sektörü",
@@ -34,8 +84,13 @@ const VARIABLE_DESCRIPTIONS: { [key: string]: string } = {
   presetPlatform: "Tasarım Platformu (Trendyol, FB vb.)",
   presetWidth: "Tasarım Genişliği (px)",
   presetHeight: "Tasarım Yüksekliği (px)",
+  presetName: "Varyant Adı (Beyaz Stüdyo A, Krem Notr B vb.)",
+  presetBackground: "Arka Plan Stili (Beyaz, Krem, Koyu, Soft)",
+  presetDesignNotes: "Varyanta Özel Tasarım Notu",
   referenceSummary: "Referans Görsel Analiz Özeti",
   inferSourceCreativeDirection: "Görselden Çıkarılan Yaratıcı Yön",
+  inferPlatformCreativeRules: "Platforma Özel Tasarım Kuralları",
+  inferVisualReferenceStyle: "Referans Estetik/Stil Bilgisi",
   copyHeadline: "Oluşturulan Reklam Başlığı",
   copySubHeadline: "Oluşturulan Alt Başlık",
   copyCTA: "Oluşturulan Eylem Çağrısı (CTA)",
@@ -168,6 +223,11 @@ export default function AdminPrompts() {
     ? JSON.parse(selectedPrompt.variables)
     : [];
 
+  // Seçili prompt için kullanım bilgisi
+  const usageInfo = selectedPrompt
+    ? PROMPT_USAGE_MAP[selectedPrompt.prompt_key]
+    : null;
+
   return (
     <div className="space-y-6">
       {/* TOAST BİLDİRİMİ */}
@@ -182,7 +242,7 @@ export default function AdminPrompts() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Sistem Promptları</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Yapay zeka modellerine giden sistem talimatlarını yönetin.
+            Yapay zeka modellerine giden sistem talimatlarını yönetin. Her prompt uygulama içinde farklı bir modülde kullanılır.
           </p>
         </div>
         <button
@@ -221,39 +281,50 @@ export default function AdminPrompts() {
                   {catName}
                 </h2>
                 <div className="space-y-2">
-                  {categories[catName].map((p) => (
-                    <button
-                      key={p.id}
-                      onClick={() => handleEdit(p)}
-                      className={`w-full text-left p-3 rounded-lg flex items-start space-x-3 transition-colors ${
-                        selectedPrompt?.id === p.id
-                          ? "bg-rose-50 border border-rose-100"
-                          : "bg-transparent hover:bg-gray-50 border border-transparent"
-                      }`}
-                    >
-                      <PencilSquareIcon
-                        className={`w-5 h-5 shrink-0 mt-0.5 ${
+                  {categories[catName].map((p) => {
+                    const usage = PROMPT_USAGE_MAP[p.prompt_key];
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => handleEdit(p)}
+                        className={`w-full text-left p-3 rounded-lg flex items-start space-x-3 transition-colors ${
                           selectedPrompt?.id === p.id
-                            ? "text-rose-500"
-                            : "text-slate-400"
+                            ? "bg-rose-50 border border-rose-100"
+                            : "bg-transparent hover:bg-gray-50 border border-transparent"
                         }`}
-                      />
-                      <div>
-                        <div
-                          className={`font-medium ${
+                      >
+                        <PencilSquareIcon
+                          className={`w-5 h-5 shrink-0 mt-0.5 ${
                             selectedPrompt?.id === p.id
-                              ? "text-rose-600"
-                              : "text-slate-700"
+                              ? "text-rose-500"
+                              : "text-slate-400"
                           }`}
-                        >
-                          {p.title}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div
+                            className={`font-medium ${
+                              selectedPrompt?.id === p.id
+                                ? "text-rose-600"
+                                : "text-slate-700"
+                            }`}
+                          >
+                            {p.title}
+                          </div>
+                          <div className="text-xs text-slate-500 mt-0.5 line-clamp-1">
+                            {p.description}
+                          </div>
+                          {usage && (
+                            <div className="flex items-center gap-1.5 mt-1.5">
+                              <span className="text-xs">{usage.icon}</span>
+                              <span className="text-[10px] font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                                {usage.page}
+                              </span>
+                            </div>
+                          )}
                         </div>
-                        <div className="text-xs text-slate-500 mt-1 line-clamp-1">
-                          {p.description}
-                        </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             ))}
@@ -281,7 +352,24 @@ export default function AdminPrompts() {
                 </div>
 
                 <div className="p-6 bg-gray-50 flex-1 overflow-y-auto">
-                  {/* AI Konfigürasyonu Alanı */}
+                  {/* KULLANIM BİLGİSİ — Bu prompt nerede kullanılır? */}
+                  {usageInfo && (
+                    <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl mb-6">
+                      <InformationCircleIcon className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-bold text-blue-700">
+                            {usageInfo.icon} Kullanıldığı Sayfa: {usageInfo.page}
+                          </span>
+                        </div>
+                        <p className="text-xs text-blue-600 leading-relaxed">
+                          {usageInfo.detail}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* AI Konfigürasyonu Alanı — bu prompt için hangi model kullanılsın */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-white border border-gray-200 rounded-xl">
                     <div>
                       <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 block mb-2">
@@ -292,8 +380,8 @@ export default function AdminPrompts() {
                         onChange={(e) => {
                           const newProv = e.target.value;
                           setEditAiProvider(newProv);
-                          if (newProv === "openai") setEditAiModel("gpt-4o");
-                          else if (newProv === "gemini") setEditAiModel("gemini-2.5-pro");
+                          if (newProv === "openai") setEditAiModel("gpt-4.1");
+                          else if (newProv === "gemini") setEditAiModel("gemini-2.5-flash");
                         }}
                         className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-rose-500"
                       >
@@ -312,47 +400,62 @@ export default function AdminPrompts() {
                       >
                         {editAiProvider === "openai" ? (
                           <>
-                            <optgroup label="Latest & Powerful">
-                              <option value="gpt-4.5-preview">gpt-4.5-preview</option>
-                              <option value="gpt-4o">gpt-4o</option>
-                              <option value="gpt-4o-mini">gpt-4o-mini</option>
+                            <optgroup label="🔥 Flagship">
+                              <option value="gpt-5.5">GPT-5.5 (En Güçlü)</option>
+                              <option value="gpt-5.5-pro">GPT-5.5 Pro</option>
                             </optgroup>
-                            <optgroup label="Reasoning Models (o serisi)">
-                              <option value="o1">o1</option>
+                            <optgroup label="⚡ Üretim (Production)">
+                              <option value="gpt-4.1">GPT-4.1</option>
+                              <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
+                              <option value="gpt-4.1-nano">GPT-4.1 Nano (En Hızlı)</option>
+                            </optgroup>
+                            <optgroup label="🧠 Reasoning (o serisi)">
+                              <option value="o3">o3</option>
                               <option value="o3-mini">o3-mini</option>
-                              <option value="o1-preview">o1-preview</option>
-                              <option value="o1-mini">o1-mini</option>
+                              <option value="o1">o1</option>
                             </optgroup>
-                            <optgroup label="Legacy & Other">
-                              <option value="gpt-4-turbo">gpt-4-turbo</option>
-                              <option value="gpt-4">gpt-4</option>
-                              <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
-                              <option value="dall-e-3">dall-e-3 (Görsel)</option>
-                              <option value="dall-e-2">dall-e-2 (Görsel)</option>
+                            <optgroup label="🖼️ Görsel Üretim">
+                              <option value="gpt-image-2">GPT Image 2 (Yeni ✓)</option>
+                              <option value="dall-e-3">DALL-E 3 (Mayıs 2026 emekli)</option>
+                              <option value="dall-e-2">DALL-E 2 (Mayıs 2026 emekli)</option>
+                            </optgroup>
+                            <optgroup label="📦 Legacy">
+                              <option value="gpt-4o">GPT-4o</option>
+                              <option value="gpt-4o-mini">GPT-4o Mini</option>
+                              <option value="gpt-4-turbo">GPT-4 Turbo</option>
                             </optgroup>
                           </>
                         ) : (
                           <>
-                            <optgroup label="Gemini 2.5 / 2.0 Serisi">
-                              <option value="gemini-2.5-pro">gemini-2.5-pro (Beta)</option>
-                              <option value="gemini-2.5-flash">gemini-2.5-flash</option>
-                              <option value="gemini-2.0-pro-exp-0205">gemini-2.0-pro-exp</option>
-                              <option value="gemini-2.0-flash">gemini-2.0-flash</option>
-                              <option value="gemini-2.0-flash-lite-preview-02-05">gemini-2.0-flash-lite</option>
-                              <option value="gemini-2.0-flash-thinking-exp-01-21">gemini-2.0-flash-thinking</option>
+                            <optgroup label="🔥 Gemini 3 Serisi (En Yeni)">
+                              <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro (Preview)</option>
+                              <option value="gemini-3-flash-preview">Gemini 3 Flash (Preview)</option>
+                              <option value="gemini-3.1-flash-lite-preview">Gemini 3.1 Flash-Lite (Preview)</option>
                             </optgroup>
-                            <optgroup label="Gemini 1.5 Serisi">
-                              <option value="gemini-1.5-pro">gemini-1.5-pro</option>
-                              <option value="gemini-1.5-flash">gemini-1.5-flash</option>
-                              <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b</option>
+                            <optgroup label="🍌 Nano Banana — Görsel Üretim">
+                              <option value="gemini-3-pro-image-preview">Nano Banana Pro (4K, En İyi ✓)</option>
+                              <option value="gemini-3.1-flash-image-preview">Nano Banana 2 (Hızlı ✓)</option>
+                              <option value="gemini-2.5-flash-preview-image">Nano Banana (Stabil ✓)</option>
                             </optgroup>
-                            <optgroup label="Legacy">
-                              <option value="gemini-1.0-pro">gemini-1.0-pro</option>
-                              <option value="gemini-exp-1206">gemini-exp-1206</option>
+                            <optgroup label="⚡ Gemini 2.5 Serisi (Stabil)">
+                              <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                              <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                              <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
+                            </optgroup>
+                            <optgroup label="📦 Legacy (Deprecated)">
+                              <option value="gemini-2.0-flash">Gemini 2.0 Flash ⚠️ Deprecated</option>
                             </optgroup>
                           </>
                         )}
                       </select>
+                      {/* Görsel modeli uyarısı */}
+                      {selectedPrompt.prompt_key.includes("studio") && 
+                       editAiProvider === "gemini" && 
+                       !editAiModel.includes("2.0-flash") && (
+                        <p className="text-xs text-amber-600 mt-1.5 flex items-center gap-1">
+                          ⚠️ Bu prompt görsel üretiminde kullanılır. Görsel üretimi yapabilen bir model seçmeniz önerilir.
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -423,7 +526,8 @@ export default function AdminPrompts() {
             ) : (
               <div className="flex flex-col items-center justify-center bg-white border border-gray-200 shadow-sm rounded-2xl h-full p-12 text-center text-slate-500">
                 <PencilSquareIcon className="w-12 h-12 mb-4 text-slate-400" />
-                <p>Düzenlemek için soldaki menüden bir prompt seçin.</p>
+                <p className="text-lg font-medium mb-2">Düzenlemek için soldaki menüden bir prompt seçin.</p>
+                <p className="text-sm text-slate-400">Her prompt&apos;un yanında hangi sayfada kullanıldığını gösteren etiket bulunur.</p>
               </div>
             )}
           </div>

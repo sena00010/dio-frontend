@@ -140,7 +140,7 @@ export default function SeoKelimeler({ activeProjectId }: Props) {
       {/* ════════════════════════════════════════
           AI BANNER
           ════════════════════════════════════════ */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#2A1215] via-[#1F1F1F] to-[#1A1A1A] px-6 py-5 text-white">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#2A1215] via-[#1F1F1F] to-[#1A1A1A] px-4 py-4 sm:px-6 sm:py-5 text-white">
         <div className="absolute left-0 top-0 h-full w-1 bg-[#E73932]" />
         <div className="flex items-start gap-4">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 text-base">🤖</div>
@@ -161,10 +161,10 @@ export default function SeoKelimeler({ activeProjectId }: Props) {
       {/* ════════════════════════════════════════
           BRAND / NON-BRAND — İki kartlı hero (tasarıma birebir)
           ════════════════════════════════════════ */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Brand */}
         <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white">
-          <div className="px-5 pt-5 pb-3">
+          <div className="px-4 pt-4 pb-3 sm:px-5 sm:pt-5">
             <div className="flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-sm bg-[#7C3AED]" />
               <h3 className="text-sm font-bold text-zinc-900">Marka Kelimeleri (Brand)</h3>
@@ -175,22 +175,22 @@ export default function SeoKelimeler({ activeProjectId }: Props) {
             </p>
           </div>
 
-          <div className="mx-5 mb-3 grid grid-cols-3 gap-2">
-            <div className="rounded-xl bg-gradient-to-b from-purple-50 to-purple-100/50 px-3 py-3 text-center">
-              <p className="text-xl font-black text-emerald-600">{brand.avg_position || 0}</p>
+          <div className="mx-4 sm:mx-5 mb-3 grid grid-cols-3 gap-1.5 sm:gap-2">
+            <div className="rounded-xl bg-gradient-to-b from-purple-50 to-purple-100/50 px-2 py-2 sm:px-3 sm:py-3 text-center">
+              <p className="text-lg sm:text-xl font-black text-emerald-600">{brand.avg_position || 0}</p>
               <p className="mt-0.5 text-[9px] font-medium text-zinc-500">Ort. Sıra</p>
             </div>
-            <div className="rounded-xl bg-gradient-to-b from-purple-50 to-purple-100/50 px-3 py-3 text-center">
-              <p className="text-xl font-black text-[#7C3AED]">%{brand.avg_ctr}</p>
+            <div className="rounded-xl bg-gradient-to-b from-purple-50 to-purple-100/50 px-2 py-2 sm:px-3 sm:py-3 text-center">
+              <p className="text-lg sm:text-xl font-black text-[#7C3AED]">%{brand.avg_ctr}</p>
               <p className="mt-0.5 text-[9px] font-medium text-zinc-500">Tıklanma</p>
             </div>
-            <div className="rounded-xl bg-gradient-to-b from-purple-50 to-purple-100/50 px-3 py-3 text-center">
-              <p className="text-xl font-black text-zinc-700">{fmtK(brand.total_impressions)}</p>
+            <div className="rounded-xl bg-gradient-to-b from-purple-50 to-purple-100/50 px-2 py-2 sm:px-3 sm:py-3 text-center">
+              <p className="text-lg sm:text-xl font-black text-zinc-700">{fmtK(brand.total_impressions)}</p>
               <p className="mt-0.5 text-[9px] font-medium text-zinc-500">Gösterim</p>
             </div>
           </div>
 
-          <div className={`mx-5 mb-5 rounded-lg px-3 py-2 ${brand.avg_position > 0 && brand.avg_position <= 5 ? "bg-emerald-50" : "bg-amber-50"}`}>
+          <div className={`mx-4 sm:mx-5 mb-4 sm:mb-5 rounded-lg px-3 py-2 ${brand.avg_position > 0 && brand.avg_position <= 5 ? "bg-emerald-50" : "bg-amber-50"}`}>
             <p className={`text-[10px] font-semibold ${brand.avg_position > 0 && brand.avg_position <= 5 ? "text-emerald-700" : "text-amber-700"}`}>
               {brand.avg_position > 0 && brand.avg_position <= 5
                 ? `✓ Marka kelimeleri ort. ${brand.avg_position}. sırada — sektör ortalamalarının üstünde`
@@ -204,7 +204,7 @@ export default function SeoKelimeler({ activeProjectId }: Props) {
 
         {/* Non-Brand */}
         <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white">
-          <div className="px-5 pt-5 pb-3">
+          <div className="px-4 pt-4 pb-3 sm:px-5 sm:pt-5">
             <div className="flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-sm bg-zinc-900" />
               <h3 className="text-sm font-bold text-zinc-900">Genel Kelimeler (Non-Brand)</h3>
@@ -218,17 +218,17 @@ export default function SeoKelimeler({ activeProjectId }: Props) {
             </p>
           </div>
 
-          <div className="mx-5 mb-3 grid grid-cols-3 gap-2">
-            <div className="rounded-xl bg-gradient-to-b from-orange-50 to-orange-100/50 px-3 py-3 text-center">
-              <p className="text-xl font-black text-orange-500">{nb.avg_position || 0}</p>
+          <div className="mx-4 sm:mx-5 mb-3 grid grid-cols-3 gap-1.5 sm:gap-2">
+            <div className="rounded-xl bg-gradient-to-b from-orange-50 to-orange-100/50 px-2 py-2 sm:px-3 sm:py-3 text-center">
+              <p className="text-lg sm:text-xl font-black text-orange-500">{nb.avg_position || 0}</p>
               <p className="mt-0.5 text-[9px] font-medium text-zinc-500">Ort. Sıra</p>
             </div>
-            <div className="rounded-xl bg-gradient-to-b from-blue-50 to-blue-100/50 px-3 py-3 text-center">
-              <p className="text-xl font-black text-blue-600">%{nb.avg_ctr}</p>
+            <div className="rounded-xl bg-gradient-to-b from-blue-50 to-blue-100/50 px-2 py-2 sm:px-3 sm:py-3 text-center">
+              <p className="text-lg sm:text-xl font-black text-blue-600">%{nb.avg_ctr}</p>
               <p className="mt-0.5 text-[9px] font-medium text-zinc-500">Tıklanma</p>
             </div>
-            <div className="rounded-xl bg-gradient-to-b from-emerald-50 to-emerald-100/50 px-3 py-3 text-center">
-              <p className="text-xl font-black text-zinc-700">{fmtK(nb.total_impressions)}</p>
+            <div className="rounded-xl bg-gradient-to-b from-emerald-50 to-emerald-100/50 px-2 py-2 sm:px-3 sm:py-3 text-center">
+              <p className="text-lg sm:text-xl font-black text-zinc-700">{fmtK(nb.total_impressions)}</p>
               <p className="mt-0.5 text-[9px] font-medium text-zinc-500">Gösterim</p>
             </div>
           </div>
@@ -254,9 +254,9 @@ export default function SeoKelimeler({ activeProjectId }: Props) {
       {/* ════════════════════════════════════════
           INTENT ANALİZİ + YÜKSELİŞTEKİ TİCARİ KELİMELER (tasarıma birebir)
           ════════════════════════════════════════ */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* SOL: Arama Niyeti Analizi */}
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5">
+        <div className="rounded-2xl border border-zinc-200 bg-white p-4 sm:p-5">
           <h3 className="text-[15px] font-bold text-zinc-900">Arama Niyeti Analizi</h3>
           <p className="mt-0.5 text-[11px] text-zinc-400">Kullanıcı ne yapmak istiyor?</p>
 
@@ -319,7 +319,7 @@ export default function SeoKelimeler({ activeProjectId }: Props) {
         </div>
 
         {/* SAĞ: Yükselişteki Ticari Kelimeler */}
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5">
+        <div className="rounded-2xl border border-zinc-200 bg-white p-4 sm:p-5">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-zinc-900">🔥 Yükselişteki Ticari Kelimeler</h3>
@@ -328,7 +328,8 @@ export default function SeoKelimeler({ activeProjectId }: Props) {
             <span className="rounded-full bg-red-100 px-2 py-0.5 text-[9px] font-bold text-red-700">Fırsat Penceresi</span>
           </div>
 
-          <table className="mt-4 w-full text-[11px]">
+          <div className="overflow-x-auto">
+          <table className="mt-4 w-full text-[11px] min-w-[500px]">
             <thead>
               <tr className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">
                 <th className="pb-2 text-left">Kelime</th>
@@ -373,6 +374,7 @@ export default function SeoKelimeler({ activeProjectId }: Props) {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
 
@@ -380,7 +382,7 @@ export default function SeoKelimeler({ activeProjectId }: Props) {
           KELİME HARİTASI — Full tablo
           ════════════════════════════════════════ */}
       <div className="rounded-2xl border border-zinc-200 bg-white">
-        <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-100 px-4 py-3 sm:px-5 sm:py-4">
           <h3 className="text-sm font-bold text-zinc-900">Kelime Haritası</h3>
           <div className="flex items-center gap-2">
             <div className="flex rounded-lg border border-zinc-200 p-0.5">
@@ -395,7 +397,8 @@ export default function SeoKelimeler({ activeProjectId }: Props) {
           </div>
         </div>
 
-        <table className="w-full text-[11px]">
+        <div className="overflow-x-auto">
+        <table className="w-full text-[11px] min-w-[700px]">
           <thead>
             <tr className="border-b border-zinc-100 text-[9px] font-bold uppercase tracking-wider text-zinc-400">
               <th className="px-5 py-3 text-left">Kelime</th>
@@ -455,6 +458,7 @@ export default function SeoKelimeler({ activeProjectId }: Props) {
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

@@ -460,7 +460,7 @@ export default function Home() {
         </aside>
 
         {/* ═══ Main content ═══════════════════ */}
-        <main className="flex-1 w-full max-w-full overflow-hidden md:overflow-y-auto h-screen bg-white">
+        <main className="flex-1 w-full max-w-full overflow-y-auto md:overflow-y-auto min-h-screen md:h-screen bg-white">
           <div className="min-h-[calc(100vh-3.5rem)] md:min-h-0 md:h-full p-4 md:p-6 w-full max-w-full overflow-x-auto overflow-y-auto relative z-10">
             <ScreenRenderer
               screen={active}

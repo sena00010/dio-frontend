@@ -139,7 +139,7 @@ export default function SeoSiralamalar({ activeProjectId }: Props) {
       {/* ════════════════════════════════════════
           AI BANNER
           ════════════════════════════════════════ */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#2A1215] via-[#1F1F1F] to-[#1A1A1A] px-6 py-5 text-white">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#2A1215] via-[#1F1F1F] to-[#1A1A1A] px-4 py-4 sm:px-6 sm:py-5 text-white">
         <div className="absolute left-0 top-0 h-full w-1 bg-[#E73932]" />
         <div className="flex items-start gap-4">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 text-base">🤖</div>
@@ -159,17 +159,17 @@ export default function SeoSiralamalar({ activeProjectId }: Props) {
       {/* ════════════════════════════════════════
           ÖZET KARTLARI (4'lü sıra grubu)
           ════════════════════════════════════════ */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
         {[
           { value: s.top_3, label: "1–3. sıra", sub: "İlk 3 — En İyi", border: "border-emerald-300", text: "text-emerald-600", bg: "bg-emerald-50" },
           { value: s.top_10, label: "4–10. sıra", sub: "İlk sayfa ✓", border: "border-blue-300", text: "text-blue-600", bg: "bg-blue-50" },
           { value: s.top_20, label: "11–20. sıra", sub: "2. sayfa — yakın", border: "border-orange-300", text: "text-orange-600", bg: "bg-orange-50" },
           { value: s.beyond_20, label: "20+ sıra", sub: "3. sayfa+ — fırsat", border: "border-red-300", text: "text-red-600", bg: "bg-red-50" },
         ].map((card, i) => (
-          <div key={i} className={`rounded-2xl border-2 ${card.border} ${card.bg} px-5 py-4 text-center`}>
-            <p className={`text-3xl font-black ${card.text}`}>{card.value}</p>
-            <p className={`mt-0.5 text-[13px] font-bold ${card.text} opacity-80`}>{card.label}</p>
-            <p className="mt-1 text-[10px] font-semibold text-zinc-400">{card.sub}</p>
+          <div key={i} className={`rounded-2xl border-2 ${card.border} ${card.bg} px-3 py-3 sm:px-5 sm:py-4 text-center`}>
+            <p className={`text-2xl sm:text-3xl font-black ${card.text}`}>{card.value}</p>
+            <p className={`mt-0.5 text-[11px] sm:text-[13px] font-bold ${card.text} opacity-80`}>{card.label}</p>
+            <p className="mt-1 text-[9px] sm:text-[10px] font-semibold text-zinc-400">{card.sub}</p>
           </div>
         ))}
       </div>
@@ -177,12 +177,12 @@ export default function SeoSiralamalar({ activeProjectId }: Props) {
       {/* ════════════════════════════════════════
           ALT SEKMELER
           ════════════════════════════════════════ */}
-      <div className="flex items-center gap-0 border-b border-zinc-200">
+      <div className="flex items-center gap-0 border-b border-zinc-200 overflow-x-auto scrollbar-none">
         {RANKING_TABS.map(tab => {
           const badge = tab.key === "rising" ? risingCount : tab.key === "falling" ? fallingCount : 0;
           return (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              className={`relative flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-semibold transition ${
+              className={`relative flex items-center gap-1.5 whitespace-nowrap px-3 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-[12px] font-semibold transition ${
                 activeTab === tab.key ? "border-b-2 border-[#E73932] text-[#E73932]" : "text-zinc-500 hover:text-zinc-700"
               }`}>
               <span>{tab.icon}</span> {tab.label}
@@ -201,7 +201,7 @@ export default function SeoSiralamalar({ activeProjectId }: Props) {
       {/* ── TÜM KELİMELER ── */}
       {activeTab === "all" && (
         <div className="rounded-2xl border border-zinc-200 bg-white">
-          <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-100 px-4 py-3 sm:px-5 sm:py-4">
             <div>
               <h3 className="text-sm font-bold text-zinc-900">Tüm Sıralamalar</h3>
               <p className="text-[10px] text-zinc-400">{s.total} kelime takip ediliyor · Günlük güncelleme</p>
@@ -215,7 +215,8 @@ export default function SeoSiralamalar({ activeProjectId }: Props) {
               ))}
             </div>
           </div>
-          <table className="w-full text-[12px]">
+          <div className="overflow-x-auto">
+          <table className="w-full text-[12px] min-w-[700px]">
             <thead>
               <tr className="border-b border-zinc-100 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                 <th className="px-5 py-3 text-left">Kelime</th>
@@ -258,6 +259,7 @@ export default function SeoSiralamalar({ activeProjectId }: Props) {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
@@ -268,7 +270,8 @@ export default function SeoSiralamalar({ activeProjectId }: Props) {
             <h3 className="text-sm font-bold text-zinc-900">↑ Yükselen Kelimeler</h3>
             <p className="text-[10px] text-zinc-400">Son 28 günde en fazla sıra kazanan</p>
           </div>
-          <table className="w-full text-[12px]">
+          <div className="overflow-x-auto">
+          <table className="w-full text-[12px] min-w-[550px]">
             <thead>
               <tr className="border-b border-zinc-100 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                 <th className="px-5 py-3 text-left">Kelime</th>
@@ -298,6 +301,7 @@ export default function SeoSiralamalar({ activeProjectId }: Props) {
               {rising.length === 0 && <tr><td colSpan={6} className="px-5 py-8 text-center text-zinc-400">Yükselen kelime bulunamadı</td></tr>}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
@@ -308,7 +312,8 @@ export default function SeoSiralamalar({ activeProjectId }: Props) {
             <h3 className="text-sm font-bold text-zinc-900">↓ Düşen Kelimeler</h3>
             <p className="text-[10px] text-zinc-400">Son 28 günde en fazla sıra kaybeden — acil önlem al</p>
           </div>
-          <table className="w-full text-[12px]">
+          <div className="overflow-x-auto">
+          <table className="w-full text-[12px] min-w-[550px]">
             <thead>
               <tr className="border-b border-zinc-100 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                 <th className="px-5 py-3 text-left">Kelime</th>
@@ -333,13 +338,14 @@ export default function SeoSiralamalar({ activeProjectId }: Props) {
               {falling.length === 0 && <tr><td colSpan={6} className="px-5 py-8 text-center text-zinc-400">Düşen kelime bulunamadı</td></tr>}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
       {/* ── TİCARİ KELİMELER ── */}
       {activeTab === "commercial" && (
         <div className="rounded-2xl border border-zinc-200 bg-white">
-          <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-100 px-4 py-3 sm:px-5 sm:py-4">
             <div>
               <h3 className="text-sm font-bold text-zinc-900">🛒 Ticari Kelimeler</h3>
               <p className="text-[10px] text-zinc-400">Satın alma niyeti yüksek — &quot;al&quot;, &quot;fiyat&quot;, &quot;satın&quot; gibi kelimeler</p>
@@ -349,7 +355,8 @@ export default function SeoSiralamalar({ activeProjectId }: Props) {
               <span className="text-[10px] font-bold text-amber-800">Bu kelimeler doğrudan satışa dönüşür</span>
             </div>
           </div>
-          <table className="w-full text-[12px]">
+          <div className="overflow-x-auto">
+          <table className="w-full text-[12px] min-w-[550px]">
             <thead>
               <tr className="border-b border-zinc-100 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                 <th className="px-5 py-3 text-left">Kelime</th>
@@ -382,13 +389,14 @@ export default function SeoSiralamalar({ activeProjectId }: Props) {
               {commercial.length === 0 && <tr><td colSpan={6} className="px-5 py-8 text-center text-zinc-400">Ticari kelime bulunamadı</td></tr>}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
       {/* ── İLK SAYFAYA YAKIN ── */}
       {activeTab === "near_first" && (
         <div className="rounded-2xl border border-zinc-200 bg-white">
-          <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-100 px-4 py-3 sm:px-5 sm:py-4">
             <div>
               <h3 className="text-sm font-bold text-zinc-900">🎯 İlk Sayfaya Yakın</h3>
               <p className="text-[10px] text-zinc-400">11–20. sırada olan kelimeler — küçük çabayla ilk sayfaya taşınabilir</p>
@@ -398,7 +406,8 @@ export default function SeoSiralamalar({ activeProjectId }: Props) {
               <span className="text-[10px] font-bold text-emerald-800">En hızlı kazanç bu gruptaki kelimelerden gelir</span>
             </div>
           </div>
-          <table className="w-full text-[12px]">
+          <div className="overflow-x-auto">
+          <table className="w-full text-[12px] min-w-[500px]">
             <thead>
               <tr className="border-b border-zinc-100 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                 <th className="px-5 py-3 text-left">Kelime</th>
@@ -423,6 +432,7 @@ export default function SeoSiralamalar({ activeProjectId }: Props) {
               {nearFirst.length === 0 && <tr><td colSpan={5} className="px-5 py-8 text-center text-zinc-400">İlk sayfaya yakın kelime bulunamadı</td></tr>}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

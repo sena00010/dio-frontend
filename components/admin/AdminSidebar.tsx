@@ -16,7 +16,6 @@ export default function AdminSidebar() {
   const navigation = [
     { name: "Dashboard", href: "/admin", icon: Square3Stack3DIcon },
     { name: "Sistem Promptları", href: "/admin/prompts", icon: BeakerIcon },
-    { name: "AI Modelleri", href: "/admin/ai-models", icon: Cog6ToothIcon },
     { name: "Yöneticiler", href: "/admin/users", icon: UserGroupIcon },
   ];
 

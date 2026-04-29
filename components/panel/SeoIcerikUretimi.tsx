@@ -117,10 +117,10 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
   return (
     <div className="space-y-5">
       {/* ═══ İÇ SEKMELER ═══ */}
-      <div className="flex items-center gap-0 border-b border-zinc-200">
+      <div className="flex items-center gap-0 border-b border-zinc-200 overflow-x-auto scrollbar-none">
         {CONTENT_TABS.map(tab => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-            className={`relative px-4 py-2.5 text-[12px] font-semibold transition ${
+            className={`relative whitespace-nowrap px-3 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-[12px] font-semibold transition ${
               activeTab === tab.key
                 ? "border-b-2 border-[#E73932] text-[#E73932]"
                 : "text-zinc-500 hover:text-zinc-700"
@@ -136,7 +136,7 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
       {activeTab === "ai" && (
         <>
           {/* AI Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#2A1215] via-[#1F1F1F] to-[#1A1A1A] px-6 py-4 text-white">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#2A1215] via-[#1F1F1F] to-[#1A1A1A] px-4 py-3 sm:px-6 sm:py-4 text-white">
             <div className="absolute left-0 top-0 h-full w-1 bg-[#E73932]" />
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/10 text-sm">🤖</div>
@@ -155,13 +155,13 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
           {opportunities.length === 0 ? (
             <EmptyState />
           ) : (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {opportunities.map((opp, i) => (
                 <div key={i} className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white transition hover:shadow-lg">
                   {/* Sol kırmızı çizgi */}
                   <div className="absolute left-0 top-0 h-full w-1 rounded-l-2xl bg-[#E73932]" />
 
-                  <div className="pl-5 pr-5 pt-4 pb-4">
+                  <div className="pl-4 pr-4 pt-3 pb-3 sm:pl-5 sm:pr-5 sm:pt-4 sm:pb-4">
                     {/* Badge'lar */}
                     <div className="flex items-center gap-1.5">
                       {opp.badges.map((b, j) => (
@@ -189,7 +189,7 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
                     </div>
 
                     {/* Alt bar: AI avatar + fırsat skoru + kreatif oluştur */}
-                    <div className="mt-3 flex items-center justify-between border-t border-zinc-100 pt-3">
+                    <div className="mt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-t border-zinc-100 pt-3">
                       <div className="flex items-center gap-2">
                         <div className={`flex h-6 w-6 items-center justify-center rounded-full text-[9px] font-bold text-white ${avatarGradient(i)}`}>AI</div>
                         <span className="text-[10px] font-semibold text-zinc-400">Fırsat skoru</span>
@@ -233,7 +233,7 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3 p-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 sm:p-5">
             {opportunities.slice(0, 6).map((opp, i) => (
               <div key={i} className="group relative cursor-pointer overflow-hidden rounded-xl border border-zinc-100 p-4 transition hover:border-[#E73932] hover:shadow-md">
                 <div className="absolute left-0 top-0 h-full w-0.5 bg-zinc-200 transition group-hover:bg-[#E73932]" />
@@ -263,7 +263,7 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
           TAB 3: BAŞLIKTAN İÇERİK
           ═══════════════════════════════════════════ */}
       {activeTab === "title" && (
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6">
+        <div className="rounded-2xl border border-zinc-200 bg-white p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-5">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-lg">✏️</div>
             <div>
@@ -286,7 +286,7 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
 
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-zinc-700">İçerik Türü</label>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {[
                   { key: "blog", label: "Blog Yazısı", icon: "📰" },
                   { key: "category", label: "Kategori Sayfası", icon: "🏷️" },
@@ -324,7 +324,7 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
           TAB 4: MANUEL OLUŞTUR
           ═══════════════════════════════════════════ */}
       {activeTab === "manual" && (
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6">
+        <div className="rounded-2xl border border-zinc-200 bg-white p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-5">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-lg">📝</div>
             <div>
@@ -346,7 +346,7 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-zinc-700">İçerik Türü</label>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {["Blog Yazısı", "Kategori Sayfası", "Ürün Açıklaması", "Landing Page"].map((type, i) => (
                   <button key={i} className={`rounded-xl border px-3 py-2.5 text-[11px] font-semibold transition ${
                     i === 0 ? "border-[#E73932] bg-red-50 text-[#E73932]" : "border-zinc-200 text-zinc-600 hover:border-zinc-300"

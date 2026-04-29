@@ -160,7 +160,7 @@ export default function SeoTeknik({ activeProjectId }: Props) {
       {/* ════════════════════════════════════════
           AI BANNER
           ════════════════════════════════════════ */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#2A1215] via-[#1F1F1F] to-[#1A1A1A] px-6 py-5 text-white">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#2A1215] via-[#1F1F1F] to-[#1A1A1A] px-4 py-4 sm:px-6 sm:py-5 text-white">
         <div className="absolute left-0 top-0 h-full w-1 bg-[#E73932]" />
         <div className="flex items-start gap-4">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 text-base">🤖</div>
@@ -183,12 +183,12 @@ export default function SeoTeknik({ activeProjectId }: Props) {
       {/* ════════════════════════════════════════
           METRİK KARTLARI — 2 sıra x 4 kolon
           ════════════════════════════════════════ */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
         {/* Site Sağlığı — Dairesel gauge (2 satır) */}
-        <div className="row-span-2 flex flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-white p-5">
-          <span className="mb-3 text-[11px] font-semibold text-zinc-400">Site Sağlığı</span>
-          <div className="relative h-28 w-28">
-            <svg className="h-28 w-28 -rotate-90" viewBox="0 0 120 120">
+        <div className="row-span-2 flex flex-col items-center justify-center rounded-2xl border border-zinc-200 bg-white p-3 sm:p-5">
+          <span className="mb-2 sm:mb-3 text-[10px] sm:text-[11px] font-semibold text-zinc-400">Site Sağlığı</span>
+          <div className="relative h-20 w-20 sm:h-28 sm:w-28">
+            <svg className="h-20 w-20 sm:h-28 sm:w-28 -rotate-90" viewBox="0 0 120 120">
               <circle cx="60" cy="60" r="52" fill="none" stroke="#f0f0f0" strokeWidth="10" />
               <circle
                 cx="60" cy="60" r="52" fill="none"
@@ -199,7 +199,7 @@ export default function SeoTeknik({ activeProjectId }: Props) {
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className={`text-3xl font-black ${hs.health_score >= 80 ? "text-emerald-600" : hs.health_score >= 60 ? "text-amber-500" : "text-red-500"}`}>
+              <span className={`text-2xl sm:text-3xl font-black ${hs.health_score >= 80 ? "text-emerald-600" : hs.health_score >= 60 ? "text-amber-500" : "text-red-500"}`}>
                 {hs.health_score}
               </span>
             </div>
@@ -238,10 +238,10 @@ export default function SeoTeknik({ activeProjectId }: Props) {
           subtitleColor={hs.mobile_score >= 50 ? "text-emerald-600" : "text-red-500"}
           borderColor="border-l-blue-500"
         />
-        <div className="rounded-2xl border border-zinc-200 border-l-4 border-l-emerald-500 bg-white p-4 flex flex-col justify-center">
+        <div className="rounded-2xl border border-zinc-200 border-l-4 border-l-emerald-500 bg-white p-3 sm:p-4 flex flex-col justify-center">
           <span className="text-[10px] font-semibold text-zinc-400">Mobil Uyumluluk</span>
           <div className="mt-1 flex items-center gap-2">
-            <span className={`text-xl font-black ${hs.mobile_friendly ? "text-emerald-600" : "text-red-500"}`}>
+            <span className={`text-base sm:text-xl font-black ${hs.mobile_friendly ? "text-emerald-600" : "text-red-500"}`}>
               {hs.mobile_friendly ? "✓ Geçti" : "✗ Başarısız"}
             </span>
           </div>
@@ -262,7 +262,7 @@ export default function SeoTeknik({ activeProjectId }: Props) {
           SİTE HIZI DETAYI
           ════════════════════════════════════════ */}
       <div className="rounded-2xl border border-zinc-200 bg-white">
-        <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-100 px-4 py-3 sm:px-5 sm:py-4">
           <div>
             <h3 className="text-sm font-bold text-zinc-900">Site Hızı Detayı</h3>
             <p className="mt-0.5 text-[10px] text-zinc-400">Sayfa hızı düştükçe Google&apos;da sıralama düşer ve ziyaretçi hemen çıkar</p>
@@ -283,7 +283,7 @@ export default function SeoTeknik({ activeProjectId }: Props) {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3 p-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 sm:p-5">
           {activeSpeed.map((metric, i) => (
             <div key={i} className="rounded-xl border border-zinc-100 p-3.5">
               <div className="flex items-center justify-between">
@@ -330,7 +330,7 @@ export default function SeoTeknik({ activeProjectId }: Props) {
 
         <div className="divide-y divide-zinc-50">
           {issues.map((issue, i) => (
-            <div key={i} className="flex items-start gap-4 px-5 py-4 transition hover:bg-zinc-50/50">
+            <div key={i} className="flex items-start gap-3 sm:gap-4 px-4 py-3 sm:px-5 sm:py-4 transition hover:bg-zinc-50/50">
               <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm ${
                 issue.severity === "critical" ? "bg-red-50 text-red-500" :
                 issue.severity === "warning" ? "bg-amber-50 text-amber-500" :
@@ -385,8 +385,8 @@ export default function SeoTeknik({ activeProjectId }: Props) {
       {/* ════════════════════════════════════════
           SCHEMA MARKUP DURUMU
           ════════════════════════════════════════ */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5">
-        <div className="flex items-center justify-between mb-4">
+      <div className="rounded-2xl border border-zinc-200 bg-white p-4 sm:p-5">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
           <div>
             <h3 className="text-sm font-bold text-zinc-900">Yapısal Veri (Schema) Durumu</h3>
             <p className="mt-0.5 text-[10px] text-zinc-400">Schema markup&apos;lar arama sonuçlarında yıldız, fiyat gibi zengin sonuçlar gösterir</p>
@@ -398,7 +398,7 @@ export default function SeoTeknik({ activeProjectId }: Props) {
           </span>
         </div>
 
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
           {schemas.map((schema, i) => (
             <div key={i} className={`rounded-xl border p-3.5 text-center transition ${
               schema.status === "ok" ? "border-emerald-200 bg-emerald-50/50" : "border-zinc-200 bg-white"
@@ -423,7 +423,7 @@ export default function SeoTeknik({ activeProjectId }: Props) {
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/30" onClick={() => setDetailPanel(prev => ({ ...prev, open: false }))} />
           {/* Panel */}
-          <div className="relative w-[480px] bg-white shadow-2xl flex flex-col animate-in slide-in-from-right">
+          <div className="relative w-full sm:w-[480px] bg-white shadow-2xl flex flex-col animate-in slide-in-from-right">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
               <div>
@@ -489,10 +489,10 @@ function MetricCard({ title, value, subtitle, subtitleColor, borderColor }: {
   title: string; value: string; subtitle: string; subtitleColor: string; borderColor: string;
 }) {
   return (
-    <div className={`rounded-2xl border border-zinc-200 border-l-4 ${borderColor} bg-white p-4 flex flex-col justify-center`}>
-      <span className="text-[10px] font-semibold text-zinc-400">{title}</span>
-      <p className="mt-1 text-2xl font-black text-zinc-900">{value}</p>
-      <span className={`mt-1 text-[10px] font-medium ${subtitleColor}`}>{subtitle}</span>
+    <div className={`rounded-2xl border border-zinc-200 border-l-4 ${borderColor} bg-white p-3 sm:p-4 flex flex-col justify-center`}>
+      <span className="text-[9px] sm:text-[10px] font-semibold text-zinc-400">{title}</span>
+      <p className="mt-1 text-xl sm:text-2xl font-black text-zinc-900">{value}</p>
+      <span className={`mt-1 text-[9px] sm:text-[10px] font-medium ${subtitleColor}`}>{subtitle}</span>
     </div>
   );
 }

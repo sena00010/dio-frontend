@@ -192,24 +192,27 @@ export default function NewContentWizard({
       </div>
 
       {/* Step indicator */}
-      <div className="flex items-center gap-3">
-        <div className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${step === 1 ? "bg-brand text-white shadow-md shadow-brand/25" : step > 1 ? "bg-emerald-100 text-emerald-700" : "bg-zinc-100 text-zinc-500"}`}>
-          <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${step > 1 ? "bg-emerald-500 text-white" : "bg-white/20"}`}>
+      <div className="flex items-center gap-1.5 sm:gap-3">
+        <div className={`flex items-center gap-1 sm:gap-2 rounded-full px-2 py-1 sm:px-4 sm:py-1.5 text-[10px] sm:text-xs font-semibold transition-all ${step === 1 ? "bg-brand text-white shadow-md shadow-brand/25" : step > 1 ? "bg-emerald-100 text-emerald-700" : "bg-zinc-100 text-zinc-500"}`}>
+          <span className={`inline-flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full text-[9px] sm:text-[10px] ${step > 1 ? "bg-emerald-500 text-white" : "bg-white/20"}`}>
             {step > 1 ? "✓" : "1"}
           </span>
-          Konu & Platform
+          <span className="hidden sm:inline">Konu & Platform</span>
+          <span className="sm:hidden">Konu</span>
         </div>
-        <div className="h-px w-8 bg-zinc-200" />
-        <div className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${step === 2 ? "bg-brand text-white shadow-md shadow-brand/25" : step > 2 ? "bg-emerald-100 text-emerald-700" : "bg-zinc-100 text-zinc-500"}`}>
-          <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${step > 2 ? "bg-emerald-500 text-white" : "bg-white/20"}`}>
+        <div className="h-px w-4 sm:w-8 bg-zinc-200" />
+        <div className={`flex items-center gap-1 sm:gap-2 rounded-full px-2 py-1 sm:px-4 sm:py-1.5 text-[10px] sm:text-xs font-semibold transition-all ${step === 2 ? "bg-brand text-white shadow-md shadow-brand/25" : step > 2 ? "bg-emerald-100 text-emerald-700" : "bg-zinc-100 text-zinc-500"}`}>
+          <span className={`inline-flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full text-[9px] sm:text-[10px] ${step > 2 ? "bg-emerald-500 text-white" : "bg-white/20"}`}>
             {step > 2 ? "✓" : "2"}
           </span>
-          AI Sonuçları
+          <span className="hidden sm:inline">AI Sonuçları</span>
+          <span className="sm:hidden">AI</span>
         </div>
-        <div className="h-px w-8 bg-zinc-200" />
-        <div className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${step === 3 ? "bg-brand text-white shadow-md shadow-brand/25" : "bg-zinc-100 text-zinc-500"}`}>
-          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[10px]">3</span>
-          Görsel Üretimi
+        <div className="h-px w-4 sm:w-8 bg-zinc-200" />
+        <div className={`flex items-center gap-1 sm:gap-2 rounded-full px-2 py-1 sm:px-4 sm:py-1.5 text-[10px] sm:text-xs font-semibold transition-all ${step === 3 ? "bg-brand text-white shadow-md shadow-brand/25" : "bg-zinc-100 text-zinc-500"}`}>
+          <span className="inline-flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-white/20 text-[9px] sm:text-[10px]">3</span>
+          <span className="hidden sm:inline">Görsel Üretimi</span>
+          <span className="sm:hidden">Görsel</span>
         </div>
       </div>
 
@@ -287,30 +290,30 @@ function Step1Form({
   onGenerate: () => void; loading: boolean; isValid: boolean;
 }) {
   return (
-    <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
+    <div className="grid gap-3 sm:gap-5 xl:grid-cols-[1.2fr_0.8fr]">
       {/* Left — Main form */}
-      <div className="min-w-0 space-y-5">
+      <div className="min-w-0 space-y-3 sm:space-y-5">
         {/* Brand Selector */}
-        <div className="card p-5">
-          <label className="mb-2 block text-sm font-semibold text-foreground">
+        <div className="card p-3 sm:p-5">
+          <label className="mb-1.5 sm:mb-2 block text-xs sm:text-sm font-semibold text-foreground">
             🏷️ Hangi Marka İçin?
           </label>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-1.5 sm:gap-2 sm:grid-cols-3">
             {companies.map((c) => (
               <button
                 key={c.id}
                 type="button"
                 onClick={() => setSelectedCompanyId(c.id)}
-                className={`flex items-center gap-2.5 rounded-xl border-2 px-3 py-2.5 text-sm font-medium transition-all ${
+                className={`flex items-center gap-1.5 sm:gap-2.5 rounded-lg sm:rounded-xl border-2 px-2 py-1.5 sm:px-3 sm:py-2.5 text-xs sm:text-sm font-medium transition-all ${
                   selectedCompanyId === c.id
                     ? "border-brand bg-brand/5 text-brand shadow-sm shadow-brand/10"
                     : "border-zinc-200 bg-white text-foreground hover:border-zinc-300 hover:bg-zinc-50"
                 }`}
               >
                 {c.logo_url ? (
-                  <img src={`${process.env.NEXT_PUBLIC_API_URL}${c.logo_url}`} alt={c.name} className="h-6 w-6 rounded-md object-cover" />
+                  <img src={`${process.env.NEXT_PUBLIC_API_URL}${c.logo_url}`} alt={c.name} className="h-5 w-5 sm:h-6 sm:w-6 rounded-md object-cover" />
                 ) : (
-                  <span className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-100 text-[10px] font-bold text-zinc-500">
+                  <span className="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-md bg-zinc-100 text-[10px] font-bold text-zinc-500">
                     {c.name[0]?.toUpperCase()}
                   </span>
                 )}
@@ -324,32 +327,32 @@ function Step1Form({
         </div>
 
         {/* Topic Input */}
-        <div className="card p-5">
-          <label className="mb-2 block text-sm font-semibold text-foreground">
+        <div className="card p-3 sm:p-5">
+          <label className="mb-1.5 sm:mb-2 block text-xs sm:text-sm font-semibold text-foreground">
             📝 Konu / İçerik Açıklaması
           </label>
           <textarea
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             placeholder="Örn: Yaz koleksiyonumuz için günlük kombinleri tanıtan, genç kitleye hitap eden bir içerik..."
-            rows={4}
-            className="w-full resize-none rounded-xl border border-zinc-200 bg-zinc-50/50 px-4 py-3 text-sm outline-none transition placeholder:text-zinc-400 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10"
+            rows={3}
+            className="w-full resize-none rounded-lg sm:rounded-xl border border-zinc-200 bg-zinc-50/50 px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm outline-none transition placeholder:text-zinc-400 focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/10"
           />
-          <p className="mt-2 text-xs text-muted">Ne kadar detaylı yazarsanız, AI o kadar isabetli fikirler üretir.</p>
+          <p className="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-muted">Ne kadar detaylı yazarsanız, AI o kadar isabetli fikirler üretir.</p>
         </div>
 
         {/* Platform Selection */}
-        <div className="card p-5">
-          <label className="mb-3 block text-sm font-semibold text-foreground">
+        <div className="card p-3 sm:p-5">
+          <label className="mb-2 sm:mb-3 block text-xs sm:text-sm font-semibold text-foreground">
             📱 Platform
           </label>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-1.5 sm:gap-2 sm:grid-cols-3">
             {PLATFORMS.map((p) => (
               <button
                 key={p.value}
                 type="button"
                 onClick={() => setPlatform(p.value)}
-                className={`flex items-center gap-2.5 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all ${
+                className={`flex items-center gap-1.5 sm:gap-2.5 rounded-lg sm:rounded-xl border-2 px-2.5 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm font-medium transition-all ${
                   platform === p.value
                     ? "border-brand bg-brand/5 text-brand shadow-sm shadow-brand/10"
                     : "border-zinc-200 bg-white text-foreground hover:border-zinc-300 hover:bg-zinc-50"
@@ -363,17 +366,17 @@ function Step1Form({
         </div>
 
         {/* Campaign Type */}
-        <div className="card p-5">
-          <label className="mb-3 block text-sm font-semibold text-foreground">
+        <div className="card p-3 sm:p-5">
+          <label className="mb-2 sm:mb-3 block text-xs sm:text-sm font-semibold text-foreground">
             🎯 Kampanya Türü
           </label>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-1.5 sm:gap-2 sm:grid-cols-3">
             {CAMPAIGN_TYPES.map((ct) => (
               <button
                 key={ct.value}
                 type="button"
                 onClick={() => setCampaignType(ct.value)}
-                className={`flex items-center gap-2 rounded-xl border-2 px-3 py-2.5 text-sm font-medium transition-all ${
+                className={`flex items-center gap-1.5 sm:gap-2 rounded-lg sm:rounded-xl border-2 px-2 py-1.5 sm:px-3 sm:py-2.5 text-xs sm:text-sm font-medium transition-all ${
                   campaignType === ct.value
                     ? "border-brand bg-brand/5 text-brand shadow-sm shadow-brand/10"
                     : "border-zinc-200 bg-white text-foreground hover:border-zinc-300 hover:bg-zinc-50"
@@ -388,10 +391,10 @@ function Step1Form({
       </div>
 
       {/* Right — Count + Submit */}
-      <div className="min-w-0 space-y-5">
+      <div className="min-w-0 space-y-3 sm:space-y-5">
         {/* Count selector */}
-        <div className="card p-5">
-          <label className="mb-3 block text-sm font-semibold text-foreground">
+        <div className="card p-3 sm:p-5">
+          <label className="mb-2 sm:mb-3 block text-xs sm:text-sm font-semibold text-foreground">
             🔢 Kaç Fikir Üretilsin?
           </label>
           <div className="flex items-center gap-4">
@@ -412,7 +415,7 @@ function Step1Form({
 
         {/* Summary card */}
         <div className="card overflow-hidden">
-          <div className="bg-gradient-to-br from-brand/5 via-transparent to-brand-light/5 p-5">
+          <div className="bg-gradient-to-br from-brand/5 via-transparent to-brand-light/5 p-3 sm:p-5">
             <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
               <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-brand/10 text-xs text-brand">✨</span>
               Özet

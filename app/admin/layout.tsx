@@ -14,24 +14,29 @@ export default function AdminLayout({
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(true);
 
   useEffect(() => {
     setIsClient(true);
-  }, []);
+    // Auth check — useEffect içinde yapılmalı (render sırasında router.replace çağırmamak için)
+    if (pathname !== "/admin/login" && pathname !== "/admin/register" && !localStorage.getItem("admin_token")) {
+      setIsAuthed(false);
+      router.replace("/admin/login");
+    }
+  }, [pathname, router]);
 
   // Yol değiştiğinde mobil menüyü kapat
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  // Login sayfasıysa sidebar gösterme
-  if (pathname === "/admin/login") {
+  // Login/Register sayfasıysa sidebar gösterme
+  if (pathname === "/admin/login" || pathname === "/admin/register") {
     return <div className="min-h-screen bg-gray-50">{children}</div>;
   }
 
-  // Auth check basic
-  if (isClient && !localStorage.getItem("admin_token")) {
-    router.replace("/admin/login");
+  // Auth yönlendirmesi bekleniyor
+  if (!isClient || !isAuthed) {
     return <div className="min-h-screen bg-gray-50" />;
   }
 

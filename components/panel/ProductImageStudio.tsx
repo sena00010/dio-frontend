@@ -453,7 +453,7 @@ export default function ProductImageStudio() {
   const [activeTab, setActiveTab] = useState<"urun-gorseli-studyosu" | "reklam-studyosu">("urun-gorseli-studyosu");
   const [selectedFormats, setSelectedFormats] = useState<string[]>([]);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(["trendyol", "hepsiburada"]);
-  const [selectedBgStyle, setSelectedBgStyle] = useState("beyaz");
+  const [selectedBgStyle, setSelectedBgStyle] = useState("");
   const [textMode, setTextMode] = useState<"ai" | "manual">("ai");
   const [manualHeadline, setManualHeadline] = useState("");
   const [manualSubHeadline, setManualSubHeadline] = useState("");
@@ -733,14 +733,14 @@ export default function ProductImageStudio() {
         source_summary: finalPrompt,
         active_tab: "urun-gorseli-studyosu",
       });
-      const { data } = await api.post(`/api/protected/product-image-studio/${currentStudio.id}/generate`, { force });
+      const { data } = await api.post(`/api/protected/product-image-studio/${currentStudio.id}/generate`, { force, bg_style: selectedBgStyle });
       setJob(data);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
       setGenerating(false);
       setError(msg || "Varyantlar olusturulamadi");
     }
-  }, [currentStudio?.id, selectedCategory, sourceSummaryDraft, title]);
+  }, [currentStudio?.id, selectedCategory, selectedBgStyle, sourceSummaryDraft, title]);
 
   const handleSaveStudioSettings = useCallback(async (nextTab?: "urun-gorseli-studyosu" | "reklam-studyosu") => {
     if (!currentStudio?.id) return;
@@ -896,7 +896,7 @@ export default function ProductImageStudio() {
   }
 
   return (
-    <div className="-m-4 sm:-m-5 lg:-m-6">
+    <div className="studio-root -m-4 sm:-m-5 lg:-m-6 overflow-x-hidden">
 
       {/* Toast */}
       {toast && (
@@ -906,8 +906,8 @@ export default function ProductImageStudio() {
         </div>
       )}
       <div className="bg-white">
-        <div className="border-b border-zinc-100 px-4 py-0 sm:px-5">
-          <div className="flex flex-wrap items-end gap-0">
+        <div className="border-b border-zinc-100 px-3 py-0 sm:px-5">
+          <div className="flex items-end gap-0 overflow-x-auto scrollbar-none">
             {modules.map((module) => {
               const isActive =
                 (module.key === "product-image-studio" && activeTab === "urun-gorseli-studyosu" && !isCreationMode) ||
@@ -935,15 +935,16 @@ export default function ProductImageStudio() {
                         setCreationTexts([]);
                         showToast("Yeni ürün görseli stüdyosu açıldı");
                       }}
-                      className={`inline-flex items-center gap-1.5 border-b-2 px-4 py-3 text-[13px] font-semibold transition ${
+                      className={`inline-flex items-center gap-1 sm:gap-1.5 whitespace-nowrap border-b-2 px-2.5 py-2.5 sm:px-4 sm:py-3 text-[11px] sm:text-[13px] font-semibold transition ${
                         isCreationMode && activeTab === "urun-gorseli-studyosu"
                           ? "border-[#F14B2A] text-[#E64A2E]"
                           : "border-transparent text-zinc-400 hover:text-zinc-600"
                       }`}
                       title="Yeni Ürün Görseli Oluştur"
                     >
-                      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="8" y1="4" x2="8" y2="12" /><line x1="4" y1="8" x2="12" y2="8" /></svg>
-                      Yeni Ürün Görseli
+                      <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="8" y1="4" x2="8" y2="12" /><line x1="4" y1="8" x2="12" y2="8" /></svg>
+                      <span className="hidden sm:inline">Yeni Ürün Görseli</span>
+                      <span className="sm:hidden">Yeni Görsel</span>
                     </button>
                   )}
                   <button
@@ -958,11 +959,11 @@ export default function ProductImageStudio() {
                         if (currentStudio?.id) handleSaveStudioSettings("urun-gorseli-studyosu");
                       }
                     }}
-                    className={`inline-flex items-center gap-1.5 border-b-2 px-4 py-3 text-[13px] font-semibold transition ${
+                    className={`inline-flex items-center gap-1 sm:gap-1.5 whitespace-nowrap border-b-2 px-2.5 py-2.5 sm:px-4 sm:py-3 text-[11px] sm:text-[13px] font-semibold transition ${
                       isActive ? "border-[#F14B2A] text-[#E64A2E]" : "border-transparent text-zinc-400 hover:text-zinc-600"
                     }`}
                   >
-                    <span className="text-base">{module.icon}</span>
+                    <span className="text-sm sm:text-base">{module.icon}</span>
                     {label}
                     {module.badge && <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold tracking-wide text-emerald-700">{module.badge}</span>}
                   </button>
@@ -972,8 +973,8 @@ export default function ProductImageStudio() {
           </div>
         </div>
 
-        <div className="grid gap-0 xl:grid-cols-[280px_minmax(0,1fr)_300px] 2xl:grid-cols-[320px_minmax(0,1fr)_340px]">
-          <aside className="border-b border-zinc-100 p-4 lg:p-5 xl:border-b-0 xl:border-r bg-[#FAFAF9] flex flex-col overflow-y-auto" style={{ maxHeight: "calc(100vh - 120px)" }}>
+        <div className="grid gap-0 grid-cols-1 xl:grid-cols-[310px_minmax(0,1fr)_320px] 2xl:grid-cols-[350px_minmax(0,1fr)_360px]">
+          <div className="p-3 lg:p-4 bg-[#FAFAF9] flex flex-col xl:overflow-y-auto">
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-zinc-400 mb-4">Urun Fotografi</p>
 
             {isCreationMode ? (
@@ -1779,14 +1780,17 @@ export default function ProductImageStudio() {
             {/* Arka Plan Stili */}
             <div className="border-t border-zinc-100 px-3 py-3">
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">Arka Plan Stili</p>
+              <p className="mt-0.5 text-[9px] text-zinc-400">
+                {selectedBgStyle ? "Tüm görseller seçilen stilde üretilir" : "Her platform kendi varyantıyla üretilir"}
+              </p>
               <div className="mt-2 grid grid-cols-4 gap-1.5">
                 {BG_STYLES.map((style) => (
                   <button
                     key={style.key}
                     type="button"
-                    onClick={() => setSelectedBgStyle(style.key)}
+                    onClick={() => setSelectedBgStyle(prev => prev === style.key ? "" : style.key)}
                     className={`rounded-lg border-2 py-2 text-xs font-semibold transition ${
-                      selectedBgStyle === style.key ? "border-[#F14B2A]" : "border-zinc-200"
+                      selectedBgStyle === style.key ? "border-[#F14B2A] ring-2 ring-[#F14B2A]/20" : "border-zinc-200"
                     }`}
                     style={{ background: style.bg, color: style.key === "koyu" ? "#fff" : "#3f3f46" }}
                   >
@@ -1850,9 +1854,9 @@ export default function ProductImageStudio() {
                 event.currentTarget.value = "";
               }}
             />
-          </aside>
+          </div>
 
-          <section className="border-b border-zinc-100 p-4 lg:p-5 xl:border-b-0 xl:border-r">
+          <section className="border-t xl:border-t-0 border-b border-zinc-100 p-3 lg:p-4 xl:border-b-0 xl:border-r">
             {activeTab === "urun-gorseli-studyosu" ? (
               <>
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -2247,16 +2251,16 @@ export default function ProductImageStudio() {
             )}
           </section>
 
-          <aside className="overflow-y-auto bg-white xl:block xl:min-w-0" style={{ maxHeight: "calc(100vh - 120px)" }}>
+          <aside className="border-t xl:border-t-0 overflow-y-auto bg-white xl:block xl:min-w-0">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3">
+            <div className="flex items-center justify-between border-b border-zinc-100 px-3 py-2.5">
               <h3 className="text-[15px] xl:text-[20px] font-extrabold text-zinc-900 truncate">
                 {activeTab === "reklam-studyosu" ? selectedAdVariant?.name || "Reklam Önizleme" : selectedVariant?.name || "Önizleme"}
               </h3>
               <button type="button" className="ml-2 shrink-0 text-lg leading-none text-zinc-300 hover:text-zinc-500">×</button>
             </div>
 
-            <div className="px-4 py-4">
+            <div className="px-3 py-3">
               {/* ÖNİZLEME */}
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">ÖNİZLEME</p>
 

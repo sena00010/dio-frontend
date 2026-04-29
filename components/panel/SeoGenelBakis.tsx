@@ -279,16 +279,16 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
       {/* ════════════════════════════════════════
           HEADER: Breadcrumb + Tabs + Actions
           ════════════════════════════════════════ */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-zinc-400">DIO</span>
-          <span className="text-xs text-zinc-300">›</span>
-          <span className="text-xs text-zinc-400">SEO Merkezi:</span>
-          <h1 className="text-lg font-bold text-zinc-900">
+          <span className="hidden sm:inline text-xs text-zinc-400">DIO</span>
+          <span className="hidden sm:inline text-xs text-zinc-300">›</span>
+          <span className="hidden sm:inline text-xs text-zinc-400">SEO Merkezi:</span>
+          <h1 className="text-base sm:text-lg font-bold text-zinc-900">
             {activeSubTab === "aksiyonlar" ? "Aksiyonlar" : activeSubTab === "siralamalar" ? "Sıralamalar" : activeSubTab === "kelimeler" ? "Kelimeler" : activeSubTab === "icerik" ? "İçerik Üretimi" : activeSubTab === "teknik" ? "Teknik SEO" : activeSubTab === "backlink" ? "Backlink" : activeSubTab === "ai" ? "AI Görünürlük" : "Genel Bakış"}
           </h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Domain Dropdown */}
           <div className="relative">
             <button
@@ -348,10 +348,10 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
       </div>
 
       {/* Sub Tabs */}
-      <div className="flex items-center gap-0 border-b border-zinc-200">
+      <div className="flex items-center gap-0 border-b border-zinc-200 overflow-x-auto scrollbar-none">
         {SUB_TABS.map((tab) => (
           <button key={tab.key} onClick={() => setActiveSubTab(tab.key)}
-            className={`relative flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-semibold transition ${
+            className={`relative flex items-center gap-1.5 whitespace-nowrap px-3 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-[12px] font-semibold transition ${
               activeSubTab === tab.key ? "border-b-2 border-[#E73932] text-[#E73932]" : "text-zinc-500 hover:text-zinc-700"
             }`}
           >
@@ -423,7 +423,7 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
           {/* ════════════════════════════════════════
               KPI CARDS
               ════════════════════════════════════════ */}
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
             {[
               { label: "Toplam Tıklama", value: fmtNum(kpi?.total_clicks || 0), delta: fmtDelta(kpi?.click_delta || 0), color: "#E73932", sparkData: trendClicks, sparkColor: "#22C55E", badge: "GSC" },
               { label: "Toplam Gösterim", value: fmtNum(kpi?.total_impressions || 0), delta: fmtDelta(kpi?.impression_delta || 0), color: "#F59E0B", sparkData: trendImps, sparkColor: "#3B82F6", badge: "GSC" },
@@ -452,7 +452,7 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
           {/* ════════════════════════════════════════
               TREND CHART + BRAND/NON-BRAND
               ════════════════════════════════════════ */}
-          <div className="grid grid-cols-[1fr_320px] gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-3">
             <div className="rounded-xl border border-zinc-200 bg-white p-5">
               <div className="mb-4 flex items-center justify-between">
                 <div>
@@ -517,7 +517,7 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
           {/* ════════════════════════════════════════
               CİHAZ / ÜLKE / ARAMA TÜRÜ
               ════════════════════════════════════════ */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* Cihaz Kırılımı */}
             <div className="rounded-xl border border-zinc-200 bg-white p-4">
               <h3 className="mb-3 text-sm font-bold text-zinc-900">Cihaz Kırılımı</h3>
@@ -566,7 +566,7 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
           {/* ════════════════════════════════════════
               EN İYİ ARAMA SORGULARI + EN İYİ SAYFALAR
               ════════════════════════════════════════ */}
-          <div className="grid grid-cols-[1.15fr_1fr] gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1fr] gap-3">
             {/* En İyi Arama Sorguları */}
             <div className="rounded-xl border border-zinc-200 bg-white">
               <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3">
@@ -643,7 +643,7 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
           {/* ════════════════════════════════════════
               CTR FIRSATLARI + DİZİN + AKSİYONLAR
               ════════════════════════════════════════ */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* CTR Fırsatları */}
                 <div className="rounded-xl border border-zinc-200 bg-white p-4">
                   <div className="mb-3 flex items-center justify-between">
@@ -729,7 +729,7 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
           </div>
 
           {/* Yükselen + Düşen Sorgular */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="rounded-xl border border-zinc-200 bg-white">
                   <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3">
                     <h3 className="text-sm font-bold text-zinc-900">↑ Yükselen Sorgular</h3>

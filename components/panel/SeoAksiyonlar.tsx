@@ -109,7 +109,7 @@ export default function SeoAksiyonlar({ activeProjectId }: Props) {
       {/* ════════════════════════════════════════
           ÖZET KARTLARI (4'lü grid)
           ════════════════════════════════════════ */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
         <div className="rounded-2xl bg-gradient-to-br from-[#E73932] to-[#F05E57] px-5 py-4 text-white">
           <p className="text-3xl font-black">{summary?.total || 0}</p>
           <p className="mt-0.5 text-[13px] font-bold opacity-95">Toplam Aksiyon</p>
@@ -135,7 +135,7 @@ export default function SeoAksiyonlar({ activeProjectId }: Props) {
       {/* ════════════════════════════════════════
           AI BANNER — Nereden başlamalısın?
           ════════════════════════════════════════ */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#2A1215] via-[#1F1F1F] to-[#1A1A1A] px-6 py-5 text-white">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#2A1215] via-[#1F1F1F] to-[#1A1A1A] px-4 py-4 sm:px-6 sm:py-5 text-white">
         <div className="absolute left-0 top-0 h-full w-1 bg-[#E73932]" />
         <div className="flex items-start gap-4">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 text-base">🤖</div>
@@ -197,8 +197,8 @@ export default function SeoAksiyonlar({ activeProjectId }: Props) {
           </div>
 
           {/* CTR Tablosu */}
-          <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white">
-            <table className="w-full text-[12px]">
+          <div className="overflow-x-auto rounded-2xl border border-zinc-200 bg-white">
+            <table className="w-full text-[12px] min-w-[600px]">
               <thead>
                 <tr className="border-b border-zinc-100 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                   <th className="px-5 py-3 text-left">Sayfa</th>
@@ -280,8 +280,8 @@ function CriticalCard({ task }: { task: ActionTask }) {
 
   if (task.task_type === "cannibalization") {
     return (
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5">
-        <div className="flex items-start justify-between">
+      <div className="rounded-2xl border border-zinc-200 bg-white p-3 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
           <div className="flex items-start gap-3.5">
             <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-orange-50">
               <span className="text-base">📄</span>
@@ -289,7 +289,7 @@ function CriticalCard({ task }: { task: ActionTask }) {
             <div>
               <h3 className="text-[13px] font-bold text-zinc-900">{task.title}</h3>
               <p className="mt-1 text-[11px] leading-4 text-zinc-500">{task.description}</p>
-              <div className="mt-3 flex gap-3">
+              <div className="mt-3 flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <div className="flex-1 rounded-xl border border-zinc-100 bg-zinc-50 px-3 py-2.5">
                   <p className="text-[11px] font-bold text-emerald-700">{d.primary_url}</p>
                   <p className="mt-0.5 text-[10px] text-zinc-400">Poz. {d.primary_pos} — ana sayfa ✓</p>
@@ -301,7 +301,7 @@ function CriticalCard({ task }: { task: ActionTask }) {
               </div>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-2 shrink-0 ml-6">
+          <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 shrink-0 sm:ml-6">
             <span className="text-[12px] font-bold text-zinc-500">Pozisyon kaybı</span>
             <button className="rounded-lg bg-[#F97316] px-4 py-1.5 text-[11px] font-bold text-white shadow-sm transition hover:bg-[#EA580C]">
               {task.action_label}
@@ -317,8 +317,8 @@ function CriticalCard({ task }: { task: ActionTask }) {
   const extraCount = (d.extra_count as number) || 0;
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-5">
-      <div className="flex items-start justify-between">
+    <div className="rounded-2xl border border-zinc-200 bg-white p-3 sm:p-5">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div className="flex items-start gap-3.5">
           <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-red-50">
             <span className="text-base">⊘</span>
@@ -336,7 +336,7 @@ function CriticalCard({ task }: { task: ActionTask }) {
             </div>
           </div>
         </div>
-        <div className="flex flex-col items-end gap-2 shrink-0 ml-6">
+        <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 shrink-0 sm:ml-6">
           <span className="text-[12px] font-bold text-[#E73932]">-{Math.round(task.potential_gain)} tık/ay kayıp</span>
           <button className="rounded-lg bg-[#22C55E] px-4 py-1.5 text-[11px] font-bold text-white shadow-sm transition hover:bg-[#16A34A]">
             {task.action_label}
@@ -355,8 +355,8 @@ function GrowthCard({ task }: { task: ActionTask }) {
 
   if (task.task_type === "competitor_weakness") {
     return (
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5">
-        <div className="flex items-start justify-between">
+      <div className="rounded-2xl border border-zinc-200 bg-white p-3 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
           <div className="flex items-start gap-3.5">
             <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-50">
               <span className="text-base">🎯</span>
@@ -364,23 +364,23 @@ function GrowthCard({ task }: { task: ActionTask }) {
             <div className="flex-1">
               <h3 className="text-[13px] font-bold text-zinc-900">{task.title}</h3>
               <p className="mt-1 text-[11px] leading-4 text-zinc-500">{task.description}</p>
-              <div className="mt-3 grid grid-cols-3 gap-2.5">
-                <div className="rounded-xl bg-zinc-900 px-4 py-3">
+              <div className="mt-3 grid grid-cols-3 gap-1.5 sm:gap-2.5">
+                <div className="rounded-xl bg-zinc-900 px-2 py-2 sm:px-4 sm:py-3">
                   <p className="text-[9px] font-semibold text-zinc-400">Sen</p>
-                  <p className="mt-0.5 text-lg font-black text-white">{d.my_position}. sıra</p>
+                  <p className="mt-0.5 text-sm sm:text-lg font-black text-white">{d.my_position}. sıra</p>
                 </div>
-                <div className="rounded-xl bg-zinc-100 px-4 py-3">
-                  <p className="text-[9px] font-semibold text-zinc-400">{d.competitor_name}</p>
-                  <p className="mt-0.5 text-lg font-black text-zinc-700">{d.competitor_new_position}. sıra <span className="text-sm text-red-500">↓{d.competitor_new_position - 12}</span></p>
+                <div className="rounded-xl bg-zinc-100 px-2 py-2 sm:px-4 sm:py-3">
+                  <p className="text-[9px] font-semibold text-zinc-400 truncate">{d.competitor_name}</p>
+                  <p className="mt-0.5 text-sm sm:text-lg font-black text-zinc-700">{d.competitor_new_position}. <span className="hidden sm:inline">sıra </span><span className="text-xs sm:text-sm text-red-500">↓{d.competitor_new_position - 12}</span></p>
                 </div>
-                <div className="rounded-xl bg-zinc-100 px-4 py-3">
+                <div className="rounded-xl bg-zinc-100 px-2 py-2 sm:px-4 sm:py-3">
                   <p className="text-[9px] font-semibold text-zinc-400">Hedef</p>
-                  <p className="mt-0.5 text-lg font-black text-emerald-600">İlk {d.target_position}</p>
+                  <p className="mt-0.5 text-sm sm:text-lg font-black text-emerald-600">İlk {d.target_position}</p>
                 </div>
               </div>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-2 shrink-0 ml-6">
+          <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 shrink-0 sm:ml-6">
             <span className="text-[12px] font-bold text-emerald-600">+{Math.round(task.potential_gain)} tık/ay</span>
             <button className="rounded-lg bg-[#22C55E] px-4 py-1.5 text-[11px] font-bold text-white shadow-sm transition hover:bg-[#16A34A]">
               {task.action_label}
@@ -393,8 +393,8 @@ function GrowthCard({ task }: { task: ActionTask }) {
 
   if (task.task_type === "schema_missing") {
     return (
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5">
-        <div className="flex items-start justify-between">
+      <div className="rounded-2xl border border-zinc-200 bg-white p-3 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
           <div className="flex items-start gap-3.5">
             <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-50">
               <span className="text-base">⭐</span>
@@ -405,7 +405,7 @@ function GrowthCard({ task }: { task: ActionTask }) {
               <p className="mt-2 text-[10px] font-medium text-zinc-400">{d.note}</p>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-2 shrink-0 ml-6">
+          <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 shrink-0 sm:ml-6">
             <span className="text-[12px] font-bold text-emerald-600">CTR {d.estimated_ctr_boost} tahmini</span>
             <button className="rounded-lg bg-zinc-900 px-4 py-1.5 text-[11px] font-bold text-white shadow-sm transition hover:bg-zinc-800">
               {task.action_label}
@@ -418,8 +418,8 @@ function GrowthCard({ task }: { task: ActionTask }) {
 
   // backlink_opportunity
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-5">
-      <div className="flex items-start justify-between">
+    <div className="rounded-2xl border border-zinc-200 bg-white p-3 sm:p-5">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div className="flex items-start gap-3.5">
           <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-purple-50">
             <span className="text-base">🔗</span>
@@ -429,7 +429,7 @@ function GrowthCard({ task }: { task: ActionTask }) {
             <p className="mt-1 text-[11px] leading-4 text-zinc-500">{task.description}</p>
           </div>
         </div>
-        <div className="flex flex-col items-end gap-2 shrink-0 ml-6">
+        <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 shrink-0 sm:ml-6">
           <span className="text-[12px] font-bold text-zinc-500">Otorite artışı</span>
           <button className="rounded-lg border border-zinc-200 bg-white px-4 py-1.5 text-[11px] font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-50">
             {task.action_label}

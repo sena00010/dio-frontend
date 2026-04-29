@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LockClosedIcon, UserIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { LockClosedIcon, UserIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import adminApi from "../../../lib/adminApi";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -86,13 +88,24 @@ export default function AdminLogin() {
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 bg-slate-950 border border-slate-800 rounded-xl shadow-sm py-3 text-white focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent sm:text-sm transition-all"
+                  className="block w-full pl-10 pr-10 bg-slate-950 border border-slate-800 rounded-xl shadow-sm py-3 text-white focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent sm:text-sm transition-all"
                   placeholder="••••••••"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300 transition"
+                >
+                  {showPassword ? (
+                    <EyeSlashIcon className="h-5 w-5" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5" />
+                  )}
+                </button>
               </div>
             </div>
 
@@ -112,6 +125,18 @@ export default function AdminLogin() {
               </button>
             </div>
           </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-slate-500">
+              Hesabın yok mu?{" "}
+              <Link
+                href="/admin/register"
+                className="font-semibold text-rose-400 hover:text-rose-300 transition"
+              >
+                Kayıt Ol
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
