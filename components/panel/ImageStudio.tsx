@@ -194,6 +194,8 @@ export default function ImageStudio({ postId, onBack, onComplete }: { postId: nu
   const [saving, setSaving] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const [bgDataUrl, setBgDataUrl] = useState("");
+  // Tuval yüksekliği görselin oranına göre (4:5 → 650, 1:1 → 520)
+  const [canvasH, setCanvasH] = useState(CANVAS_SIZE);
   const [imageStyle, setImageStyle] = useState("realistic");
   const [customPrompt, setCustomPrompt] = useState("");
   const [autoGenTriggered, setAutoGenTriggered] = useState(false);
@@ -302,15 +304,30 @@ export default function ImageStudio({ postId, onBack, onComplete }: { postId: nu
     })();
   }, [postId]);
 
+  useEffect(() => {
+    if (!bgDataUrl) return;
+    const img = new Image();
+    img.onload = () => {
+      if (!img.naturalWidth || !img.naturalHeight) return;
+      const h = Math.round(CANVAS_SIZE * img.naturalHeight / img.naturalWidth);
+      setCanvasH(prev => {
+        // Alt yarıdaki logo yeni tuvalin altına kaysın
+        if (h !== prev) setLogoY(y => (y > prev / 2 ? Math.max(0, y + h - prev) : y));
+        return h;
+      });
+    };
+    img.src = bgDataUrl;
+  }, [bgDataUrl]);
+
   useEffect(() => { if (!imageUrl) { setBgDataUrl(""); return; } const u = imageUrl.startsWith("/") ? `${process.env.NEXT_PUBLIC_API_URL}${imageUrl}` : imageUrl; fetch(u).then(r => r.blob()).then(b => { const r = new FileReader(); r.onload = () => setBgDataUrl(r.result as string); r.readAsDataURL(b); }).catch(() => setBgDataUrl(u)); }, [imageUrl]);
 
   useEffect(() => {
     if (!company?.logo_url) { const ini = (company?.name || "?").charAt(0).toUpperCase(); let pc = "#e6272f"; if (company?.brand_colors) { try { const c = JSON.parse(company.brand_colors); if (c.length) pc = c[0]; } catch {/* */} } const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" rx="40" fill="${pc}"/><text x="100" y="100" text-anchor="middle" dominant-baseline="central" font-family="Inter,sans-serif" font-size="100" font-weight="700" fill="white">${ini}</text></svg>`; setLogoDataUrl(`data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`); return; }
     const fullUrl = company.logo_url.startsWith("/") ? `${process.env.NEXT_PUBLIC_API_URL}${company.logo_url}` : company.logo_url;
-    fetch(fullUrl, { mode: "cors" }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.blob(); }).then(b => { const r = new FileReader(); r.onload = () => setLogoDataUrl(r.result as string); r.readAsDataURL(b); }).catch(() => { const img = new Image(); img.crossOrigin = "anonymous"; img.onload = () => { const c = document.createElement("canvas"); c.width = img.naturalWidth; c.height = img.naturalHeight; const ctx = c.getContext("2d"); if (ctx) { ctx.drawImage(img,0,0); setLogoDataUrl(c.toDataURL("image/png")); } }; img.onerror = () => setLogoDataUrl(""); img.src = fullUrl; });
+    fetch(fullUrl, { mode: "cors" }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.blob(); }).then(b => { const r = new FileReader(); r.onload = () => { setLogoDataUrl(r.result as string); setLogoEnabled(true); }; r.readAsDataURL(b); }).catch(() => { const img = new Image(); img.crossOrigin = "anonymous"; img.onload = () => { const c = document.createElement("canvas"); c.width = img.naturalWidth; c.height = img.naturalHeight; const ctx = c.getContext("2d"); if (ctx) { ctx.drawImage(img,0,0); setLogoDataUrl(c.toDataURL("image/png")); } }; img.onerror = () => setLogoDataUrl(""); img.src = fullUrl; });
   }, [company?.logo_url, company?.name, company?.brand_colors]);
 
-  useEffect(() => { if (!logoDragging) return; const hm = (e: MouseEvent) => { const r = canvasRef.current?.getBoundingClientRect(); if (!r) return; setLogoX(Math.max(0, Math.min(CANVAS_SIZE-logoWidth, e.clientX-r.left-logoDragOffset.dx))); setLogoY(Math.max(0, Math.min(CANVAS_SIZE-logoWidth, e.clientY-r.top-logoDragOffset.dy))); }; const hu = () => setLogoDragging(false); window.addEventListener("mousemove", hm); window.addEventListener("mouseup", hu); return () => { window.removeEventListener("mousemove", hm); window.removeEventListener("mouseup", hu); }; }, [logoDragging, logoDragOffset, logoWidth]);
+  useEffect(() => { if (!logoDragging) return; const hm = (e: MouseEvent) => { const r = canvasRef.current?.getBoundingClientRect(); if (!r) return; setLogoX(Math.max(0, Math.min(CANVAS_SIZE-logoWidth, e.clientX-r.left-logoDragOffset.dx))); setLogoY(Math.max(0, Math.min(canvasH-logoWidth, e.clientY-r.top-logoDragOffset.dy))); }; const hu = () => setLogoDragging(false); window.addEventListener("mousemove", hm); window.addEventListener("mouseup", hu); return () => { window.removeEventListener("mousemove", hm); window.removeEventListener("mouseup", hu); }; }, [logoDragging, logoDragOffset, logoWidth, canvasH]);
 
   const updateLayer = useCallback((id: string, u: Partial<DesignLayer>) => { setLayers(p => p.map(l => l.id === id ? { ...l, ...u } : l)); if (u.font_family) loadGoogleFont(u.font_family); }, []);
 
@@ -367,7 +384,8 @@ export default function ImageStudio({ postId, onBack, onComplete }: { postId: nu
   const handleSave = useCallback(async () => {
     if (!compositeRef.current || !bgDataUrl) return; setSaving(true); setError(""); setSaveSuccess(false);
     try {
-      const du = await toPng(compositeRef.current, { pixelRatio: 2, quality: 1, skipFonts: true, cacheBust: true });
+      // 1080 px genişlikte dışa aktar (4:5 → 1080x1350)
+      const du = await toPng(compositeRef.current, { pixelRatio: 1080 / CANVAS_SIZE, quality: 1, skipFonts: true, cacheBust: true });
       const r = await fetch(du); const b = await r.blob();
       const fd = new FormData(); fd.append("canvas", b, `canvas_${postId}.png`);
       const up = await api.post("/api/protected/upload-canvas", fd, { headers: { "Content-Type": "multipart/form-data" } });
@@ -535,9 +553,9 @@ export default function ImageStudio({ postId, onBack, onComplete }: { postId: nu
 
         {/* CENTER CANVAS */}
         <div className="flex-1 flex items-center justify-center p-4 bg-zinc-100/50 min-w-0 border-l border-zinc-200">
-          <div ref={compositeRef} className="relative" style={{ width: 520, height: 520, maxWidth: "100%" }}>
+          <div ref={compositeRef} className="relative" style={{ width: CANVAS_SIZE, height: canvasH, maxWidth: "100%" }}>
             {bgDataUrl ? (
-              <div ref={canvasRef} className="relative overflow-hidden rounded-xl shadow-2xl" style={{ width: "100%", aspectRatio: "1/1" }} onClick={() => { setSelectedLayerId(null); setEditingLayerId(null); }}>
+              <div ref={canvasRef} className="relative overflow-hidden rounded-xl shadow-2xl" style={{ width: "100%", aspectRatio: `${CANVAS_SIZE}/${canvasH}` }} onClick={() => { setSelectedLayerId(null); setEditingLayerId(null); }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={bgDataUrl} alt="" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
                 {gradientEnabled && <div style={getGradientForLayers(layers, gradientOpacity)} />}

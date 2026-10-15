@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, type ReactNode } from "react";
 import { useAuth } from "@/lib/auth-context";
 import api from "@/lib/api";
+import PostPreview, { platformAspectClass } from "./PostPreview";
 
 // ──────────────────────────────────────────────
 // Types
@@ -687,6 +688,7 @@ function Step3ImageGeneration({
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [postId, setPostId] = useState<number | null>(null);
   const [genError, setGenError] = useState<string | null>(null);
+  const { activeCompany } = useAuth();
 
   const platformInfo = PLATFORMS.find((p) => p.value === idea.platform);
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -952,7 +954,7 @@ function Step3ImageGeneration({
                       : "border-zinc-200 hover:border-zinc-300 hover:shadow-lg hover:-translate-y-0.5"
                   }`}
                 >
-                  <div className="aspect-square bg-zinc-100 relative">
+                  <div className={`${platformAspectClass(idea.platform)} bg-zinc-100 relative`}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={img.url.startsWith("/") ? `${baseUrl}${img.url}` : img.url}
@@ -983,6 +985,22 @@ function Step3ImageGeneration({
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Platform önizlemesi */}
+          <div className="card p-4 md:p-5">
+            <h3 className="mb-3 text-center text-sm font-bold text-foreground">{idea.platform} Önizlemesi</h3>
+            <div className="flex justify-center">
+              <PostPreview
+                platform={idea.platform}
+                brandName={activeCompany?.name || ""}
+                logoUrl={activeCompany?.logo_url ? (activeCompany.logo_url.startsWith("/") ? `${baseUrl}${activeCompany.logo_url}` : activeCompany.logo_url) : undefined}
+                imageUrl={(() => { const u = selectedImageUrl || generatedImages[0]?.url; return u ? (u.startsWith("/") ? `${baseUrl}${u}` : u) : null; })()}
+                caption={idea.generated_description}
+                hashtags={idea.generated_hashtags}
+              />
+            </div>
+            <p className="mt-3 text-center text-[11px] text-muted">Başlık, CTA ve logo stüdyoda marka renklerinizle görsele eklenir.</p>
           </div>
 
           {/* Open Studio button */}
