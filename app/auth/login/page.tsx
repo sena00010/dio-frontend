@@ -83,20 +83,21 @@ export default function LoginPage() {
   return (
     <div className="animate-fade-in-up">
       {/* Logo & heading */}
-      <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-dark shadow-lg shadow-brand/20">
-          <span className="text-2xl font-black text-white tracking-tight">D</span>
+      <div className="mb-8">
+        {/* Küçük ekranda marka paneli gizli olduğu için logo burada */}
+        <div className="mb-8 flex items-center gap-2.5 lg:hidden">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-[13px] font-black text-white">DIO</span>
+          <span className="text-[13px] font-semibold text-muted">Dijital İş Ortağı</span>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          Tekrar Hoş Geldiniz
+        <h1 className="text-[28px] font-bold tracking-tight text-foreground">
+          Tekrar hoş geldiniz
         </h1>
-        <p className="subtle mt-1.5 text-sm">
-          Hesabınıza giriş yapın
+        <p className="subtle mt-1.5 text-[15px]">
+          İçerik planınız sizi bekliyor. Hesabınıza giriş yapın.
         </p>
       </div>
 
-      {/* Card */}
-      <div className="glass-card rounded-2xl p-8">
+      <div>
         {/* Error message */}
         {error && (
           <div className="auth-error mb-5 animate-fade-in-up">

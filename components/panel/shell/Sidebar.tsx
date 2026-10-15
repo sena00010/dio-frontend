@@ -41,7 +41,7 @@ const initialsOf = (name: string) =>
 function BrandAvatar({ company, size = 36 }: { company: Company | null; size?: number }) {
   if (company?.logo_url) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={company.logo_url.startsWith("/") ? `${apiUrl}${company.logo_url}` : company.logo_url} alt="" className="rounded-lg border border-line bg-white object-contain" style={{ width: size, height: size }} />;
+    return <img src={company.logo_url.startsWith("/") ? `${apiUrl}${company.logo_url}` : company.logo_url} alt="" className="rounded-lg bg-white object-contain" style={{ width: size, height: size }} />;
   }
   return (
     <span className="flex items-center justify-center rounded-lg bg-brand font-bold text-white" style={{ width: size, height: size, fontSize: size * 0.36 }}>
@@ -58,21 +58,21 @@ export default function Sidebar({
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
 
   return (
-    <div className="flex h-full flex-col bg-white">
+    <div className="flex h-full flex-col bg-[#0d0d10] text-zinc-300">
       {/* Marka seçici */}
       <div className="relative px-3 pb-3 pt-4">
         <button
           type="button"
           onClick={() => setBrandOpen(o => !o)}
           aria-expanded={brandOpen}
-          className="flex w-full items-center gap-3 rounded-xl border border-line px-2.5 py-2 text-left transition hover:bg-zinc-50"
+          className="flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-2.5 py-2 text-left transition hover:bg-white/[0.07]"
         >
           <BrandAvatar company={activeCompany} />
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[14px] font-semibold text-foreground">{activeCompany?.name || "Marka seçin"}</span>
-            <span className="block text-[11px] text-muted">DIO · Dijital İş Ortağı</span>
+            <span className="block truncate text-[14px] font-semibold text-white">{activeCompany?.name || "Marka seçin"}</span>
+            <span className="block text-[11px] text-zinc-500">DIO · Dijital İş Ortağı</span>
           </span>
-          <ChevronUpDownIcon className="h-4 w-4 shrink-0 text-muted" />
+          <ChevronUpDownIcon className="h-4 w-4 shrink-0 text-zinc-500" />
         </button>
         {brandOpen && (
           <>
@@ -117,12 +117,12 @@ export default function Sidebar({
             <div key={group.id}>
               {collapsible ? (
                 <button type="button" onClick={() => setOpenGroups(g => ({ ...g, [group.id]: !open }))} aria-expanded={open}
-                  className="mb-1 flex w-full items-center justify-between px-2.5 text-[11px] font-bold uppercase tracking-widest text-muted hover:text-foreground">
+                  className="mb-1 flex w-full items-center justify-between px-2.5 text-[11px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-300">
                   {group.label}
                   <ChevronDownIcon className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
                 </button>
               ) : (
-                <p className="mb-1 px-2.5 text-[11px] font-bold uppercase tracking-widest text-muted">{group.label}</p>
+                <p className="mb-1 px-2.5 text-[11px] font-bold uppercase tracking-widest text-zinc-500">{group.label}</p>
               )}
               {open && (
                 <ul className="space-y-0.5">
@@ -132,9 +132,9 @@ export default function Sidebar({
                     return (
                       <li key={item.key}>
                         <button type="button" onClick={() => onNavigate(item.key)} aria-current={selected ? "page" : undefined}
-                          className={`relative flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-[13.5px] transition ${selected ? "bg-brand-soft font-semibold text-brand" : "font-medium text-zinc-600 hover:bg-zinc-50 hover:text-foreground"}`}>
+                          className={`relative flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-[13.5px] transition ${selected ? "bg-white/10 font-semibold text-white" : "font-medium text-zinc-400 hover:bg-white/5 hover:text-white"}`}>
                           {selected && <span className="absolute -left-3 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-brand" />}
-                          {Icon ? <Icon className={`h-[18px] w-[18px] shrink-0 ${selected ? "text-brand" : "text-zinc-400"}`} /> : <span className="w-[18px]" />}
+                          {Icon ? <Icon className={`h-[18px] w-[18px] shrink-0 ${selected ? "text-brand-light" : "text-zinc-500"}`} /> : <span className="w-[18px]" />}
                           <span className="truncate">{item.label}</span>
                         </button>
                       </li>
@@ -148,14 +148,14 @@ export default function Sidebar({
       </nav>
 
       {/* Kullanıcı */}
-      <div className="flex items-center gap-2.5 border-t border-line px-3 py-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-[12px] font-bold text-white">{initialsOf(userName)}</span>
+      <div className="flex items-center gap-2.5 border-t border-white/10 px-3 py-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-[12px] font-bold text-white">{initialsOf(userName)}</span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[13px] font-semibold text-foreground">{userName}</span>
-          {userEmail && <span className="block truncate text-[11px] text-muted">{userEmail}</span>}
+          <span className="block truncate text-[13px] font-semibold text-white">{userName}</span>
+          {userEmail && <span className="block truncate text-[11px] text-zinc-500">{userEmail}</span>}
         </span>
         <button type="button" onClick={onLogout} aria-label="Çıkış yap" title="Çıkış yap"
-          className="rounded-lg p-2 text-muted transition hover:bg-red-50 hover:text-red-600">
+          className="rounded-lg p-2 text-zinc-500 transition hover:bg-white/10 hover:text-white">
           <ArrowRightOnRectangleIcon className="h-[18px] w-[18px]" />
         </button>
       </div>

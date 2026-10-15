@@ -140,7 +140,7 @@ export default function Home() {
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       {/* ═══ Masaüstü kenar çubuğu ═══ */}
-      <aside className="sticky top-0 hidden h-screen w-[256px] shrink-0 border-r border-line md:block">
+      <aside className="sticky top-0 hidden h-screen w-[256px] shrink-0 md:block">
         <Sidebar {...sidebarProps} />
       </aside>
 

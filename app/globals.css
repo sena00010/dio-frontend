@@ -38,8 +38,9 @@ body {
 
 .card {
   background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 12px;
+  border: 1px solid #ebebee;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.03);
 }
 
 .subtle {
@@ -357,7 +358,7 @@ body {
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb {
-  background: var(--line);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 4px;
 }
 
