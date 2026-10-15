@@ -231,7 +231,7 @@ export default function ImageStudio({ postId, onBack, onComplete }: { postId: nu
 
   const fetchGoogleFonts = useCallback(async () => {
     if (allFonts.length > SEED_FONTS.length) return;
-    try { const r = await fetch("https://www.googleapis.com/webfonts/v1/webfonts?key=AIzaSyBwIX97bVWr3-6AIUvGkcNnmFgirefZ-20&sort=popularity"); const d = await r.json(); if (d.items) setAllFonts(d.items.map((f: {family:string}) => f.family)); } catch (e) { console.warn("Fonts API err:", e); }
+    try { const r = await fetch(`https://www.googleapis.com/webfonts/v1/webfonts?key=${process.env.NEXT_PUBLIC_GOOGLE_FONTS_KEY}&sort=popularity`); const d = await r.json(); if (d.items) setAllFonts(d.items.map((f: {family:string}) => f.family)); } catch (e) { console.warn("Fonts API err:", e); }
   }, [allFonts.length]);
   const filteredFonts = useMemo(() => { const q = fontSearch.toLowerCase().trim(); const list = q ? allFonts.filter(f => f.toLowerCase().includes(q)) : allFonts; return list.slice(0, fontsPage * 30); }, [allFonts, fontSearch, fontsPage]);
 
