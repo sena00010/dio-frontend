@@ -57,11 +57,6 @@ export default function RegisterPage() {
     <div className="animate-fade-in-up">
       {/* Logo & heading */}
       <div className="mb-8">
-        {/* Küçük ekranda marka paneli gizli olduğu için logo burada */}
-        <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand text-[13px] font-black text-white">DIO</span>
-          <span className="text-[13px] font-semibold text-muted">Dijital İş Ortağı</span>
-        </div>
         <h1 className="text-[28px] font-bold tracking-tight text-foreground">
           Hesabınızı oluşturun
         </h1>
