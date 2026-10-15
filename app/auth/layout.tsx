@@ -56,10 +56,10 @@ function SamplePost({ samples, delay, className }: { samples: Sample[]; delay: n
         <span key={cur.handle} className="dio-word-in text-[11px] font-semibold text-zinc-800">{cur.handle}</span>
         <span className="ml-auto text-zinc-400">•••</span>
       </div>
-      <div className="relative aspect-[4/5] bg-zinc-200">
+      <div className="relative aspect-[4/5] bg-gradient-to-br from-[#ff4d54] to-[#c91f26]">
         {samples.map((sm, idx) => (
           // eslint-disable-next-line @next/next/no-img-element
-          <img key={sm.img} src={`/login-samples/${sm.img}.jpg`} alt="" loading="lazy"
+          <img key={sm.img} src={`/login-samples/${sm.img}.jpg`} alt="" loading={idx === 0 ? "eager" : "lazy"}
             className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${idx === i ? "opacity-100" : "opacity-0"}`} />
         ))}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
