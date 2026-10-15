@@ -4,7 +4,13 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { FullPageSpinner } from "@/components/ui/spinner";
 
-const ROTATING = ["planlasın", "tasarlasın", "yazsın", "zamanlasın"];
+// Her kelime kırmızı zeminde okunaklı, farklı bir renkte
+const ROTATING = [
+  { word: "planlasın", color: "from-[#fff3a3] to-[#ffd23f]" },
+  { word: "tasarlasın", color: "from-white to-[#ffc8d6]" },
+  { word: "yazsın", color: "from-[#d6ffe4] to-[#7ee8a6]" },
+  { word: "zamanlasın", color: "from-[#e0f2ff] to-[#9ad4ff]" },
+];
 const FEATURES = ["Ayın planı tek tıkla", "Marka renklerinizle tasarım", "Carousel ve Instagram formatı", "Türk özel günleri otomatik"];
 
 // Başlıktaki dönen kelime
@@ -15,8 +21,8 @@ function RotatingWord() {
     return () => clearInterval(t);
   }, []);
   return (
-    <span key={i} className="dio-word-in inline-block bg-gradient-to-r from-white to-[#ffd1d3] bg-clip-text text-transparent">
-      {ROTATING[i]}.
+    <span key={i} className={`dio-word-in inline-block bg-gradient-to-r bg-clip-text text-transparent ${ROTATING[i].color}`}>
+      {ROTATING[i].word}.
     </span>
   );
 }
