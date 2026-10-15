@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { navigationGroups } from "@/components/panel/data";
 import { ScreenRenderer } from "@/components/panel/screens";
-import type { ScreenKey } from "@/components/panel/types";
+import { clearWizardDraft } from "@/components/panel/NewContentWizard";
+import { SCREEN_KEYS, type ScreenKey } from "@/components/panel/types";
 import { FullPageSpinner } from "@/components/ui/spinner";
 import {
   Bars3Icon,
@@ -58,11 +59,35 @@ const NAV_ICONS: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement
 };
 
 /* ── Hash → screen sync helpers ──────── */
+// Biçim: #ekran veya #ekran/parametre (örn. #studio/123) — yenilemede ekran ve kayıt korunur
+function parseHash(): { screen: ScreenKey; param?: number } {
+  if (typeof window === "undefined") return { screen: "dashboard" };
+  const [key, raw] = window.location.hash.replace("#", "").split("/");
+  if (!key || !(SCREEN_KEYS as readonly string[]).includes(key)) return { screen: "dashboard" };
+  const param = raw ? Number(raw) : undefined;
+  return { screen: key as ScreenKey, param: param && Number.isFinite(param) ? param : undefined };
+}
+
 function getScreenFromHash(): ScreenKey {
-  if (typeof window === "undefined") return "dashboard";
-  const hash = window.location.hash.replace("#", "");
-  if (!hash) return "dashboard";
-  return hash as ScreenKey;
+  const { screen, param } = parseHash();
+  // Parametre gerektiren ekranlar parametresiz açılırsa üst ekrana dön
+  if (screen === "studio" && !param) return "icerik";
+  if (screen === "marka-detay" && !param) return "profil";
+  return screen;
+}
+
+/* ── Menüdeki ana eylem: her yerden tek tıkla yeni içerik ── */
+function NewContentButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand to-brand-dark px-4 py-2.5 text-[14px] font-semibold text-white shadow-md shadow-brand/20 transition hover:-translate-y-0.5 hover:shadow-lg"
+    >
+      <SparklesIcon className="h-[18px] w-[18px]" />
+      Yeni İçerik Oluştur
+    </button>
+  );
 }
 
 export default function Home() {
@@ -70,22 +95,28 @@ export default function Home() {
   const [active, setActiveRaw] = useState<ScreenKey>(() => getScreenFromHash());
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [brandMenuOpen, setBrandMenuOpen] = useState(false);
-  const [studioPostId, setStudioPostId] = useState<number | undefined>();
+  const [studioPostId, setStudioPostId] = useState<number | undefined>(() => (parseHash().screen === "studio" ? parseHash().param : undefined));
+  const [schedulePostId, setSchedulePostId] = useState<number | undefined>(() => (parseHash().screen === "zamanlayici" ? parseHash().param : undefined));
   const [kreatifTopics, setKreatifTopics] = useState<string[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
-  const [brandDetailId, setBrandDetailId] = useState<number | undefined>();
+  const [brandDetailId, setBrandDetailId] = useState<number | undefined>(() => (parseHash().screen === "marka-detay" ? parseHash().param : undefined));
   const [initialTopic, setInitialTopic] = useState<string>("");
 
-  const setActive = useCallback((key: ScreenKey) => {
+  const setActive = useCallback((key: ScreenKey, param?: number) => {
     setActiveRaw(key);
+    setSchedulePostId(key === "zamanlayici" ? param : undefined);
     if (typeof window !== "undefined") {
-      window.location.hash = key === "dashboard" ? "" : key;
+      window.location.hash = key === "dashboard" ? "" : param ? `${key}/${param}` : key;
     }
   }, []);
 
   useEffect(() => {
     const onHashChange = () => {
+      const { screen, param } = parseHash();
+      if (screen === "studio" && param) setStudioPostId(param);
+      if (screen === "marka-detay" && param) setBrandDetailId(param);
+      setSchedulePostId(screen === "zamanlayici" ? param : undefined);
       setActiveRaw(getScreenFromHash());
     };
     window.addEventListener("hashchange", onHashChange);
@@ -158,6 +189,7 @@ export default function Home() {
 
         {/* Mobile Navigation Content */}
         <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 sidebar-nav">
+          <NewContentButton onClick={() => { clearWizardDraft(); handleNavClick("yeni-icerik"); }} />
           {navigationGroups.map((group) => (
             <div key={group.id} className="space-y-1">
               <p className="px-2 mb-2 text-[11px] font-bold uppercase tracking-widest text-[#A1A1A8]">{group.label}</p>
@@ -307,6 +339,7 @@ export default function Home() {
 
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto px-5 py-6 space-y-[26px] sidebar-nav">
+            <NewContentButton onClick={() => { clearWizardDraft(); handleNavClick("yeni-icerik"); }} />
             {navigationGroups.map((group) => (
               <div key={group.id} className="space-y-1.5">
                 <p className="px-2 mb-2.5 text-[11px] font-extrabold tracking-widest text-[#9CA3AF] uppercase">
@@ -468,7 +501,12 @@ export default function Home() {
               studioPostId={studioPostId}
               onStudioNavigate={(postId) => {
                 setStudioPostId(postId);
-                setActive("studio");
+                setActive("studio", postId);
+              }}
+              schedulePostId={schedulePostId}
+              onScheduleNavigate={(postId: number) => {
+                setSchedulePostId(postId);
+                setActive("zamanlayici", postId);
               }}
               kreatifTopics={kreatifTopics}
               onKreatifNavigate={(topics: string[]) => {
@@ -478,7 +516,7 @@ export default function Home() {
               brandDetailId={brandDetailId}
               onBrandDetailNavigate={(id: number) => {
                 setBrandDetailId(id);
-                setActive("marka-detay");
+                setActive("marka-detay", id);
               }}
               initialTopic={initialTopic}
               onSetInitialTopic={(topic: string) => {

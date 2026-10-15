@@ -3,6 +3,8 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth-context";
 import api from "@/lib/api";
+import { useToast } from "@/components/ui/Toast";
+import { getApiError } from "@/lib/apiError";
 
 /* ────────────────────────────────────────────────
    TYPES
@@ -167,6 +169,7 @@ export default function KreatifOlusturScreen({
   onStudioNavigate?: (postId: number) => void;
 }) {
   const { activeCompany } = useAuth();
+  const toast = useToast();
 
   /* ── Settings state ─────────────────────────── */
   const [emphasis, setEmphasis] = useState("yenilik");
@@ -304,8 +307,23 @@ export default function KreatifOlusturScreen({
   const startPolling = useCallback((jobId: string) => {
     // Eski polling varsa temizle
     if (pollingRef.current) clearInterval(pollingRef.current);
-    
+
+    // Sonsuz sorguyu önle: 4 dk üst sınır, art arda 5 hatada dur
+    const startedAt = Date.now();
+    let failures = 0;
+    const stopPolling = () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
+      }
+    };
+
     const poll = async () => {
+      if (Date.now() - startedAt > 4 * 60 * 1000) {
+        stopPolling();
+        toast.error("Görsel üretimi beklenenden uzun sürdü. Hazır olanlar gösteriliyor; diğerleri için tekrar deneyin.");
+        return;
+      }
       try {
         const { data } = await api.get(`/api/protected/creative-images-status?job_id=${jobId}`);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -337,22 +355,26 @@ export default function KreatifOlusturScreen({
           return prev;
         });
 
+        failures = 0;
         // Tamamlandıysa polling'i durdur
         if (data.status === "completed" || data.completed === data.total) {
-          if (pollingRef.current) {
-            clearInterval(pollingRef.current);
-            pollingRef.current = null;
-          }
+          stopPolling();
+          const failed = images.filter(img => img.status === "error" || img.status === "failed").length;
+          if (failed > 0) toast.error(`${failed} görsel üretilemedi. Diğer varyantları kullanabilir veya tekrar deneyebilirsiniz.`);
         }
-      } catch {
-        // Polling hatası — devam et
+      } catch (err) {
+        failures += 1;
+        if (failures >= 5) {
+          stopPolling();
+          toast.error(getApiError(err, "Görsel durumu alınamadı. Sayfayı yenileyip tekrar deneyin."));
+        }
       }
     };
     
     // İlk çağrıyı hızlı yap, sonra her 2 saniyede bir (paralel üretim hızlı)
     setTimeout(poll, 1500);
     pollingRef.current = setInterval(poll, 2000);
-  }, []);
+  }, [toast]);
 
   /* ── Start image generation after variants are ready ─── */
   const startImageGeneration = useCallback(async (generatedVariants: CreativeVariant[]) => {
@@ -385,10 +407,11 @@ export default function KreatifOlusturScreen({
       if (data.job_id) {
         startPolling(data.job_id);
       }
-    } catch {
-      // Görsel üretimi başarısız — sessiz fail, gradient gösterilmeye devam eder
+    } catch (err) {
+      // Varyantlar gradient ile gösterilmeye devam eder, kullanıcı bilgilendirilir
+      toast.error(getApiError(err, "Görseller üretilemedi. Varyant metinleri hazır; görseller için tekrar deneyin."));
     }
-  }, [activeCompany, platforms, startPolling]);
+  }, [activeCompany, platforms, startPolling, toast]);
 
   // Cleanup polling on unmount
   useEffect(() => {

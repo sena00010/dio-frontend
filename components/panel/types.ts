@@ -1,30 +1,33 @@
-export type ScreenKey =
-  | "dashboard"
-  | "reklam"
-  | "seo"
-  | "seo-genel-bakis"
-  | "seo-aksiyonlar"
-  | "seo-siralamalar"
-  | "seo-kelimeler"
-  | "seo-icerik"
-  | "seo-teknik"
-  | "seo-backlink"
-  | "seo-ai"
-  | "sosyal"
-  | "performans"
-  | "yapay-zeka"
-  | "icerik"
-  | "yeni-icerik"
-  | "studio"
-  | "ekip"
-  | "takvim"
-  | "zamanlayici"
-  | "kreatif-studyo"
-  | "urun-gorseli-studyosu"
-  | "kreatif-olustur"
-  | "profil"
-  | "marka-detay"
-  | "ayarlar";
+export const SCREEN_KEYS = [
+  "dashboard",
+  "reklam",
+  "seo",
+  "seo-genel-bakis",
+  "seo-aksiyonlar",
+  "seo-siralamalar",
+  "seo-kelimeler",
+  "seo-icerik",
+  "seo-teknik",
+  "seo-backlink",
+  "seo-ai",
+  "sosyal",
+  "performans",
+  "yapay-zeka",
+  "icerik",
+  "yeni-icerik",
+  "studio",
+  "ekip",
+  "takvim",
+  "zamanlayici",
+  "kreatif-studyo",
+  "urun-gorseli-studyosu",
+  "kreatif-olustur",
+  "profil",
+  "marka-detay",
+  "ayarlar",
+] as const;
+
+export type ScreenKey = (typeof SCREEN_KEYS)[number];
 
 export type NavItem = {
   key: ScreenKey;

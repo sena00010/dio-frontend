@@ -4,6 +4,39 @@ import { useState, useCallback, useEffect, type ReactNode } from "react";
 import { useAuth } from "@/lib/auth-context";
 import api from "@/lib/api";
 import PostPreview, { platformAspectClass } from "./PostPreview";
+import { useToast } from "@/components/ui/Toast";
+import { getApiError } from "@/lib/apiError";
+
+// ── Taslak: stüdyoya gidip geri dönünce sihirbaz kaldığı yerden devam eder ──
+const DRAFT_KEY = "dio:wizard-draft";
+const STEP3_KEY = "dio:wizard-step3:";
+
+function readSession<T>(key: string): T | null {
+  try {
+    const raw = sessionStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeSession(key: string, value: unknown) {
+  try {
+    sessionStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* depolama kapalıysa taslak tutulmaz */
+  }
+}
+
+export function clearWizardDraft() {
+  try {
+    Object.keys(sessionStorage)
+      .filter(k => k === DRAFT_KEY || k.startsWith(STEP3_KEY))
+      .forEach(k => sessionStorage.removeItem(k));
+  } catch {
+    /* yok say */
+  }
+}
 
 // ──────────────────────────────────────────────
 // Types
@@ -89,27 +122,33 @@ export default function NewContentWizard({
   initialTopic?: string;
 }) {
   const { companies, activeCompany } = useAuth();
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  type Draft = { step: 1 | 2 | 3; companyId: number; topic: string; platform: string; campaignType: string; count: number; ideas: AiIdea[]; selectedIdea: AiIdea | null };
+  const [draft] = useState<Draft | null>(() => (initialTopic ? null : readSession<Draft>(DRAFT_KEY)));
+  const [step, setStep] = useState<1 | 2 | 3>(draft?.step || 1);
 
   // Brand selection — defaults to activeCompany
   const [selectedCompanyId, setSelectedCompanyId] = useState<number>(
-    activeCompany?.id || companies[0]?.id || 0
+    draft?.companyId || activeCompany?.id || companies[0]?.id || 0
   );
   const selectedCompany = companies.find((c) => c.id === selectedCompanyId);
 
   // Form state
-  const [topic, setTopic] = useState(initialTopic || "");
-  const [platform, setPlatform] = useState("");
-  const [campaignType, setCampaignType] = useState("");
-  const [count, setCount] = useState(3);
+  const [topic, setTopic] = useState(initialTopic || draft?.topic || "");
+  const [platform, setPlatform] = useState(draft?.platform || "");
+  const [campaignType, setCampaignType] = useState(draft?.campaignType || "");
+  const [count, setCount] = useState(draft?.count || 3);
 
   // AI results
-  const [ideas, setIdeas] = useState<AiIdea[]>([]);
+  const [ideas, setIdeas] = useState<AiIdea[]>(draft?.ideas || []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   // Step 3 — selected idea for image generation
-  const [selectedIdea, setSelectedIdea] = useState<AiIdea | null>(null);
+  const [selectedIdea, setSelectedIdea] = useState<AiIdea | null>(draft?.selectedIdea || null);
+
+  useEffect(() => {
+    writeSession(DRAFT_KEY, { step, companyId: selectedCompanyId, topic, platform, campaignType, count, ideas, selectedIdea });
+  }, [step, selectedCompanyId, topic, platform, campaignType, count, ideas, selectedIdea]);
 
   // ── Generate Ideas ─────────────────────
   const handleGenerate = useCallback(async () => {
@@ -154,7 +193,7 @@ export default function NewContentWizard({
             onClick={() => {
               if (step === 3) { setStep(2); }
               else if (step === 2) { setStep(1); }
-              else { onBack(); }
+              else { clearWizardDraft(); onBack(); }
             }}
             className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 bg-white text-sm text-muted transition hover:bg-zinc-50 hover:border-zinc-300"
             title="Geri"
@@ -518,6 +557,7 @@ function IdeaCard({
   const [description, setDescription] = useState(idea.generated_description);
   const [hashtags, setHashtags] = useState(idea.generated_hashtags);
   const [regenerating, setRegenerating] = useState(false);
+  const toast = useToast();
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"" | "saved" | "error">("");
 
@@ -556,12 +596,12 @@ function IdeaCard({
       setDescription(updated.generated_description);
       setHashtags(updated.generated_hashtags);
       onUpdate(updated);
-    } catch {
-      // silently fail
+    } catch (err) {
+      toast.error(getApiError(err, "Fikir yeniden üretilemedi."));
     } finally {
       setRegenerating(false);
     }
-  }, [idea.id, onUpdate]);
+  }, [idea.id, onUpdate, toast]);
 
   return (
     <article
@@ -681,14 +721,21 @@ function Step3ImageGeneration({
   onApproved: (postId: number) => void;
   onBack: () => void;
 }) {
+  type Step3State = { postId: number | null; images: { url: string; seed: number }[]; selectedImageUrl: string | null };
+  const [saved] = useState(() => readSession<Step3State>(STEP3_KEY + idea.id));
   const [imageCount, setImageCount] = useState(2);
   const [approving, setApproving] = useState(false);
   const [generatingImages, setGeneratingImages] = useState(false);
-  const [generatedImages, setGeneratedImages] = useState<{ url: string; seed: number }[]>([]);
-  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
-  const [postId, setPostId] = useState<number | null>(null);
+  const [generatedImages, setGeneratedImages] = useState<{ url: string; seed: number }[]>(saved?.images || []);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(saved?.selectedImageUrl || null);
+  const [postId, setPostId] = useState<number | null>(saved?.postId || null);
+
+  useEffect(() => {
+    writeSession(STEP3_KEY + idea.id, { postId, images: generatedImages, selectedImageUrl });
+  }, [idea.id, postId, generatedImages, selectedImageUrl]);
   const [genError, setGenError] = useState<string | null>(null);
   const { activeCompany } = useAuth();
+  const toast = useToast();
 
   const platformInfo = PLATFORMS.find((p) => p.value === idea.platform);
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -737,10 +784,10 @@ function Step3ImageGeneration({
         post_id: postId,
         image_url: url,
       });
-    } catch {
-      // silently
+    } catch (err) {
+      toast.error(getApiError(err, "Görsel seçimi kaydedilemedi."));
     }
-  }, [postId]);
+  }, [postId, toast]);
 
   const handleOpenStudio = () => {
     if (postId) {

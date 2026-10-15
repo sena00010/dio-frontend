@@ -1,32 +1,34 @@
 import type { NavGroup } from "./types";
 
+// Menü işe göre gruplanır: önce günlük içerik işi, sonra analiz/reklam, en sonda SEO.
 export const navigationGroups: NavGroup[] = [
   {
-    id: "profil",
-    label: "Profil",
-    icon: "👤",
-    items: [
-      { key: "dashboard", label: "Dashboard", icon: "DB" },
-      { key: "profil", label: "Firma ve Markalar", icon: "FM" },
-      { key: "ekip", label: "Ekip Yönetimi", icon: "EY" },
-    ],
-  },
-  {
-    id: "sosyal-medya",
-    label: "Sosyal Medya",
+    id: "icerik",
+    label: "İçerik",
     icon: "📱",
     items: [
+      { key: "dashboard", label: "Dashboard", icon: "DB" },
       { key: "icerik", label: "İçerik Yönetimi", icon: "İY" },
       { key: "takvim", label: "İçerik Takvimi", icon: "TK" },
-      { key: "zamanlayici", label: "Zamanlama Ayarla", icon: "ZA" },
-      { key: "sosyal", label: "Sosyal Medya", icon: "SM" },
+      { key: "zamanlayici", label: "Zamanlama", icon: "ZA" },
       { key: "kreatif-studyo", label: "Kreatif Stüdyo", icon: "KS" },
       { key: "urun-gorseli-studyosu", label: "Ürün Görseli Stüdyosu", icon: "ÜG" },
     ],
   },
   {
+    id: "analiz",
+    label: "Analiz & Reklam",
+    icon: "📈",
+    items: [
+      { key: "sosyal", label: "Sosyal Medya Analizi", icon: "SM" },
+      { key: "performans", label: "Performans", icon: "PF" },
+      { key: "reklam", label: "Reklam Yönetimi", icon: "RY" },
+      { key: "yapay-zeka", label: "Yapay Zeka Asistanı", icon: "YZ" },
+    ],
+  },
+  {
     id: "seo-analiz",
-    label: "SEO & Analiz",
+    label: "SEO",
     icon: "📊",
     items: [
       { key: "seo-genel-bakis", label: "Genel Bakış", icon: "📊" },
@@ -37,9 +39,15 @@ export const navigationGroups: NavGroup[] = [
       { key: "seo-teknik", label: "Teknik", icon: "⚙️" },
       { key: "seo-backlink", label: "Backlink", icon: "🔗" },
       { key: "seo-ai", label: "AI Görünürlük", icon: "🤖" },
-      { key: "reklam", label: "Reklam Yönetimi", icon: "RY" },
-      { key: "performans", label: "Performans", icon: "PF" },
-      { key: "yapay-zeka", label: "Yapay Zeka", icon: "YZ" },
+    ],
+  },
+  {
+    id: "profil",
+    label: "Hesap",
+    icon: "👤",
+    items: [
+      { key: "profil", label: "Firma ve Markalar", icon: "FM" },
+      { key: "ekip", label: "Ekip Yönetimi", icon: "EY" },
     ],
   },
 ];

@@ -646,6 +646,7 @@ export default function ProductImageStudio() {
         }
       } catch {
         setGenerating(false);
+        showToast("Görsel durumu alınamadı, lütfen tekrar deneyin");
         window.clearInterval(timer);
       }
     }, 2500);

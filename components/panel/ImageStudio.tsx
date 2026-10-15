@@ -381,8 +381,8 @@ export default function ImageStudio({ postId, onBack, onComplete }: { postId: nu
   }, [loading, post, autoGenTriggered, imageUrl, handleGenerate]);
 
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const handleSave = useCallback(async () => {
-    if (!compositeRef.current || !bgDataUrl) return; setSaving(true); setError(""); setSaveSuccess(false);
+  const handleSave = useCallback(async (): Promise<boolean> => {
+    if (!compositeRef.current || !bgDataUrl) return false; setSaving(true); setError(""); setSaveSuccess(false);
     try {
       // 1080 px genişlikte dışa aktar (4:5 → 1080x1350)
       const du = await toPng(compositeRef.current, { pixelRatio: 1080 / CANVAS_SIZE, quality: 1, skipFonts: true, cacheBust: true });
@@ -395,7 +395,8 @@ export default function ImageStudio({ postId, onBack, onComplete }: { postId: nu
       // Sayfada kal, başarılı mesajı göster
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
-    } catch { setError("Kaydetme hatası"); } finally { setSaving(false); }
+      return true;
+    } catch { setError("Kaydetme hatası"); return false; } finally { setSaving(false); }
   }, [bgDataUrl, postId, layers]);
 
   const addLayer = useCallback((type: DesignLayer["type"]) => {
@@ -420,6 +421,7 @@ export default function ImageStudio({ postId, onBack, onComplete }: { postId: nu
         <div className="flex items-center gap-2">
           {error && <span className="text-xs text-red-500">⚠️ {error}</span>}
           {bgDataUrl && <button onClick={handleSave} disabled={saving} className={`rounded-lg px-4 py-1.5 text-xs font-medium text-white transition ${saveSuccess ? "bg-emerald-600 hover:bg-emerald-700" : "bg-zinc-900 hover:bg-zinc-800"} disabled:opacity-50`}>{saving ? "Kaydediliyor…" : saveSuccess ? "✓ Kaydedildi" : "💾 Kaydet"}</button>}
+          {bgDataUrl && <button onClick={async () => { if (await handleSave()) onComplete(); }} disabled={saving} className="rounded-lg bg-gradient-to-r from-brand to-brand-dark px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:shadow-md disabled:opacity-50">Kaydet ve Zamanla →</button>}
         </div>
       </div>
 

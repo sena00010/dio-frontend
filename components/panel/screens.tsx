@@ -5,7 +5,7 @@ import { PanelTitle, SectionCard, StatusPill } from "./ui";
 import type { ScreenKey } from "./types";
 import api from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import NewContentWizard from "./NewContentWizard";
+import NewContentWizard, { clearWizardDraft } from "./NewContentWizard";
 import dynamic from "next/dynamic";
 import { PhotoIcon, BuildingOffice2Icon, SparklesIcon, ShareIcon, PaintBrushIcon, ComputerDesktopIcon, AdjustmentsHorizontalIcon, LinkIcon, LanguageIcon, TagIcon, BuildingLibraryIcon, UserGroupIcon, IdentificationIcon, EyeIcon, MagnifyingGlassIcon, UsersIcon } from "@heroicons/react/24/outline";
 import { CustomSelect, SearchableFontSelect, GenderToggle, SocialMediaManager } from "./AdvancedInputs";
@@ -2949,6 +2949,8 @@ export function ScreenRenderer({
   onBrandDetailNavigate,
   initialTopic,
   onSetInitialTopic,
+  schedulePostId,
+  onScheduleNavigate,
 }: {
   screen: ScreenKey;
   onNavigate?: (key: ScreenKey) => void;
@@ -2960,9 +2962,11 @@ export function ScreenRenderer({
   onBrandDetailNavigate?: (id: number) => void;
   initialTopic?: string;
   onSetInitialTopic?: (topic: string) => void;
+  schedulePostId?: number;
+  onScheduleNavigate?: (postId: number) => void;
 }) {
   if (screen === "dashboard") return <DashboardScreen />;
-  if (screen === "icerik") return <IcerikScreen onNewContent={() => onNavigate?.("yeni-icerik")} onOpenStudio={(postId) => onStudioNavigate?.(postId)} />;
+  if (screen === "icerik") return <IcerikScreen onNewContent={() => { clearWizardDraft(); onNavigate?.("yeni-icerik"); }} onOpenStudio={(postId) => onStudioNavigate?.(postId)} />;
   if (screen === "yeni-icerik")
     return (
       <NewContentWizard
@@ -2976,11 +2980,11 @@ export function ScreenRenderer({
       <ImageStudio
         postId={studioPostId}
         onBack={() => onNavigate?.("yeni-icerik")}
-        onComplete={() => onNavigate?.("dashboard")}
+        onComplete={() => { clearWizardDraft(); onScheduleNavigate?.(studioPostId); }}
       />
     );
   if (screen === "takvim") return <ContentCalendar onOpenStudio={(postId) => onStudioNavigate?.(postId)} />;
-  if (screen === "zamanlayici") return <ZamanlayiciScreen />;
+  if (screen === "zamanlayici") return <ZamanlayiciScreen initialPostId={schedulePostId} />;
   if (screen === "reklam") return <ReklamScreen />;
   if (screen === "ekip") return <EkipScreen />;
   if (screen === "seo") return <SeoScreen />;

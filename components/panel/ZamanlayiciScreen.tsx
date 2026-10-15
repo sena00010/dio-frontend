@@ -272,7 +272,7 @@ function DragOverlayCard({ item }: { item: PendingItem }) {
 // ══════════════════════════════════════════════
 // MAIN COMPONENT
 // ══════════════════════════════════════════════
-export default function ZamanlayiciScreen() {
+export default function ZamanlayiciScreen({ initialPostId }: { initialPostId?: number } = {}) {
   const { activeCompany } = useAuth();
   const today = new Date();
 
@@ -502,6 +502,16 @@ export default function ZamanlayiciScreen() {
   };
 
   // ── Helper to get title from selected ───────
+  // Stüdyodan "Zamanla" ile gelindiyse o gönderiyi seçili aç
+  const [autoSelectedId, setAutoSelectedId] = useState<number | undefined>();
+  useEffect(() => {
+    if (!initialPostId || autoSelectedId === initialPostId || loadingPending) return;
+    const item = pendingItems.find(p => p.type === "post" && p.id === initialPostId);
+    if (item) handlePendingClick(item);
+    setAutoSelectedId(initialPostId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialPostId, pendingItems, loadingPending]);
+
   const getSelectedTitle = () => {
     if (!selectedItem) return "";
     if (selectedType === "pending") return (selectedItem as PendingItem).title;
