@@ -686,19 +686,25 @@ function Step3ImageGeneration({
   const [generatedImages, setGeneratedImages] = useState<{ url: string; seed: number }[]>([]);
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [postId, setPostId] = useState<number | null>(null);
+  const [genError, setGenError] = useState<string | null>(null);
 
   const platformInfo = PLATFORMS.find((p) => p.value === idea.platform);
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
   // ── Approve idea + generate multiple images
   const handleGenerateImages = useCallback(async () => {
-    setApproving(true);
+    setGenError(null);
     setGeneratingImages(false);
     try {
-      const { data: approveData } = await api.post("/api/protected/approve-idea", { id: idea.id });
-      const createdPostId = approveData.post?.id;
-      if (!createdPostId) throw new Error("Post oluşturulamadı");
-      setPostId(createdPostId);
+      // Tekrar denemede aynı post'u kullan, mükerrer post oluşturma
+      let createdPostId = postId;
+      if (!createdPostId) {
+        setApproving(true);
+        const { data: approveData } = await api.post("/api/protected/approve-idea", { id: idea.id });
+        createdPostId = approveData.post?.id;
+        if (!createdPostId) throw new Error("Post oluşturulamadı");
+        setPostId(createdPostId);
+      }
 
       setApproving(false);
       setGeneratingImages(true);
@@ -710,13 +716,15 @@ function Step3ImageGeneration({
 
       const imgs = imgData.images || [];
       setGeneratedImages(imgs);
-    } catch {
-      // silently fail
+      if (imgs.length === 0) setGenError("Görsel üretilemedi. Lütfen tekrar deneyin.");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      setGenError(msg || "Görsel üretilemedi. Lütfen birkaç saniye sonra tekrar deneyin.");
     } finally {
       setApproving(false);
       setGeneratingImages(false);
     }
-  }, [idea.id, imageCount]);
+  }, [idea.id, imageCount, postId]);
 
   // ── User selects an image
   const handleSelectImage = useCallback(async (url: string) => {
@@ -834,6 +842,13 @@ function Step3ImageGeneration({
               </span>
             </div>
           </div>
+
+          {genError && (
+            <div role="alert" className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>{genError}</span>
+            </div>
+          )}
 
           {/* Generate button */}
           <button
