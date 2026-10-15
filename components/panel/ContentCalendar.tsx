@@ -11,6 +11,8 @@ import { format, parse, startOfWeek, getDay } from "date-fns";
 import { tr } from "date-fns/locale/tr";
 import api from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import ContentPlanModal from "./ContentPlanModal";
+import type { AiIdea } from "./NewContentWizard";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
@@ -56,6 +58,15 @@ type ScheduleData = {
   post_status: string;
   status: string;
   scheduled_at: string;
+  idea_id?: number;
+  content_pillar?: string;
+  special_day?: string;
+  idea?: AiIdea;
+};
+
+const PILLAR_LABELS: Record<string, string> = {
+  egitim: "Eğitici", etkilesim: "Etkileşim", sosyal_kanit: "Sosyal Kanıt",
+  sahne_arkasi: "Sahne Arkası", urun: "Ürün / Kampanya", ozel_gun: "Özel Gün",
 };
 
 type CalEvent = {
@@ -69,6 +80,8 @@ type CalEvent = {
   postStatus: string;
   start: Date;
   end: Date;
+  idea?: AiIdea;
+  planLabel?: string;
 };
 
 // ──────────────────────────────────────────────
@@ -76,9 +89,12 @@ type CalEvent = {
 // ──────────────────────────────────────────────
 export default function ContentCalendar({
   onOpenStudio,
+  onPrepareIdea,
 }: {
   onOpenStudio?: (postId: number) => void;
+  onPrepareIdea?: (idea: AiIdea) => void;
 }) {
+  const [planOpen, setPlanOpen] = useState(false);
   const { activeCompany } = useAuth();
   const [events, setEvents] = useState<CalEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,6 +119,8 @@ export default function ContentCalendar({
           postStatus: s.post_status || s.status,
           start: new Date(s.scheduled_at),
           end: new Date(s.scheduled_at),
+          idea: s.post_id ? undefined : s.idea,
+          planLabel: s.special_day || (s.content_pillar ? PILLAR_LABELS[s.content_pillar] : undefined),
         }));
         setEvents(items);
       })
@@ -215,7 +233,21 @@ export default function ContentCalendar({
           <h1 className="text-2xl font-semibold tracking-tight">📅 İçerik Takvimi</h1>
           <p className="subtle text-sm">{activeCompany?.name || ""} markasının içerik planını yönetin</p>
         </div>
+        <button
+          type="button"
+          onClick={() => setPlanOpen(true)}
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand to-brand-dark px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-brand/20 transition hover:-translate-y-0.5 hover:shadow-lg"
+        >
+          ✨ Ayın Planını Oluştur
+        </button>
       </div>
+
+      {planOpen && (
+        <ContentPlanModal
+          onClose={() => { setPlanOpen(false); fetchSchedules(); }}
+          onDone={() => { setPlanOpen(false); fetchSchedules(); }}
+        />
+      )}
 
       {/* Filters + Legend */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -339,6 +371,9 @@ export default function ContentCalendar({
                     {selectedEvent.postStatus === "ready" ? "Hazır" : selectedEvent.postStatus === "approved" ? "Onaylı" : "Taslak"}
                   </span>
                 </div>
+                {selectedEvent.planLabel && (
+                  <span className="mb-1 inline-block rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-bold text-brand">{selectedEvent.planLabel}</span>
+                )}
                 <h3 className="text-sm font-semibold text-foreground">{selectedEvent.title}</h3>
                 <p className="mt-1 text-xs text-muted line-clamp-2 leading-relaxed">{selectedEvent.content}</p>
               </div>
@@ -348,7 +383,15 @@ export default function ContentCalendar({
               </div>
 
               <div className="flex gap-2">
-                {onOpenStudio && (
+                {selectedEvent.idea && onPrepareIdea && (
+                  <button
+                    onClick={() => { const idea = selectedEvent.idea!; setSelectedEvent(null); onPrepareIdea(idea); }}
+                    className="flex-1 rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-white shadow-sm shadow-brand/20 transition hover:shadow-md"
+                  >
+                    ✨ İçeriği Hazırla
+                  </button>
+                )}
+                {onOpenStudio && !!selectedEvent.postId && (
                   <button
                     onClick={() => { setSelectedEvent(null); onOpenStudio(selectedEvent.postId); }}
                     className="flex-1 rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-white shadow-sm shadow-brand/20 transition hover:shadow-md"

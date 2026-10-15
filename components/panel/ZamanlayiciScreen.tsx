@@ -14,6 +14,7 @@ import {
 } from "@dnd-kit/core";
 import api from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useToast } from "@/components/ui/Toast";
 
 // ── Types ─────────────────────────────────────
 type PendingItem = {
@@ -274,6 +275,7 @@ function DragOverlayCard({ item }: { item: PendingItem }) {
 // ══════════════════════════════════════════════
 export default function ZamanlayiciScreen({ initialPostId }: { initialPostId?: number } = {}) {
   const { activeCompany } = useAuth();
+  const toast = useToast();
   const today = new Date();
 
   // ── State ───────────────────────────────────
@@ -508,6 +510,7 @@ export default function ZamanlayiciScreen({ initialPostId }: { initialPostId?: n
     if (!initialPostId || autoSelectedId === initialPostId || loadingPending) return;
     const item = pendingItems.find(p => p.type === "post" && p.id === initialPostId);
     if (item) handlePendingClick(item);
+    else toast.info("Bu gönderi takvimde zaten planlı. Tarihini takvimden sürükleyerek değiştirebilirsiniz.");
     setAutoSelectedId(initialPostId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialPostId, pendingItems, loadingPending]);

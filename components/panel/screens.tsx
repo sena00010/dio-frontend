@@ -5,7 +5,7 @@ import { PanelTitle, SectionCard, StatusPill } from "./ui";
 import type { ScreenKey } from "./types";
 import api from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import NewContentWizard, { clearWizardDraft } from "./NewContentWizard";
+import NewContentWizard, { clearWizardDraft, startWizardWithIdea } from "./NewContentWizard";
 import dynamic from "next/dynamic";
 import { PhotoIcon, BuildingOffice2Icon, SparklesIcon, ShareIcon, PaintBrushIcon, ComputerDesktopIcon, AdjustmentsHorizontalIcon, LinkIcon, LanguageIcon, TagIcon, BuildingLibraryIcon, UserGroupIcon, IdentificationIcon, EyeIcon, MagnifyingGlassIcon, UsersIcon } from "@heroicons/react/24/outline";
 import { CustomSelect, SearchableFontSelect, GenderToggle, SocialMediaManager } from "./AdvancedInputs";
@@ -2983,7 +2983,13 @@ export function ScreenRenderer({
         onComplete={() => { clearWizardDraft(); onScheduleNavigate?.(studioPostId); }}
       />
     );
-  if (screen === "takvim") return <ContentCalendar onOpenStudio={(postId) => onStudioNavigate?.(postId)} />;
+  if (screen === "takvim")
+    return (
+      <ContentCalendar
+        onOpenStudio={(postId) => onStudioNavigate?.(postId)}
+        onPrepareIdea={(idea) => { startWizardWithIdea(idea); onNavigate?.("yeni-icerik"); }}
+      />
+    );
   if (screen === "zamanlayici") return <ZamanlayiciScreen initialPostId={schedulePostId} />;
   if (screen === "reklam") return <ReklamScreen />;
   if (screen === "ekip") return <EkipScreen />;

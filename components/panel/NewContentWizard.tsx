@@ -28,6 +28,15 @@ function writeSession(key: string, value: unknown) {
   }
 }
 
+// Takvimdeki planlı bir fikirden doğrudan görsel üretim adımını açar
+export function startWizardWithIdea(idea: AiIdea) {
+  clearWizardDraft();
+  writeSession(DRAFT_KEY, {
+    step: 3, companyId: idea.company_id, topic: idea.user_input_topic, platform: idea.platform,
+    campaignType: idea.campaign_type, count: 1, ideas: [idea], selectedIdea: idea,
+  });
+}
+
 export function clearWizardDraft() {
   try {
     Object.keys(sessionStorage)
@@ -42,7 +51,7 @@ export function clearWizardDraft() {
 // Types
 // ──────────────────────────────────────────────
 
-type AiIdea = {
+export type AiIdea = {
   id: number;
   company_id: number;
   user_input_topic: string;
