@@ -124,10 +124,12 @@ const CAMPAIGN_TYPES = [
 export default function NewContentWizard({
   onBack,
   onApproved,
+  onCarousel,
   initialTopic,
 }: {
   onBack: () => void;
   onApproved: (postId: number) => void;
+  onCarousel?: (postId: number) => void;
   initialTopic?: string;
 }) {
   const { companies, activeCompany } = useAuth();
@@ -307,6 +309,7 @@ export default function NewContentWizard({
         <Step3ImageGeneration
           idea={selectedIdea}
           onApproved={onApproved}
+          onCarousel={onCarousel}
           onBack={() => setStep(2)}
         />
       )}
@@ -725,14 +728,18 @@ function IdeaCard({
 function Step3ImageGeneration({
   idea,
   onApproved,
+  onCarousel,
 }: {
   idea: AiIdea;
   onApproved: (postId: number) => void;
+  onCarousel?: (postId: number) => void;
   onBack: () => void;
 }) {
   type Step3State = { postId: number | null; images: { url: string; seed: number }[]; selectedImageUrl: string | null };
   const [saved] = useState(() => readSession<Step3State>(STEP3_KEY + idea.id));
   const [imageCount, setImageCount] = useState(2);
+  const [format, setFormat] = useState<"single" | "carousel">("single");
+  const [slideCount, setSlideCount] = useState(5);
   const [approving, setApproving] = useState(false);
   const [generatingImages, setGeneratingImages] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<{ url: string; seed: number }[]>(saved?.images || []);
@@ -783,6 +790,30 @@ function Step3ImageGeneration({
       setGeneratingImages(false);
     }
   }, [idea.id, imageCount, postId]);
+
+  // ── Carousel: postu oluştur, slaytları üret, düzenleyiciyi aç
+  const handleCreateCarousel = useCallback(async () => {
+    setGenError(null);
+    try {
+      let createdPostId = postId;
+      if (!createdPostId) {
+        setApproving(true);
+        const { data: approveData } = await api.post("/api/protected/approve-idea", { id: idea.id });
+        createdPostId = approveData.post?.id;
+        if (!createdPostId) throw new Error("Post oluşturulamadı");
+        setPostId(createdPostId);
+      }
+      setApproving(false);
+      setGeneratingImages(true);
+      await api.post(`/api/protected/posts/${createdPostId}/carousel`, { slide_count: slideCount });
+      onCarousel?.(createdPostId);
+    } catch (err) {
+      setGenError(getApiError(err, "Carousel oluşturulamadı. Lütfen tekrar deneyin."));
+    } finally {
+      setApproving(false);
+      setGeneratingImages(false);
+    }
+  }, [idea.id, postId, slideCount, onCarousel]);
 
   // ── User selects an image
   const handleSelectImage = useCallback(async (url: string) => {
@@ -840,6 +871,39 @@ function Step3ImageGeneration({
       {/* ═══ IMAGE COUNT SELECTOR — Before generation ═══ */}
       {!isGenerating && !hasImages && (
         <div className="space-y-4">
+          {/* Format seçimi */}
+          {onCarousel && (
+            <div className="mx-auto flex w-full max-w-xs rounded-xl bg-zinc-100 p-1">
+              {([["single", "Tek Görsel"], ["carousel", "Carousel"]] as const).map(([v, label]) => (
+                <button key={v} type="button" onClick={() => setFormat(v)}
+                  className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${format === v ? "bg-white text-foreground shadow-sm" : "text-muted"}`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {format === "carousel" ? (
+            <div className="card space-y-4 p-4 text-center md:p-5">
+              <div>
+                <h3 className="mb-0.5 text-sm font-bold text-foreground">Kaç Slaytlık Carousel?</h3>
+                <p className="text-xs text-muted">Kapak (AI görsel) → bilgi slaytları → harekete geçirici son slayt, marka renklerinizle</p>
+              </div>
+              <div className="flex justify-center gap-1.5">
+                {[4, 5, 6, 7].map(n => (
+                  <button key={n} type="button" onClick={() => setSlideCount(n)}
+                    className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${n === slideCount ? "border-brand bg-brand/5 text-brand" : "border-zinc-200"}`}>
+                    {n} slayt
+                  </button>
+                ))}
+              </div>
+              <button type="button" onClick={handleCreateCarousel}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand to-brand-dark text-white px-6 py-3.5 text-sm font-bold shadow-lg shadow-brand/25 transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5">
+                {slideCount} Slaytlık Carousel Oluştur
+              </button>
+              {genError && <p role="alert" className="text-xs text-red-600">{genError}</p>}
+            </div>
+          ) : (<>
           {/* Image count cards */}
           <div className="card p-4 md:p-5">
             <div className="text-center mb-4">
@@ -916,6 +980,7 @@ function Step3ImageGeneration({
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
             {imageCount} Görsel Üret
           </button>
+          </>)}
 
           {/* Collapsible content details */}
           <details className="card overflow-hidden group">
@@ -955,7 +1020,7 @@ function Step3ImageGeneration({
 
             <div className="text-center">
               <h3 className="text-base font-bold text-foreground mb-1">
-                {approving ? "İçerik Onaylanıyor..." : `${imageCount} Görsel Üretiliyor...`}
+                {approving ? "İçerik Onaylanıyor..." : format === "carousel" ? `${slideCount} slaytlık carousel hazırlanıyor... (~20 sn)` : `${imageCount} Görsel Üretiliyor...`}
               </h3>
               <p className="text-xs text-muted max-w-sm">
                 {approving

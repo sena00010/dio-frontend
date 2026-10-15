@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 // Gönderinin platformda nasıl görüneceğini gösteren önizleme (Instagram / LinkedIn / genel feed)
 
@@ -19,7 +19,29 @@ type PostPreviewProps = {
   imageUrl?: string | null;
   caption: string;
   hashtags?: string;
+  // Carousel: her slayt 378 px genişlikte hazır bir düğüm (görsel yerine gösterilir)
+  slides?: ReactNode[];
 };
+
+function CarouselMedia({ slides }: { slides: ReactNode[] }) {
+  const [idx, setIdx] = useState(0);
+  const go = (d: number) => setIdx(i => Math.min(slides.length - 1, Math.max(0, i + d)));
+  return (
+    <div className="relative">
+      <div className="overflow-hidden">{slides[idx]}</div>
+      <span className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-semibold text-white">{idx + 1}/{slides.length}</span>
+      {idx > 0 && (
+        <button type="button" onClick={() => go(-1)} aria-label="Önceki slayt" className="absolute left-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-sm shadow">‹</button>
+      )}
+      {idx < slides.length - 1 && (
+        <button type="button" onClick={() => go(1)} aria-label="Sonraki slayt" className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-sm shadow">›</button>
+      )}
+      <div className="flex justify-center gap-1 py-2">
+        {slides.map((_, i) => <span key={i} className={`h-1.5 w-1.5 rounded-full ${i === idx ? "bg-[#0095f6]" : "bg-zinc-300"}`} />)}
+      </div>
+    </div>
+  );
+}
 
 function Avatar({ brandName, logoUrl, size }: { brandName: string; logoUrl?: string; size: number }) {
   if (logoUrl) {
@@ -54,11 +76,11 @@ function Caption({ caption, hashtags, collapsedLines }: { caption: string; hasht
   );
 }
 
-export default function PostPreview({ platform, brandName, logoUrl, imageUrl, caption, hashtags }: PostPreviewProps) {
+export default function PostPreview({ platform, brandName, logoUrl, imageUrl, caption, hashtags, slides }: PostPreviewProps) {
   const trMap: Record<string, string> = { ç: "c", ğ: "g", ı: "i", ö: "o", ş: "s", ü: "u" };
   const handle = brandName.toLocaleLowerCase("tr-TR").replace(/[çğıöşü]/g, ch => trMap[ch]).replace(/[^a-z0-9._]+/g, "");
   const isLinkedIn = platform.toLowerCase() === "linkedin";
-  const media = (
+  const media = slides && slides.length > 0 ? <CarouselMedia slides={slides} /> : (
     <div className={`${platformAspectClass(platform)} w-full bg-zinc-100`}>
       {imageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element

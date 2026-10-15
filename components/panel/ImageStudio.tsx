@@ -7,7 +7,7 @@ import { toPng } from "html-to-image";
 // ── Types ──
 type PostData = {
   id: number; company_id: number; title: string; content: string; platform: string;
-  hashtags: string; image_prompt: string; image_url: string; status: string;
+  hashtags: string; image_prompt: string; image_url: string; status: string; format?: string;
   suggested_layout: string; suggested_font: string; content_items: string; design_layers: string;
   logo_position?: string;
 };
@@ -185,7 +185,7 @@ function getGradientForLayers(layers: DesignLayer[], opacity: number): React.CSS
 }
 
 // ── Component ──
-export default function ImageStudio({ postId, onBack, onComplete }: { postId: number; onBack: () => void; onComplete: () => void }) {
+export default function ImageStudio({ postId, onBack, onComplete, onOpenCarousel }: { postId: number; onBack: () => void; onComplete: () => void; onOpenCarousel?: () => void }) {
   const [post, setPost] = useState<PostData | null>(null);
   const [company, setCompany] = useState<CompanyData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -272,6 +272,8 @@ export default function ImageStudio({ postId, onBack, onComplete }: { postId: nu
       try {
         const { data } = await api.get(`/api/protected/posts/${postId}`);
         const p = data.post, c = data.company;
+        // Carousel gönderileri kendi düzenleyicisinde açılır
+        if (p.format === "carousel" && onOpenCarousel) { onOpenCarousel(); return; }
         setPost(p); setCompany(c); setCustomPrompt(p.image_prompt || "");
         if (p.image_url) setImageUrl(p.image_url);
         let parsed: DesignLayer[] = [];

@@ -12,6 +12,7 @@ import { CustomSelect, SearchableFontSelect, GenderToggle, SocialMediaManager } 
 import { useMarketingData } from "./useMarketingData";
 
 const ImageStudio = dynamic(() => import("./ImageStudio"), { ssr: false });
+const CarouselEditor = dynamic(() => import("./carousel/CarouselEditor"), { ssr: false });
 const ContentCalendar = dynamic(() => import("./ContentCalendar"), { ssr: false });
 const KreatifStudyoScreen = dynamic(() => import("./KreatifStudyo"), { ssr: false });
 const KreatifOlusturScreen = dynamic(() => import("./KreatifOlustur"), { ssr: false });
@@ -2951,6 +2952,7 @@ export function ScreenRenderer({
   onSetInitialTopic,
   schedulePostId,
   onScheduleNavigate,
+  onCarouselNavigate,
 }: {
   screen: ScreenKey;
   onNavigate?: (key: ScreenKey) => void;
@@ -2964,6 +2966,7 @@ export function ScreenRenderer({
   onSetInitialTopic?: (topic: string) => void;
   schedulePostId?: number;
   onScheduleNavigate?: (postId: number) => void;
+  onCarouselNavigate?: (postId: number) => void;
 }) {
   if (screen === "dashboard") return <DashboardScreen />;
   if (screen === "icerik") return <IcerikScreen onNewContent={() => { clearWizardDraft(); onNavigate?.("yeni-icerik"); }} onOpenStudio={(postId) => onStudioNavigate?.(postId)} />;
@@ -2972,12 +2975,22 @@ export function ScreenRenderer({
       <NewContentWizard
         onBack={() => onNavigate?.("icerik")}
         onApproved={(postId) => onStudioNavigate?.(postId)}
+        onCarousel={(postId) => onCarouselNavigate?.(postId)}
         initialTopic={initialTopic}
       />
     );
   if (screen === "studio" && studioPostId)
     return (
       <ImageStudio
+        postId={studioPostId}
+        onBack={() => onNavigate?.("yeni-icerik")}
+        onComplete={() => { clearWizardDraft(); onScheduleNavigate?.(studioPostId); }}
+        onOpenCarousel={() => onCarouselNavigate?.(studioPostId)}
+      />
+    );
+  if (screen === "carousel" && studioPostId)
+    return (
+      <CarouselEditor
         postId={studioPostId}
         onBack={() => onNavigate?.("yeni-icerik")}
         onComplete={() => { clearWizardDraft(); onScheduleNavigate?.(studioPostId); }}

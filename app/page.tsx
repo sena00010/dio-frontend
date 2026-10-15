@@ -71,7 +71,7 @@ function parseHash(): { screen: ScreenKey; param?: number } {
 function getScreenFromHash(): ScreenKey {
   const { screen, param } = parseHash();
   // Parametre gerektiren ekranlar parametresiz açılırsa üst ekrana dön
-  if (screen === "studio" && !param) return "icerik";
+  if ((screen === "studio" || screen === "carousel") && !param) return "icerik";
   if (screen === "marka-detay" && !param) return "profil";
   return screen;
 }
@@ -95,7 +95,7 @@ export default function Home() {
   const [active, setActiveRaw] = useState<ScreenKey>(() => getScreenFromHash());
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [brandMenuOpen, setBrandMenuOpen] = useState(false);
-  const [studioPostId, setStudioPostId] = useState<number | undefined>(() => (parseHash().screen === "studio" ? parseHash().param : undefined));
+  const [studioPostId, setStudioPostId] = useState<number | undefined>(() => (["studio", "carousel"].includes(parseHash().screen) ? parseHash().param : undefined));
   const [schedulePostId, setSchedulePostId] = useState<number | undefined>(() => (parseHash().screen === "zamanlayici" ? parseHash().param : undefined));
   const [kreatifTopics, setKreatifTopics] = useState<string[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -114,7 +114,7 @@ export default function Home() {
   useEffect(() => {
     const onHashChange = () => {
       const { screen, param } = parseHash();
-      if (screen === "studio" && param) setStudioPostId(param);
+      if ((screen === "studio" || screen === "carousel") && param) setStudioPostId(param);
       if (screen === "marka-detay" && param) setBrandDetailId(param);
       setSchedulePostId(screen === "zamanlayici" ? param : undefined);
       setActiveRaw(getScreenFromHash());
@@ -502,6 +502,10 @@ export default function Home() {
               onStudioNavigate={(postId) => {
                 setStudioPostId(postId);
                 setActive("studio", postId);
+              }}
+              onCarouselNavigate={(postId: number) => {
+                setStudioPostId(postId);
+                setActive("carousel", postId);
               }}
               schedulePostId={schedulePostId}
               onScheduleNavigate={(postId: number) => {
