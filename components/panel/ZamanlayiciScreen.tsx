@@ -148,7 +148,7 @@ function DraggableCard({
       onClick={onClick}
       className={`group relative flex items-start gap-3 rounded-xl border p-3 cursor-grab active:cursor-grabbing transition-all duration-200 ${
         isDragging ? "opacity-30 scale-95" : "hover:shadow-md hover:border-zinc-300"
-      } ${isSelected ? "border-[#E73932] bg-[#FFF5F3] ring-2 ring-[#E73932]/10" : "border-zinc-200 bg-white"}`}
+      } ${isSelected ? "border-brand bg-brand-soft ring-2 ring-brand/10" : "border-zinc-200 bg-white"}`}
     >
       {/* Number badge */}
       <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-zinc-900 text-[11px] font-bold text-white">
@@ -215,13 +215,13 @@ function DroppableDay({
       ref={setNodeRef}
       className={`relative min-h-[100px] border-b border-r p-1.5 transition-colors duration-150 ${
         !isCurrentMonth ? "bg-zinc-50/50" : "bg-white"
-      } ${isOver ? "bg-[#FFF5F3] ring-2 ring-inset ring-[#E73932]/30" : ""} ${
+      } ${isOver ? "bg-brand-soft ring-2 ring-inset ring-brand/30" : ""} ${
         isToday ? "bg-orange-50/60" : ""
       }`}
     >
       <span
         className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[12px] font-semibold ${
-          isToday ? "bg-[#E73932] text-white" : isCurrentMonth ? "text-foreground" : "text-zinc-300"
+          isToday ? "bg-brand text-white" : isCurrentMonth ? "text-foreground" : "text-zinc-300"
         }`}
       >
         {dateObj.getDate()}
@@ -247,7 +247,7 @@ function DroppableDay({
           );
         })}
         {pills.length > 3 && (
-          <span className="block text-center text-[9px] font-bold text-[#E73932]">+{pills.length - 3} daha</span>
+          <span className="block text-center text-[9px] font-bold text-brand">+{pills.length - 3} daha</span>
         )}
       </div>
     </div>
@@ -258,8 +258,8 @@ function DroppableDay({
 function DragOverlayCard({ item }: { item: PendingItem }) {
   const icon = PLATFORM_ICONS[item.platform] || "📝";
   return (
-    <div className="flex items-center gap-2 rounded-xl border-2 border-[#E73932] bg-white p-3 shadow-2xl w-[260px]">
-      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#FFF5F3] text-lg">
+    <div className="flex items-center gap-2 rounded-xl border-2 border-brand bg-white p-3 shadow-2xl w-[260px]">
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-brand-soft text-lg">
         {icon}
       </div>
       <div className="flex-1 min-w-0">
@@ -537,7 +537,7 @@ export default function ZamanlayiciScreen({ initialPostId }: { initialPostId?: n
         <div className="flex items-center justify-between border-b border-zinc-200 bg-white px-4 py-2.5 flex-shrink-0">
           {/* Left nav links */}
           <div className="flex items-center gap-6 text-[13px] text-muted">
-            <span className="text-foreground font-semibold cursor-pointer border-b-2 border-[#E73932] pb-1">Zamanlama Ayarla</span>
+            <span className="text-foreground font-semibold cursor-pointer border-b-2 border-brand pb-1">Zamanlama Ayarla</span>
           </div>
 
           {/* Center info */}
@@ -555,7 +555,7 @@ export default function ZamanlayiciScreen({ initialPostId }: { initialPostId?: n
             <button className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-[12px] font-medium text-foreground transition hover:bg-zinc-50">
               Taslak Kaydet
             </button>
-            <button className="rounded-lg bg-[#E73932] px-4 py-1.5 text-[12px] font-semibold text-white shadow-sm shadow-[#E73932]/20 transition hover:bg-[#d32f2f] hover:shadow-md flex items-center gap-1.5">
+            <button className="rounded-lg bg-brand px-4 py-1.5 text-[12px] font-semibold text-white shadow-sm shadow-brand/20 transition hover:bg-brand-dark hover:shadow-md flex items-center gap-1.5">
               Tümünü Zamanla →
             </button>
           </div>
@@ -592,7 +592,7 @@ export default function ZamanlayiciScreen({ initialPostId }: { initialPostId?: n
             <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2 sidebar-nav">
               {loadingPending ? (
                 <div className="flex justify-center py-10">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-200 border-t-[#E73932]" />
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-200 border-t-brand" />
                 </div>
               ) : pendingItems.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-10 text-center">
@@ -759,7 +759,7 @@ export default function ZamanlayiciScreen({ initialPostId }: { initialPostId?: n
                           />
                           <label
                             htmlFor="detail-date-input"
-                            className="cursor-pointer text-[11px] font-semibold text-[#E73932] hover:underline"
+                            className="cursor-pointer text-[11px] font-semibold text-brand hover:underline"
                           >
                             Değiştir
                           </label>
@@ -783,7 +783,7 @@ export default function ZamanlayiciScreen({ initialPostId }: { initialPostId?: n
                           />
                           <label
                             htmlFor="detail-time-input"
-                            className="cursor-pointer text-[11px] font-semibold text-[#E73932] hover:underline"
+                            className="cursor-pointer text-[11px] font-semibold text-brand hover:underline"
                           >
                             Değiştir
                           </label>
@@ -798,7 +798,7 @@ export default function ZamanlayiciScreen({ initialPostId }: { initialPostId?: n
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-[12px] font-semibold text-foreground">Bir kez</span>
-                          <span className="text-[11px] font-semibold text-[#E73932] cursor-pointer hover:underline">Değiştir</span>
+                          <span className="text-[11px] font-semibold text-brand cursor-pointer hover:underline">Değiştir</span>
                         </div>
                       </div>
                     </div>
@@ -824,7 +824,7 @@ export default function ZamanlayiciScreen({ initialPostId }: { initialPostId?: n
                             %{h.pct}
                           </span>
                           {h.label && (
-                            <span className="rounded bg-[#FFF5F3] px-1.5 py-0.5 text-[9px] font-bold text-[#E73932]">
+                            <span className="rounded bg-brand-soft px-1.5 py-0.5 text-[9px] font-bold text-brand">
                               {h.label}
                             </span>
                           )}
@@ -840,7 +840,7 @@ export default function ZamanlayiciScreen({ initialPostId }: { initialPostId?: n
                       {/* Instagram */}
                       <div
                         className={`flex items-center justify-between rounded-xl border-2 p-3 transition-all cursor-pointer ${
-                          detailPlatforms.instagram ? "border-[#E73932] bg-[#FFF5F3]" : "border-zinc-200 bg-white"
+                          detailPlatforms.instagram ? "border-brand bg-brand-soft" : "border-zinc-200 bg-white"
                         }`}
                         onClick={() => setDetailPlatforms((p) => ({ ...p, instagram: !p.instagram }))}
                       >
@@ -853,7 +853,7 @@ export default function ZamanlayiciScreen({ initialPostId }: { initialPostId?: n
                         </div>
                         <div
                           className={`relative h-6 w-11 rounded-full transition-colors duration-200 ${
-                            detailPlatforms.instagram ? "bg-[#E73932]" : "bg-zinc-300"
+                            detailPlatforms.instagram ? "bg-brand" : "bg-zinc-300"
                           }`}
                         >
                           <div
@@ -867,7 +867,7 @@ export default function ZamanlayiciScreen({ initialPostId }: { initialPostId?: n
                       {/* TikTok */}
                       <div
                         className={`flex items-center justify-between rounded-xl border-2 p-3 transition-all cursor-pointer ${
-                          detailPlatforms.tiktok ? "border-[#E73932] bg-[#FFF5F3]" : "border-zinc-200 bg-white"
+                          detailPlatforms.tiktok ? "border-brand bg-brand-soft" : "border-zinc-200 bg-white"
                         }`}
                         onClick={() => setDetailPlatforms((p) => ({ ...p, tiktok: !p.tiktok }))}
                       >
@@ -880,7 +880,7 @@ export default function ZamanlayiciScreen({ initialPostId }: { initialPostId?: n
                         </div>
                         <div
                           className={`relative h-6 w-11 rounded-full transition-colors duration-200 ${
-                            detailPlatforms.tiktok ? "bg-[#E73932]" : "bg-zinc-300"
+                            detailPlatforms.tiktok ? "bg-brand" : "bg-zinc-300"
                           }`}
                         >
                           <div
@@ -911,7 +911,7 @@ export default function ZamanlayiciScreen({ initialPostId }: { initialPostId?: n
                   <button
                     onClick={handleSave}
                     disabled={saving || !detailDate || saveResult?.type === "success"}
-                    className="w-full rounded-xl bg-[#E73932] py-3 text-[13px] font-bold text-white shadow-sm shadow-[#E73932]/20 transition hover:bg-[#d32f2f] hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full rounded-xl bg-brand py-3 text-[13px] font-bold text-white shadow-sm shadow-brand/20 transition hover:bg-brand-dark hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {saving ? (
                       <>

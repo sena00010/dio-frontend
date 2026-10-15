@@ -117,7 +117,7 @@ export default function SeoAIVisibility({ activeProjectId }: Props) {
   if (loading && !data) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-[#E73932]" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-brand" />
         <span className="mt-4 text-sm font-bold text-zinc-700">AI Görünürlük Yükleniyor...</span>
       </div>
     );
@@ -129,7 +129,7 @@ export default function SeoAIVisibility({ activeProjectId }: Props) {
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <div className="relative mb-6">
           <div className="absolute inset-0 animate-ping rounded-full bg-red-100 opacity-75" />
-          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#E73932] to-[#ff6b65] text-2xl shadow-xl shadow-red-200">
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-brand to-[#ff6b65] text-2xl shadow-xl shadow-red-200">
             🤖
           </div>
         </div>
@@ -140,9 +140,9 @@ export default function SeoAIVisibility({ activeProjectId }: Props) {
         
         {/* Progress Animasyonu */}
         <div className="mt-8 w-64 overflow-hidden rounded-full bg-zinc-100 h-2 relative">
-          <div className="absolute left-0 top-0 h-full w-full animate-[progress_2s_ease-in-out_infinite] bg-[#E73932] rounded-full" style={{ left: '-100%' }} />
+          <div className="absolute left-0 top-0 h-full w-full animate-[progress_2s_ease-in-out_infinite] bg-brand rounded-full" style={{ left: '-100%' }} />
         </div>
-        <p className="mt-3 text-[10px] uppercase font-bold tracking-widest text-[#E73932] animate-pulse">Lütfen Bekleyin</p>
+        <p className="mt-3 text-[10px] uppercase font-bold tracking-widest text-brand animate-pulse">Lütfen Bekleyin</p>
 
         <style dangerouslySetInnerHTML={{__html: `
           @keyframes progress {
@@ -167,7 +167,7 @@ export default function SeoAIVisibility({ activeProjectId }: Props) {
           AI BANNER — Kırmızı Uyarı
           ════════════════════════════════════════ */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#2A1215] via-[#1F1F1F] to-[#1A1A1A] px-6 py-5 text-white">
-        <div className="absolute left-0 top-0 h-full w-1 bg-[#E73932]" />
+        <div className="absolute left-0 top-0 h-full w-1 bg-brand" />
         <div className="flex items-start gap-4">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-500/20 text-base">🚨</div>
           <div className="flex-1">
@@ -248,10 +248,10 @@ export default function SeoAIVisibility({ activeProjectId }: Props) {
         <div className="space-y-3">
           {competitors.map((comp, i) => {
             const pct = Math.min((comp.mentions / maxMentions) * 100, 100);
-            const colors = ["bg-blue-500", "bg-purple-500", "bg-[#E73932]"];
+            const colors = ["bg-blue-500", "bg-purple-500", "bg-brand"];
             return (
               <div key={i} className="flex items-center gap-3">
-                <span className={`w-14 text-[11px] font-bold ${comp.is_self ? "text-[#E73932]" : "text-zinc-600"}`}>
+                <span className={`w-14 text-[11px] font-bold ${comp.is_self ? "text-brand" : "text-zinc-600"}`}>
                   {comp.name}
                 </span>
                 <div className="flex-1 h-5 bg-zinc-100 rounded-full overflow-hidden">
@@ -270,9 +270,9 @@ export default function SeoAIVisibility({ activeProjectId }: Props) {
           ════════════════════════════════════════ */}
       <div className="grid grid-cols-3 gap-3">
         {actions.map((action, i) => {
-          const borderColors = ["border-t-[#E73932]", "border-t-orange-400", "border-t-emerald-500"];
+          const borderColors = ["border-t-brand", "border-t-orange-400", "border-t-emerald-500"];
           const impactColors = ["text-emerald-500", "text-emerald-500", "text-zinc-500"];
-          const btnColors = ["bg-[#E73932] hover:bg-[#D32F2F]", "bg-orange-400 hover:bg-orange-500", "bg-emerald-500 hover:bg-emerald-600"];
+          const btnColors = ["bg-brand hover:bg-brand-dark", "bg-orange-400 hover:bg-orange-500", "bg-emerald-500 hover:bg-emerald-600"];
           return (
             <div key={i} className={`rounded-xl border border-zinc-200 border-t-4 ${borderColors[i]} bg-white p-5 flex flex-col`}>
               <div className="flex items-center gap-2 mb-3">

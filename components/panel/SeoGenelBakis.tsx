@@ -243,7 +243,7 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
             api.get(`/api/seo/auth/google/login?company_id=${activeCompany?.id}`)
               .then(({ data }) => { if (data.url) window.location.href = data.url; });
           }}
-          className="mt-6 rounded-xl bg-[#E73932] px-6 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-[#D32F2F]"
+          className="mt-6 rounded-xl bg-brand px-6 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-brand-dark"
         >
           Google Search Console Bağla
         </button>
@@ -307,9 +307,9 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
                   <button
                     key={p.id}
                     onClick={() => { setActiveProjectId(p.id); setShowProjectDropdown(false); }}
-                    className={`flex w-full items-center gap-2 px-3 py-2 text-left text-xs transition hover:bg-zinc-50 ${activeProjectId === p.id ? "font-bold text-[#E73932]" : "text-zinc-700"}`}
+                    className={`flex w-full items-center gap-2 px-3 py-2 text-left text-xs transition hover:bg-zinc-50 ${activeProjectId === p.id ? "font-bold text-brand" : "text-zinc-700"}`}
                   >
-                    <span className={`h-1.5 w-1.5 rounded-full ${activeProjectId === p.id ? "bg-[#E73932]" : "bg-zinc-300"}`} />
+                    <span className={`h-1.5 w-1.5 rounded-full ${activeProjectId === p.id ? "bg-brand" : "bg-zinc-300"}`} />
                     {p.display_name}
                   </button>
                 ))}
@@ -341,7 +341,7 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
           <button onClick={handleDisconnect} className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 shadow-sm transition hover:bg-red-50">
             Bağlantıyı Kes
           </button>
-          <button className="rounded-lg bg-[#E73932] px-4 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#D32F2F]">
+          <button className="rounded-lg bg-brand px-4 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-brand-dark">
             ● Rapor
           </button>
         </div>
@@ -352,7 +352,7 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
         {SUB_TABS.map((tab) => (
           <button key={tab.key} onClick={() => setActiveSubTab(tab.key)}
             className={`relative flex items-center gap-1.5 whitespace-nowrap px-3 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-[12px] font-semibold transition ${
-              activeSubTab === tab.key ? "border-b-2 border-[#E73932] text-[#E73932]" : "text-zinc-500 hover:text-zinc-700"
+              activeSubTab === tab.key ? "border-b-2 border-brand text-brand" : "text-zinc-500 hover:text-zinc-700"
             }`}
           >
             <span className="text-[11px]">{tab.icon}</span> {tab.label}
@@ -392,7 +392,7 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
           {/* LOADING STATE */}
           {loading && (
             <div className="flex items-center justify-center py-20">
-              <div className="h-8 w-8 animate-spin rounded-full border-3 border-zinc-200 border-t-[#E73932]" />
+              <div className="h-8 w-8 animate-spin rounded-full border-3 border-zinc-200 border-t-brand" />
               <span className="ml-3 text-sm text-zinc-500">Veriler yükleniyor...</span>
             </div>
           )}
@@ -404,14 +404,14 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
               ════════════════════════════════════════ */}
           {overview.ai_summary && (
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#2A1215] via-[#1F1F1F] to-[#1A1A1A] px-6 py-5 text-white">
-              <div className="absolute left-0 top-0 h-full w-1 bg-[#E73932]" />
+              <div className="absolute left-0 top-0 h-full w-1 bg-brand" />
               <div className="flex items-start gap-4">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 text-base">🤖</div>
                 <div className="flex-1">
                   <h3 className="text-sm font-bold">Son {PERIODS.find(p => p.key === selectedPeriod)?.label || "28G"} özeti — GSC verilerinden</h3>
                   <p className="mt-2 text-[12px] leading-5 text-zinc-300">{overview.ai_summary}</p>
                   <div className="mt-3 flex gap-2">
-                    <button className="rounded-lg bg-[#E73932] px-3.5 py-1.5 text-[11px] font-bold text-white shadow-sm">
+                    <button className="rounded-lg bg-brand px-3.5 py-1.5 text-[11px] font-bold text-white shadow-sm">
                       Aksiyonları Gör →
                     </button>
                   </div>
@@ -653,10 +653,10 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
                   <div className="space-y-2.5">
                     {ctrOpps.map((item, i) => (
                       <div key={i} className="flex items-center justify-between rounded-lg border border-zinc-100 px-3 py-2.5 transition hover:border-zinc-200 hover:bg-zinc-50/50">
-                        <div><p className="text-[12px] font-bold text-[#E73932]">{item.query}</p><p className="mt-0.5 text-[10px] text-zinc-400">{item.detail}</p></div>
+                        <div><p className="text-[12px] font-bold text-brand">{item.query}</p><p className="mt-0.5 text-[10px] text-zinc-400">{item.detail}</p></div>
                         <div className="flex items-center gap-2">
                           <span className="rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700">{item.gain}</span>
-                          <button className="rounded-lg bg-[#E73932] px-2.5 py-1 text-[10px] font-bold text-white hover:bg-[#D32F2F]">AI Yaz</button>
+                          <button className="rounded-lg bg-brand px-2.5 py-1 text-[10px] font-bold text-white hover:bg-brand-dark">AI Yaz</button>
                         </div>
                       </div>
                     ))}
@@ -710,7 +710,7 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
                     </div>
                     <div className="space-y-2">
                       {[
-                        { text: "4 sayfada 404 hatası", tag: "Kritik", tagColor: "bg-red-100 text-red-700", btn: "Düzelt", btnColor: "bg-[#E73932] text-white" },
+                        { text: "4 sayfada 404 hatası", tag: "Kritik", tagColor: "bg-red-100 text-red-700", btn: "Düzelt", btnColor: "bg-brand text-white" },
                         { text: "7 sorgu düşük CTR", tag: "CTR", tagColor: "bg-orange-100 text-orange-700", btn: "AI Yaz", btnColor: "bg-[#22C55E] text-white" },
                         { text: "Rakip B 5 sıra geriledi", tag: "Fırsat", tagColor: "bg-blue-100 text-blue-700", btn: "İçerik Üret", btnColor: "bg-[#22C55E] text-white" },
                         { text: "48 sayfada Schema eksik", tag: "GEO", tagColor: "bg-zinc-100 text-zinc-600", btn: "Kodu Al", btnColor: "bg-zinc-900 text-white" },
@@ -762,7 +762,7 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
                       <tr key={i} className="border-b border-zinc-50 transition hover:bg-zinc-50/50">
                         <td className="px-4 py-2.5 font-semibold text-zinc-800">{q.query}</td>
                         <td className="px-2 py-2.5 text-right text-zinc-500">{q.pos}</td>
-                        <td className="px-3 py-2.5 text-right"><button className="rounded-lg bg-[#E73932] px-2.5 py-1 text-[10px] font-bold text-white hover:bg-[#D32F2F]">{q.action || "AI Yaz"}</button></td>
+                        <td className="px-3 py-2.5 text-right"><button className="rounded-lg bg-brand px-2.5 py-1 text-[10px] font-bold text-white hover:bg-brand-dark">{q.action || "AI Yaz"}</button></td>
                       </tr>
                     ))}{fallingQ.length === 0 && <tr><td colSpan={3} className="px-4 py-6 text-center text-zinc-400">Henüz veri yok</td></tr>}</tbody>
                   </table></div>
@@ -781,7 +781,7 @@ export default function SeoGenelBakis({ onNavigateToKreatif, initialTab }: { onN
             GSC verilerini çekmek için &ldquo;Verileri Tara&rdquo; butonuna tıklayın. Her tıklamada en güncel veriler çekilir.
           </p>
           <button onClick={handleSync} disabled={syncing}
-            className="mt-4 rounded-xl bg-[#E73932] px-6 py-3 text-sm font-bold text-white shadow-lg disabled:opacity-50 transition hover:bg-[#D32F2F]">
+            className="mt-4 rounded-xl bg-brand px-6 py-3 text-sm font-bold text-white shadow-lg disabled:opacity-50 transition hover:bg-brand-dark">
             {syncing ? (
               <span className="flex items-center gap-2">
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />

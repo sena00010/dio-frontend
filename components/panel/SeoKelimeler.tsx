@@ -76,7 +76,7 @@ export default function SeoKelimeler({ activeProjectId }: Props) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-3 border-zinc-200 border-t-[#E73932]" />
+        <div className="h-8 w-8 animate-spin rounded-full border-3 border-zinc-200 border-t-brand" />
         <span className="ml-3 text-sm text-zinc-500">Kelime analizi yükleniyor...</span>
       </div>
     );
@@ -102,7 +102,7 @@ export default function SeoKelimeler({ activeProjectId }: Props) {
           GSC&apos;den anahtar kelime verilerini çekerek intent analizi, brand/non-brand dağılımı ve ticari kelime tespiti yapılacak.
         </p>
         <button onClick={handleSync} disabled={syncing}
-          className="mt-4 rounded-xl bg-[#E73932] px-6 py-3 text-sm font-bold text-white shadow-lg disabled:opacity-50 transition hover:bg-[#D32F2F]">
+          className="mt-4 rounded-xl bg-brand px-6 py-3 text-sm font-bold text-white shadow-lg disabled:opacity-50 transition hover:bg-brand-dark">
           {syncing ? (
             <span className="flex items-center gap-2">
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -141,7 +141,7 @@ export default function SeoKelimeler({ activeProjectId }: Props) {
           AI BANNER
           ════════════════════════════════════════ */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#2A1215] via-[#1F1F1F] to-[#1A1A1A] px-4 py-4 sm:px-6 sm:py-5 text-white">
-        <div className="absolute left-0 top-0 h-full w-1 bg-[#E73932]" />
+        <div className="absolute left-0 top-0 h-full w-1 bg-brand" />
         <div className="flex items-start gap-4">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 text-base">🤖</div>
           <div className="flex-1">
@@ -366,7 +366,7 @@ export default function SeoKelimeler({ activeProjectId }: Props) {
                   </td>
                   <td className="py-2.5 text-center text-zinc-600">{fmtK(kw.volume)}</td>
                   <td className="py-2.5 text-right">
-                    <button className="rounded-lg bg-[#E73932] px-2.5 py-1 text-[9px] font-bold text-white shadow-sm">
+                    <button className="rounded-lg bg-brand px-2.5 py-1 text-[9px] font-bold text-white shadow-sm">
                       {kw.current_position > 0 ? "İçerik Üret" : "İçerik Yaz"}
                     </button>
                   </td>
@@ -393,7 +393,7 @@ export default function SeoKelimeler({ activeProjectId }: Props) {
                   }`}>{f}</button>
               ))}
             </div>
-            <button className="rounded-lg bg-[#E73932] px-3 py-1.5 text-[10px] font-bold text-white shadow-sm">+ İçerik Üret</button>
+            <button className="rounded-lg bg-brand px-3 py-1.5 text-[10px] font-bold text-white shadow-sm">+ İçerik Üret</button>
           </div>
         </div>
 
@@ -446,7 +446,7 @@ export default function SeoKelimeler({ activeProjectId }: Props) {
                 </td>
                 <td className="px-3 py-3 text-right">
                   {kw.potential === "Çok Yüksek" || kw.potential === "Fırsat" ? (
-                    <button className="rounded-lg bg-[#E73932] px-2.5 py-1 text-[9px] font-bold text-white shadow-sm">AI Yaz</button>
+                    <button className="rounded-lg bg-brand px-2.5 py-1 text-[9px] font-bold text-white shadow-sm">AI Yaz</button>
                   ) : (
                     <button className="rounded-lg border border-zinc-200 bg-white px-2.5 py-1 text-[9px] font-bold text-zinc-600 shadow-sm">Optimize</button>
                   )}

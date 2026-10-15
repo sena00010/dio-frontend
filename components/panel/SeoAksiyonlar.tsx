@@ -88,7 +88,7 @@ export default function SeoAksiyonlar({ activeProjectId }: Props) {
           Action Engine'i çalıştırarak GSC verilerinden otomatik aksiyon önerileri üretebilirsiniz.
         </p>
         <button onClick={handleRunEngine} disabled={running}
-          className="mt-4 rounded-xl bg-[#E73932] px-6 py-3 text-sm font-bold text-white shadow-lg disabled:opacity-50 transition hover:bg-[#D32F2F]">
+          className="mt-4 rounded-xl bg-brand px-6 py-3 text-sm font-bold text-white shadow-lg disabled:opacity-50 transition hover:bg-brand-dark">
           {running ? "Analiz ediliyor..." : "⚡ Aksiyon Motoru Çalıştır"}
         </button>
       </div>
@@ -98,7 +98,7 @@ export default function SeoAksiyonlar({ activeProjectId }: Props) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-3 border-zinc-200 border-t-[#E73932]" />
+        <div className="h-8 w-8 animate-spin rounded-full border-3 border-zinc-200 border-t-brand" />
         <span className="ml-3 text-sm text-zinc-500">Aksiyonlar yükleniyor...</span>
       </div>
     );
@@ -110,7 +110,7 @@ export default function SeoAksiyonlar({ activeProjectId }: Props) {
           ÖZET KARTLARI (4'lü grid)
           ════════════════════════════════════════ */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-        <div className="rounded-2xl bg-gradient-to-br from-[#E73932] to-[#F05E57] px-5 py-4 text-white">
+        <div className="rounded-2xl bg-gradient-to-br from-brand to-[#F05E57] px-5 py-4 text-white">
           <p className="text-3xl font-black">{summary?.total || 0}</p>
           <p className="mt-0.5 text-[13px] font-bold opacity-95">Toplam Aksiyon</p>
           <p className="mt-1 text-[11px] font-semibold opacity-75">+{Math.round(summary?.total_gain || 0)} tık/ay potansiyeli</p>
@@ -136,7 +136,7 @@ export default function SeoAksiyonlar({ activeProjectId }: Props) {
           AI BANNER — Nereden başlamalısın?
           ════════════════════════════════════════ */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#2A1215] via-[#1F1F1F] to-[#1A1A1A] px-4 py-4 sm:px-6 sm:py-5 text-white">
-        <div className="absolute left-0 top-0 h-full w-1 bg-[#E73932]" />
+        <div className="absolute left-0 top-0 h-full w-1 bg-brand" />
         <div className="flex items-start gap-4">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 text-base">🤖</div>
           <div className="flex-1">
@@ -161,7 +161,7 @@ export default function SeoAksiyonlar({ activeProjectId }: Props) {
         <div>
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#E73932]" />
+              <span className="h-2.5 w-2.5 rounded-full bg-brand" />
               <h2 className="text-sm font-black text-zinc-900">KRİTİK — Hemen yapılmalı</h2>
             </div>
             <span className="text-[11px] font-semibold text-zinc-400">{criticals.length} aksiyon</span>
@@ -227,14 +227,14 @@ export default function SeoAksiyonlar({ activeProjectId }: Props) {
                         <p className="mt-0.5 text-[10px] text-zinc-400">kişi gördü</p>
                       </td>
                       <td className="px-4 py-4">
-                        <p className="text-[12px] font-bold text-[#E73932]">%{d.current_ctr || 0}</p>
+                        <p className="text-[12px] font-bold text-brand">%{d.current_ctr || 0}</p>
                         <p className="mt-0.5 text-[10px] text-zinc-400">çok düşük</p>
                       </td>
                       <td className="px-4 py-4">
                         <span className="text-[12px] font-bold text-emerald-600">+{Math.round(task.potential_gain)} tık/ay</span>
                       </td>
                       <td className="px-4 py-4 text-right">
-                        <button className="rounded-lg bg-[#E73932] px-3.5 py-1.5 text-[11px] font-bold text-white shadow-sm transition hover:bg-[#D32F2F]">
+                        <button className="rounded-lg bg-brand px-3.5 py-1.5 text-[11px] font-bold text-white shadow-sm transition hover:bg-brand-dark">
                           {task.action_label || "AI Başlık Yaz"}
                         </button>
                       </td>
@@ -337,7 +337,7 @@ function CriticalCard({ task }: { task: ActionTask }) {
           </div>
         </div>
         <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 shrink-0 sm:ml-6">
-          <span className="text-[12px] font-bold text-[#E73932]">-{Math.round(task.potential_gain)} tık/ay kayıp</span>
+          <span className="text-[12px] font-bold text-brand">-{Math.round(task.potential_gain)} tık/ay kayıp</span>
           <button className="rounded-lg bg-[#22C55E] px-4 py-1.5 text-[11px] font-bold text-white shadow-sm transition hover:bg-[#16A34A]">
             {task.action_label}
           </button>

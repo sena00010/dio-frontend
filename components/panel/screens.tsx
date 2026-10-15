@@ -13,6 +13,7 @@ import { useMarketingData } from "./useMarketingData";
 
 const ImageStudio = dynamic(() => import("./ImageStudio"), { ssr: false });
 const CarouselEditor = dynamic(() => import("./carousel/CarouselEditor"), { ssr: false });
+const HomeScreen = dynamic(() => import("./home/HomeScreen"), { ssr: false });
 const ContentCalendar = dynamic(() => import("./ContentCalendar"), { ssr: false });
 const KreatifStudyoScreen = dynamic(() => import("./KreatifStudyo"), { ssr: false });
 const KreatifOlusturScreen = dynamic(() => import("./KreatifOlustur"), { ssr: false });
@@ -2968,7 +2969,21 @@ export function ScreenRenderer({
   onScheduleNavigate?: (postId: number) => void;
   onCarouselNavigate?: (postId: number) => void;
 }) {
-  if (screen === "dashboard") return <DashboardScreen />;
+  if (screen === "dashboard")
+    return (
+      <>
+        <HomeScreen
+          onNavigate={(key) => { if (key === "yeni-icerik") clearWizardDraft(); onNavigate?.(key); }}
+          onOpenStudio={(postId) => onStudioNavigate?.(postId)}
+          onScheduleNavigate={(postId) => onScheduleNavigate?.(postId)}
+          onStartTopic={(topic) => { clearWizardDraft(); onSetInitialTopic?.(topic); onNavigate?.("yeni-icerik"); }}
+        />
+        {/* Reklam ve SEO panosu olduğu gibi korunur */}
+        <section className="mt-10 border-t border-line pt-8" aria-label="Reklam ve SEO Özeti">
+          <DashboardScreen />
+        </section>
+      </>
+    );
   if (screen === "icerik") return <IcerikScreen onNewContent={() => { clearWizardDraft(); onNavigate?.("yeni-icerik"); }} onOpenStudio={(postId) => onStudioNavigate?.(postId)} />;
   if (screen === "yeni-icerik")
     return (

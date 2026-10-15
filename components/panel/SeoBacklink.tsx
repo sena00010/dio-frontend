@@ -86,7 +86,7 @@ export default function SeoBacklink({ activeProjectId }: Props) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-3 border-zinc-200 border-t-[#E73932]" />
+        <div className="h-8 w-8 animate-spin rounded-full border-3 border-zinc-200 border-t-brand" />
         <span className="ml-3 text-sm text-zinc-500">Backlink verileri yükleniyor...</span>
       </div>
     );
@@ -103,7 +103,7 @@ export default function SeoBacklink({ activeProjectId }: Props) {
         <button
           onClick={handleSync}
           disabled={syncing}
-          className="mt-4 rounded-xl bg-[#E73932] px-6 py-3 text-sm font-bold text-white shadow-lg disabled:opacity-50 transition hover:bg-[#D32F2F]"
+          className="mt-4 rounded-xl bg-brand px-6 py-3 text-sm font-bold text-white shadow-lg disabled:opacity-50 transition hover:bg-brand-dark"
         >
           {syncing ? (
             <span className="flex items-center gap-2">
@@ -127,7 +127,7 @@ export default function SeoBacklink({ activeProjectId }: Props) {
           AI BANNER
           ════════════════════════════════════════ */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#2A1215] via-[#1F1F1F] to-[#1A1A1A] px-6 py-5 text-white">
-        <div className="absolute left-0 top-0 h-full w-1 bg-[#E73932]" />
+        <div className="absolute left-0 top-0 h-full w-1 bg-brand" />
         <div className="flex items-start gap-4">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 text-base">🔗</div>
           <div className="flex-1">
@@ -146,7 +146,7 @@ export default function SeoBacklink({ activeProjectId }: Props) {
         </div>
         {/* E-posta şablonu butonu */}
         {opps.length > 0 && (
-          <button className="mt-3 rounded-lg bg-[#E73932] px-4 py-2 text-[10px] font-bold text-white shadow transition hover:bg-[#D32F2F]">
+          <button className="mt-3 rounded-lg bg-brand px-4 py-2 text-[10px] font-bold text-white shadow transition hover:bg-brand-dark">
             📧 {opps.length} Site için Toplu E-posta Şablonu Oluştur
           </button>
         )}
@@ -232,7 +232,7 @@ export default function SeoBacklink({ activeProjectId }: Props) {
                   opp.dr >= 50 ? "bg-emerald-500" : opp.dr >= 30 ? "bg-amber-500" : "bg-orange-500"
                 }`}>DR {opp.dr}</span>
                 <span className="text-[10px] text-zinc-500 truncate">{opp.common_topic}</span>
-                <button className="rounded-md bg-[#E73932] px-2 py-1 text-[8px] font-bold text-white transition hover:bg-[#D32F2F]">
+                <button className="rounded-md bg-brand px-2 py-1 text-[8px] font-bold text-white transition hover:bg-brand-dark">
                   E-posta
                 </button>
               </div>
@@ -296,7 +296,7 @@ export default function SeoBacklink({ activeProjectId }: Props) {
                 <p className="mt-0.5 text-[10px] text-red-600">Bu linkler Google&apos;dan ceza almanıza neden olabilir</p>
               </div>
             </div>
-            <button className="rounded-lg bg-[#E73932] px-4 py-2 text-[10px] font-bold text-white shadow transition hover:bg-[#D32F2F]">
+            <button className="rounded-lg bg-brand px-4 py-2 text-[10px] font-bold text-white shadow transition hover:bg-brand-dark">
               Temizle
             </button>
           </div>
@@ -323,7 +323,7 @@ export default function SeoBacklink({ activeProjectId }: Props) {
       <div className="rounded-2xl border border-zinc-200 bg-white p-5">
         <h3 className="text-sm font-bold text-zinc-900 mb-4">Rakip Karşılaştırması</h3>
         <div className="space-y-3">
-          <CompetitorBar label="Sen" value={s.referring_domains} maxValue={Math.max(s.referring_domains * 3, 500)} dr={s.domain_rating} color="bg-[#E73932]" isSelf />
+          <CompetitorBar label="Sen" value={s.referring_domains} maxValue={Math.max(s.referring_domains * 3, 500)} dr={s.domain_rating} color="bg-brand" isSelf />
           <CompetitorBar label="Rakip A" value={Math.round(s.referring_domains * 1.7)} maxValue={Math.max(s.referring_domains * 3, 500)} dr={s.domain_rating + 18} color="bg-blue-500" />
           <CompetitorBar label="Rakip B" value={Math.round(s.referring_domains * 1.3)} maxValue={Math.max(s.referring_domains * 3, 500)} dr={s.domain_rating + 10} color="bg-purple-500" />
         </div>
@@ -365,7 +365,7 @@ function CompetitorBar({ label, value, maxValue, dr, color, isSelf }: {
   const pct = Math.min((value / maxValue) * 100, 100);
   return (
     <div className="flex items-center gap-3">
-      <span className={`w-14 text-[11px] font-bold ${isSelf ? "text-[#E73932]" : "text-zinc-600"}`}>{label}</span>
+      <span className={`w-14 text-[11px] font-bold ${isSelf ? "text-brand" : "text-zinc-600"}`}>{label}</span>
       <div className="flex-1 h-5 bg-zinc-100 rounded-full overflow-hidden relative">
         <div className={`h-full rounded-full ${color} transition-all`} style={{ width: `${pct}%` }} />
       </div>

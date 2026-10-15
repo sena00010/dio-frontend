@@ -108,7 +108,7 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-3 border-zinc-200 border-t-[#E73932]" />
+        <div className="h-8 w-8 animate-spin rounded-full border-3 border-zinc-200 border-t-brand" />
         <span className="ml-3 text-sm text-zinc-500">İçerik fırsatları analiz ediliyor...</span>
       </div>
     );
@@ -122,7 +122,7 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
             className={`relative whitespace-nowrap px-3 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-[12px] font-semibold transition ${
               activeTab === tab.key
-                ? "border-b-2 border-[#E73932] text-[#E73932]"
+                ? "border-b-2 border-brand text-brand"
                 : "text-zinc-500 hover:text-zinc-700"
             }`}>
             {tab.label}
@@ -137,7 +137,7 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
         <>
           {/* AI Banner */}
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#2A1215] via-[#1F1F1F] to-[#1A1A1A] px-4 py-3 sm:px-6 sm:py-4 text-white">
-            <div className="absolute left-0 top-0 h-full w-1 bg-[#E73932]" />
+            <div className="absolute left-0 top-0 h-full w-1 bg-brand" />
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/10 text-sm">🤖</div>
               <div className="flex-1">
@@ -159,7 +159,7 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
               {opportunities.map((opp, i) => (
                 <div key={i} className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white transition hover:shadow-lg">
                   {/* Sol kırmızı çizgi */}
-                  <div className="absolute left-0 top-0 h-full w-1 rounded-l-2xl bg-[#E73932]" />
+                  <div className="absolute left-0 top-0 h-full w-1 rounded-l-2xl bg-brand" />
 
                   <div className="pl-4 pr-4 pt-3 pb-3 sm:pl-5 sm:pr-5 sm:pt-4 sm:pb-4">
                     {/* Badge'lar */}
@@ -200,7 +200,7 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
                         <button
                           onClick={() => handleGenerateBrief(opp, i)}
                           disabled={generating === i}
-                          className="rounded-lg bg-[#E73932] px-3 py-1.5 text-[9px] font-bold text-white shadow-sm transition hover:bg-[#D32F2F] disabled:opacity-50">
+                          className="rounded-lg bg-brand px-3 py-1.5 text-[9px] font-bold text-white shadow-sm transition hover:bg-brand-dark disabled:opacity-50">
                           {generating === i ? (
                             <span className="flex items-center gap-1.5">
                               <span className="h-3 w-3 animate-spin rounded-full border border-white/30 border-t-white" />
@@ -235,8 +235,8 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 sm:p-5">
             {opportunities.slice(0, 6).map((opp, i) => (
-              <div key={i} className="group relative cursor-pointer overflow-hidden rounded-xl border border-zinc-100 p-4 transition hover:border-[#E73932] hover:shadow-md">
-                <div className="absolute left-0 top-0 h-full w-0.5 bg-zinc-200 transition group-hover:bg-[#E73932]" />
+              <div key={i} className="group relative cursor-pointer overflow-hidden rounded-xl border border-zinc-100 p-4 transition hover:border-brand hover:shadow-md">
+                <div className="absolute left-0 top-0 h-full w-0.5 bg-zinc-200 transition group-hover:bg-brand" />
                 <div className="flex items-center gap-2 mb-2">
                   {opp.badges.slice(0, 1).map((b, j) => (
                     <span key={j} className={`rounded-full px-2 py-0.5 text-[8px] font-bold ${badgeColor(b.color)}`}>{b.label}</span>
@@ -250,7 +250,7 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
                 <button
                   onClick={() => handleGenerateBrief(opp, i + 100)}
                   disabled={generating === i + 100}
-                  className="mt-3 w-full rounded-lg bg-[#E73932] py-1.5 text-[10px] font-bold text-white transition hover:bg-[#D32F2F] disabled:opacity-50">
+                  className="mt-3 w-full rounded-lg bg-brand py-1.5 text-[10px] font-bold text-white transition hover:bg-brand-dark disabled:opacity-50">
                   {generating === i + 100 ? "Üretiliyor..." : "İçerik Oluştur →"}
                 </button>
               </div>
@@ -280,7 +280,7 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
                 value={titleInput}
                 onChange={e => setTitleInput(e.target.value)}
                 placeholder="Örn: 2026 Yaz Modası Trendleri — Kadın Giyim Rehberi"
-                className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-[#E73932] focus:outline-none focus:ring-1 focus:ring-[#E73932]"
+                className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
               />
             </div>
 
@@ -296,7 +296,7 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
                   <button key={t.key} onClick={() => setContentType(t.key)}
                     className={`rounded-xl border px-3 py-2.5 text-[11px] font-semibold transition ${
                       contentType === t.key
-                        ? "border-[#E73932] bg-red-50 text-[#E73932]"
+                        ? "border-brand bg-red-50 text-brand"
                         : "border-zinc-200 text-zinc-600 hover:border-zinc-300"
                     }`}>
                     {t.icon} {t.label}
@@ -308,7 +308,7 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
             <button
               onClick={handleTitleBrief}
               disabled={!titleInput.trim() || generating === -1}
-              className="w-full rounded-xl bg-[#E73932] py-3 text-sm font-bold text-white shadow-lg transition hover:bg-[#D32F2F] disabled:opacity-40">
+              className="w-full rounded-xl bg-brand py-3 text-sm font-bold text-white shadow-lg transition hover:bg-brand-dark disabled:opacity-40">
               {generating === -1 ? (
                 <span className="flex items-center justify-center gap-2">
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -337,26 +337,26 @@ export default function SeoIcerikUretimi({ activeProjectId, onNavigateToKreatif 
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-zinc-700">Başlık</label>
               <input type="text" placeholder="İçerik başlığını girin..."
-                className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-[#E73932] focus:outline-none" />
+                className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-brand focus:outline-none" />
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-zinc-700">Hedef Kelimeler (virgülle ayırın)</label>
               <input type="text" placeholder="oversize tişört, yazlık elbise, kadın giyim..."
-                className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-[#E73932] focus:outline-none" />
+                className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-brand focus:outline-none" />
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-zinc-700">İçerik Türü</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {["Blog Yazısı", "Kategori Sayfası", "Ürün Açıklaması", "Landing Page"].map((type, i) => (
                   <button key={i} className={`rounded-xl border px-3 py-2.5 text-[11px] font-semibold transition ${
-                    i === 0 ? "border-[#E73932] bg-red-50 text-[#E73932]" : "border-zinc-200 text-zinc-600 hover:border-zinc-300"
+                    i === 0 ? "border-brand bg-red-50 text-brand" : "border-zinc-200 text-zinc-600 hover:border-zinc-300"
                   }`}>
                     {type}
                   </button>
                 ))}
               </div>
             </div>
-            <button className="w-full rounded-xl bg-[#E73932] py-3 text-sm font-bold text-white shadow-lg transition hover:bg-[#D32F2F]">
+            <button className="w-full rounded-xl bg-brand py-3 text-sm font-bold text-white shadow-lg transition hover:bg-brand-dark">
               📝 İçerik Üretmeye Başla
             </button>
           </div>
@@ -395,7 +395,7 @@ function badgeColor(color: string): string {
 
 function avatarGradient(i: number): string {
   const gradients = [
-    "bg-gradient-to-br from-[#E73932] to-[#FF6B35]",
+    "bg-gradient-to-br from-brand to-[#FF6B35]",
     "bg-gradient-to-br from-[#6366F1] to-[#A855F7]",
     "bg-gradient-to-br from-[#10B981] to-[#34D399]",
     "bg-gradient-to-br from-[#F59E0B] to-[#EF4444]",

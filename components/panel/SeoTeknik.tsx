@@ -117,7 +117,7 @@ export default function SeoTeknik({ activeProjectId }: Props) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-3 border-zinc-200 border-t-[#E73932]" />
+        <div className="h-8 w-8 animate-spin rounded-full border-3 border-zinc-200 border-t-brand" />
         <span className="ml-3 text-sm text-zinc-500">Teknik analiz yükleniyor...</span>
       </div>
     );
@@ -134,7 +134,7 @@ export default function SeoTeknik({ activeProjectId }: Props) {
         <button
           onClick={handleSync}
           disabled={syncing}
-          className="mt-4 rounded-xl bg-[#E73932] px-6 py-3 text-sm font-bold text-white shadow-lg disabled:opacity-50 transition hover:bg-[#D32F2F]"
+          className="mt-4 rounded-xl bg-brand px-6 py-3 text-sm font-bold text-white shadow-lg disabled:opacity-50 transition hover:bg-brand-dark"
         >
           {syncing ? (
             <span className="flex items-center gap-2">
@@ -161,7 +161,7 @@ export default function SeoTeknik({ activeProjectId }: Props) {
           AI BANNER
           ════════════════════════════════════════ */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#2A1215] via-[#1F1F1F] to-[#1A1A1A] px-4 py-4 sm:px-6 sm:py-5 text-white">
-        <div className="absolute left-0 top-0 h-full w-1 bg-[#E73932]" />
+        <div className="absolute left-0 top-0 h-full w-1 bg-brand" />
         <div className="flex items-start gap-4">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 text-base">🤖</div>
           <div className="flex-1">
@@ -271,13 +271,13 @@ export default function SeoTeknik({ activeProjectId }: Props) {
             <button
               onClick={() => setSpeedTab("mobile")}
               className={`rounded-md px-3 py-1 text-[10px] font-bold transition ${
-                speedTab === "mobile" ? "bg-[#E73932] text-white" : "text-zinc-500 hover:text-zinc-700"
+                speedTab === "mobile" ? "bg-brand text-white" : "text-zinc-500 hover:text-zinc-700"
               }`}
             >Mobil</button>
             <button
               onClick={() => setSpeedTab("desktop")}
               className={`rounded-md px-3 py-1 text-[10px] font-bold transition ${
-                speedTab === "desktop" ? "bg-[#E73932] text-white" : "text-zinc-500 hover:text-zinc-700"
+                speedTab === "desktop" ? "bg-brand text-white" : "text-zinc-500 hover:text-zinc-700"
               }`}
             >Masaüstü</button>
           </div>
@@ -360,7 +360,7 @@ export default function SeoTeknik({ activeProjectId }: Props) {
                       onClick={() => fetchIssueDetails(mapTitleToTaskType(issue.title), issue.title + " — Detay")}
                       className={`rounded-lg px-3 py-1 text-[9px] font-bold transition ${
                         j === 0
-                          ? "bg-[#E73932] text-white shadow-sm hover:bg-[#D32F2F]"
+                          ? "bg-brand text-white shadow-sm hover:bg-brand-dark"
                           : "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
                       }`}>{action}</button>
                   ))}
@@ -440,7 +440,7 @@ export default function SeoTeknik({ activeProjectId }: Props) {
             <div className="flex-1 overflow-y-auto p-5 space-y-3">
               {detailPanel.loading ? (
                 <div className="flex items-center justify-center py-16">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-200 border-t-[#E73932]" />
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-200 border-t-brand" />
                   <span className="ml-2 text-xs text-zinc-500">Yükleniyor...</span>
                 </div>
               ) : detailPanel.items.length === 0 ? (

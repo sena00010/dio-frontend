@@ -938,7 +938,7 @@ export default function ProductImageStudio() {
                       }}
                       className={`inline-flex items-center gap-1 sm:gap-1.5 whitespace-nowrap border-b-2 px-2.5 py-2.5 sm:px-4 sm:py-3 text-[11px] sm:text-[13px] font-semibold transition ${
                         isCreationMode && activeTab === "urun-gorseli-studyosu"
-                          ? "border-[#F14B2A] text-[#E64A2E]"
+                          ? "border-brand text-brand"
                           : "border-transparent text-zinc-400 hover:text-zinc-600"
                       }`}
                       title="Yeni Ürün Görseli Oluştur"
@@ -961,7 +961,7 @@ export default function ProductImageStudio() {
                       }
                     }}
                     className={`inline-flex items-center gap-1 sm:gap-1.5 whitespace-nowrap border-b-2 px-2.5 py-2.5 sm:px-4 sm:py-3 text-[11px] sm:text-[13px] font-semibold transition ${
-                      isActive ? "border-[#F14B2A] text-[#E64A2E]" : "border-transparent text-zinc-400 hover:text-zinc-600"
+                      isActive ? "border-brand text-brand" : "border-transparent text-zinc-400 hover:text-zinc-600"
                     }`}
                   >
                     <span className="text-sm sm:text-base">{module.icon}</span>
@@ -991,7 +991,7 @@ export default function ProductImageStudio() {
                 {/* 1. ÜRÜN GÖRSELİ */}
                 <div className="px-3 pb-3">
                   <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">1. Ürün Görseli</p>
-                  <div className="mt-2 relative overflow-hidden rounded-xl border-2 border-dashed border-zinc-300 bg-white cursor-pointer transition hover:border-[#F14B2A] hover:bg-orange-50/30" onClick={() => fileInputRef.current?.click()}>
+                  <div className="mt-2 relative overflow-hidden rounded-xl border-2 border-dashed border-zinc-300 bg-white cursor-pointer transition hover:border-brand hover:bg-orange-50/30" onClick={() => fileInputRef.current?.click()}>
                     <div className="flex flex-col items-center justify-center gap-2 py-6 text-center">
                       <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-100">
                         <span className="text-xl">📷</span>
@@ -1018,7 +1018,7 @@ export default function ProductImageStudio() {
                               setCurrentStudio(studio);
                               setActiveTab("urun-gorseli-studyosu");
                             }}
-                            className="group flex shrink-0 flex-col items-center gap-1 rounded-lg border border-zinc-200 bg-white p-1.5 transition hover:border-[#F14B2A] hover:shadow-sm"
+                            className="group flex shrink-0 flex-col items-center gap-1 rounded-lg border border-zinc-200 bg-white p-1.5 transition hover:border-brand hover:shadow-sm"
                             title={studio.title || "Stüdyo"}
                           >
                             {studio.source_image ? (
@@ -1047,7 +1047,7 @@ export default function ProductImageStudio() {
                     <button
                       type="button"
                       onClick={() => setUseBrandLogo(!useBrandLogo)}
-                      className={`relative h-5 w-9 rounded-full transition ${useBrandLogo ? "bg-[#F14B2A]" : "bg-zinc-200"}`}
+                      className={`relative h-5 w-9 rounded-full transition ${useBrandLogo ? "bg-brand" : "bg-zinc-200"}`}
                     >
                       <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${useBrandLogo ? "left-[18px]" : "left-0.5"}`} />
                     </button>
@@ -1058,7 +1058,7 @@ export default function ProductImageStudio() {
                 <div className="border-t border-zinc-100 px-3 py-3">
                   <div className="flex items-center gap-2">
                     <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">2. AI Sahnesi</p>
-                    <span className="rounded bg-[#F14B2A] px-1.5 py-0.5 text-[8px] font-bold text-white">DIO ÖZEL</span>
+                    <span className="rounded bg-brand px-1.5 py-0.5 text-[8px] font-bold text-white">DIO ÖZEL</span>
                   </div>
                   {/* Prompt Box */}
                   <div className="mt-2 rounded-xl border border-zinc-800 bg-zinc-900 p-3">
@@ -1134,7 +1134,7 @@ export default function ProductImageStudio() {
                       }
                     }}
                     disabled={!scenePrompt.trim() || creationGenerating}
-                    className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#F14B2A] py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#D93E1F] disabled:opacity-50"
+                    className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-brand-dark disabled:opacity-50"
                   >
                     {creationGenerating ? (
                       <>
@@ -1181,7 +1181,7 @@ export default function ProductImageStudio() {
                               key={c}
                               type="button"
                               onClick={() => setBgColor(c)}
-                              className={`aspect-square rounded-lg border-2 transition hover:scale-105 ${bgColor === c ? "border-[#F14B2A] shadow-sm" : "border-zinc-200"}`}
+                              className={`aspect-square rounded-lg border-2 transition hover:scale-105 ${bgColor === c ? "border-brand shadow-sm" : "border-zinc-200"}`}
                               style={{ backgroundColor: c }}
                             />
                           ))}
@@ -1201,7 +1201,7 @@ export default function ProductImageStudio() {
                             type="text"
                             value={bgColor.toUpperCase()}
                             onChange={(e) => setBgColor(e.target.value)}
-                            className="flex-1 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-mono outline-none focus:border-[#F14B2A]"
+                            className="flex-1 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-mono outline-none focus:border-brand"
                           />
                         </div>
                       </div>
@@ -1217,7 +1217,7 @@ export default function ProductImageStudio() {
                           max={100}
                           value={bgOpacity}
                           onChange={(e) => setBgOpacity(Number(e.target.value))}
-                          className="mt-1 h-2 w-full cursor-pointer rounded-full bg-zinc-200 accent-[#F14B2A]"
+                          className="mt-1 h-2 w-full cursor-pointer rounded-full bg-zinc-200 accent-brand"
                         />
                       </div>
                     </div>
@@ -1242,7 +1242,7 @@ export default function ProductImageStudio() {
                   {bgType === "texture" && (
                     <div className="mt-3 grid grid-cols-3 gap-1.5">
                       {["Mermer", "Ahşap", "Kumaş", "Beton", "Kum", "Yaprak"].map((t) => (
-                        <button key={t} type="button" onClick={() => setScenePrompt(p => p ? `${p}, ${t.toLowerCase()} doku` : `${t.toLowerCase()} doku arka plan`)} className="rounded-xl border border-zinc-200 bg-white px-2 py-3 text-center text-[10px] font-semibold text-zinc-600 transition hover:border-[#F14B2A] hover:bg-orange-50">
+                        <button key={t} type="button" onClick={() => setScenePrompt(p => p ? `${p}, ${t.toLowerCase()} doku` : `${t.toLowerCase()} doku arka plan`)} className="rounded-xl border border-zinc-200 bg-white px-2 py-3 text-center text-[10px] font-semibold text-zinc-600 transition hover:border-brand hover:bg-orange-50">
                           {t}
                         </button>
                       ))}
@@ -1252,7 +1252,7 @@ export default function ProductImageStudio() {
                   {bgType === "scene" && (
                     <div className="mt-3 grid grid-cols-2 gap-1.5">
                       {["Mutfak Tezgahı", "Bahçe", "Ofis Masası", "Deniz Kenarı", "Yatak Odası", "Salon"].map((s) => (
-                        <button key={s} type="button" onClick={() => setScenePrompt(p => p ? `${p}, ${s.toLowerCase()} sahnesinde` : `${s.toLowerCase()} sahnesinde`)} className="rounded-xl border border-zinc-200 bg-white px-2 py-3 text-center text-[10px] font-semibold text-zinc-600 transition hover:border-[#F14B2A] hover:bg-orange-50">
+                        <button key={s} type="button" onClick={() => setScenePrompt(p => p ? `${p}, ${s.toLowerCase()} sahnesinde` : `${s.toLowerCase()} sahnesinde`)} className="rounded-xl border border-zinc-200 bg-white px-2 py-3 text-center text-[10px] font-semibold text-zinc-600 transition hover:border-brand hover:bg-orange-50">
                           {s}
                         </button>
                       ))}
@@ -1268,11 +1268,11 @@ export default function ProductImageStudio() {
                   {creationTexts.map((layer) => {
                     const isEditing = editingTextId === layer.id;
                     return (
-                      <div key={layer.id} className={`mt-2 rounded-xl border px-3 py-2 transition ${isEditing ? "border-[#F14B2A] bg-orange-50/50" : "border-zinc-200 bg-white"}`}>
+                      <div key={layer.id} className={`mt-2 rounded-xl border px-3 py-2 transition ${isEditing ? "border-brand bg-orange-50/50" : "border-zinc-200 bg-white"}`}>
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-bold text-zinc-800" style={{ fontFamily: layer.fontStyle }}>{layer.text}</span>
                           <div className="flex items-center gap-1.5">
-                            <button type="button" onClick={() => setEditingTextId(isEditing ? null : layer.id)} className="text-[10px] font-semibold text-zinc-400 hover:text-[#F14B2A]">
+                            <button type="button" onClick={() => setEditingTextId(isEditing ? null : layer.id)} className="text-[10px] font-semibold text-zinc-400 hover:text-brand">
                               Düzenle ↗
                             </button>
                             <button type="button" onClick={() => { setCreationTexts(prev => prev.filter(t => t.id !== layer.id)); if (isEditing) setEditingTextId(null); }} className="text-[10px] font-semibold text-red-400 hover:text-red-600" title="Katmanı sil">
@@ -1290,7 +1290,7 @@ export default function ProductImageStudio() {
                                 type="text"
                                 value={layer.text}
                                 onChange={(e) => setCreationTexts(prev => prev.map(t => t.id === layer.id ? { ...t, text: e.target.value } : t))}
-                                className="mt-0.5 w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-bold outline-none focus:border-[#F14B2A]"
+                                className="mt-0.5 w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-bold outline-none focus:border-brand"
                               />
                             </div>
                             {/* Font Seç — Google Fonts */}
@@ -1303,7 +1303,7 @@ export default function ProductImageStudio() {
                                     key={fs.key}
                                     type="button"
                                     onClick={() => { loadGoogleFont(fs.family); setCreationTexts(prev => prev.map(t => t.id === layer.id ? { ...t, fontStyle: fs.family } : t)); }}
-                                    className={`rounded-lg border px-2 py-1.5 text-center transition ${layer.fontStyle === fs.family ? "border-[#F14B2A] bg-orange-50" : "border-zinc-200 bg-white hover:border-zinc-300"}`}
+                                    className={`rounded-lg border px-2 py-1.5 text-center transition ${layer.fontStyle === fs.family ? "border-brand bg-orange-50" : "border-zinc-200 bg-white hover:border-zinc-300"}`}
                                   >
                                     <span className="block text-[11px] font-bold" style={{ fontFamily: fs.family }}>{fs.label}</span>
                                     <span className="block text-[8px] text-zinc-400">{fs.desc}</span>
@@ -1317,7 +1317,7 @@ export default function ProductImageStudio() {
                                   value={fontSearch}
                                   onChange={(e) => setFontSearch(e.target.value)}
                                   placeholder="Font ara... (ör: Montserrat)"
-                                  className="w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-[10px] outline-none focus:border-[#F14B2A]"
+                                  className="w-full rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-[10px] outline-none focus:border-brand"
                                 />
                                 <div className="mt-1 max-h-32 overflow-y-auto rounded-lg border border-zinc-100 bg-white">
                                   {GOOGLE_FONTS
@@ -1328,7 +1328,7 @@ export default function ProductImageStudio() {
                                         type="button"
                                         onClick={() => { loadGoogleFont(font); setCreationTexts(prev => prev.map(t => t.id === layer.id ? { ...t, fontStyle: font } : t)); setFontSearch(""); }}
                                         onMouseEnter={() => loadGoogleFont(font)}
-                                        className={`flex w-full items-center justify-between px-2.5 py-1.5 text-left text-[10px] transition hover:bg-orange-50 ${layer.fontStyle === font ? "bg-orange-50 font-bold text-[#E64A2E]" : "text-zinc-600"}`}
+                                        className={`flex w-full items-center justify-between px-2.5 py-1.5 text-left text-[10px] transition hover:bg-orange-50 ${layer.fontStyle === font ? "bg-orange-50 font-bold text-brand" : "text-zinc-600"}`}
                                       >
                                         <span style={{ fontFamily: font }}>{font}</span>
                                         {layer.fontStyle === font && <span className="text-[8px]">✓</span>}
@@ -1351,7 +1351,7 @@ export default function ProductImageStudio() {
                                 max={80}
                                 value={layer.fontSize}
                                 onChange={(e) => setCreationTexts(prev => prev.map(t => t.id === layer.id ? { ...t, fontSize: Number(e.target.value) } : t))}
-                                className="mt-0.5 h-2 w-full cursor-pointer rounded-full bg-zinc-200 accent-[#F14B2A]"
+                                className="mt-0.5 h-2 w-full cursor-pointer rounded-full bg-zinc-200 accent-brand"
                               />
                             </div>
                             {/* Renk */}
@@ -1363,7 +1363,7 @@ export default function ProductImageStudio() {
                                     key={c}
                                     type="button"
                                     onClick={() => setCreationTexts(prev => prev.map(t => t.id === layer.id ? { ...t, color: c } : t))}
-                                    className={`h-6 w-6 rounded-md border-2 transition ${layer.color === c ? "border-[#F14B2A]" : "border-zinc-200"}`}
+                                    className={`h-6 w-6 rounded-md border-2 transition ${layer.color === c ? "border-brand" : "border-zinc-200"}`}
                                     style={{ backgroundColor: c }}
                                   />
                                 ))}
@@ -1378,7 +1378,7 @@ export default function ProductImageStudio() {
                                     key={pos.key}
                                     type="button"
                                     onClick={() => setCreationTexts(prev => prev.map(t => t.id === layer.id ? { ...t, position: pos.key } : t))}
-                                    className={`rounded-lg px-2 py-1 text-[10px] font-semibold transition ${layer.position === pos.key ? "bg-[#F14B2A] text-white" : "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
+                                    className={`rounded-lg px-2 py-1 text-[10px] font-semibold transition ${layer.position === pos.key ? "bg-brand text-white" : "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"}`}
                                   >
                                     {pos.label}
                                   </button>
@@ -1403,7 +1403,7 @@ export default function ProductImageStudio() {
                   <button
                     type="button"
                     onClick={() => { loadGoogleFont("Bebas Neue"); setCreationTexts(prev => [...prev, { id: `txt_${Date.now()}`, text: "Metin yaz...", fontStyle: "Bebas Neue", fontSize: 32, color: "#FFFFFF", position: "bottom-right" }]); }}
-                    className="mt-2 w-full rounded-xl border border-dashed border-zinc-300 bg-white py-2.5 text-xs font-semibold text-zinc-500 transition hover:border-[#F14B2A] hover:text-[#F14B2A]"
+                    className="mt-2 w-full rounded-xl border border-dashed border-zinc-300 bg-white py-2.5 text-xs font-semibold text-zinc-500 transition hover:border-brand hover:text-brand"
                   >
                     + Metin Katmanı Ekle
                   </button>
@@ -1417,7 +1417,7 @@ export default function ProductImageStudio() {
                           key={tpl.key}
                           type="button"
                           onClick={() => { loadGoogleFont("Bebas Neue"); setCreationTexts(prev => [...prev, { id: `label_${Date.now()}`, text: tpl.text, fontStyle: "Bebas Neue", fontSize: 24, color: "#FFFFFF", position: "bottom-right" }]); }}
-                          className="flex flex-col items-center gap-1 rounded-xl border border-zinc-200 bg-white px-2 py-2.5 transition hover:border-[#F14B2A] hover:bg-orange-50"
+                          className="flex flex-col items-center gap-1 rounded-xl border border-zinc-200 bg-white px-2 py-2.5 transition hover:border-brand hover:bg-orange-50"
                         >
                           <span className="text-base">{tpl.icon}</span>
                           <span className="text-[10px] font-semibold text-zinc-600">{tpl.label}</span>
@@ -1442,7 +1442,7 @@ export default function ProductImageStudio() {
                         <button
                           type="button"
                           onClick={() => setter(!value)}
-                          className={`relative h-5 w-9 rounded-full transition ${value ? "bg-[#F14B2A]" : "bg-zinc-200"}`}
+                          className={`relative h-5 w-9 rounded-full transition ${value ? "bg-brand" : "bg-zinc-200"}`}
                         >
                           <div className={`absolute top-[2px] h-4 w-4 rounded-full bg-white shadow transition-all ${value ? "left-[18px]" : "left-[2px]"}`} />
                         </button>
@@ -1460,7 +1460,7 @@ export default function ProductImageStudio() {
                         max={100}
                         value={shadowIntensity}
                         onChange={(e) => setShadowIntensity(Number(e.target.value))}
-                        className="mt-1.5 h-2 w-full cursor-pointer rounded-full bg-zinc-200 accent-[#F14B2A]"
+                        className="mt-1.5 h-2 w-full cursor-pointer rounded-full bg-zinc-200 accent-brand"
                       />
                     </div>
                   </div>
@@ -1496,7 +1496,7 @@ export default function ProductImageStudio() {
                         showToast("Önce bir ürün görseli yükleyin veya AI sahne oluşturun");
                       }
                     }}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#F14B2A] px-4 py-3 text-sm font-bold text-white shadow-md shadow-orange-200 transition hover:bg-[#D93E1F] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 text-sm font-bold text-white shadow-md shadow-orange-200 transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {generating ? (
                       <>⏳ Üretiliyor...</>
@@ -1527,7 +1527,7 @@ export default function ProductImageStudio() {
                     setCreationTexts([]);
                     showToast("Yeni ürün görseli stüdyosu açıldı");
                   }}
-                  className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-bold text-zinc-500 transition hover:border-[#F14B2A] hover:bg-orange-50 hover:text-[#E64A2E]"
+                  className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-bold text-zinc-500 transition hover:border-brand hover:bg-orange-50 hover:text-brand"
                   title="Yeni Ürün Görseli Oluştur"
                 >
                   <svg className="h-3 w-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="8" y1="3" x2="8" y2="13" /><line x1="3" y1="8" x2="13" y2="8" /></svg>
@@ -1554,7 +1554,7 @@ export default function ProductImageStudio() {
               </div>
               <div className="mt-1.5 flex items-center justify-between gap-2 text-xs">
                 <p className="min-w-0 truncate font-semibold text-emerald-700">{currentStudio?.source_file || "urun_fotografi.jpg"}</p>
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="shrink-0 font-semibold text-[#E64A2E] transition hover:opacity-80">
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="shrink-0 font-semibold text-brand transition hover:opacity-80">
                   {uploading ? "Yükleniyor..." : "Değiştir"}
                 </button>
               </div>
@@ -1581,7 +1581,7 @@ export default function ProductImageStudio() {
                     onClick={() => setSelectedSlot(slot.key)}
                     className={`rounded-lg border px-1 py-2 text-xs font-semibold transition ${
                       selectedSlot === slot.key
-                        ? "border-[#F14B2A] bg-[#F14B2A] text-white"
+                        ? "border-brand bg-brand text-white"
                         : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
                     }`}
                   >
@@ -1608,7 +1608,7 @@ export default function ProductImageStudio() {
                   >
                     {showBriefLibrary ? "Kütüphaneyi Kapat" : `Kütüphane (${briefs.length})`}
                   </button>
-                  <button type="button" onClick={() => handleAnalyzeStudio()} disabled={!currentStudio?.id || analyzingStudio} className="text-[10px] font-semibold text-[#E64A2E] disabled:opacity-40">
+                  <button type="button" onClick={() => handleAnalyzeStudio()} disabled={!currentStudio?.id || analyzingStudio} className="text-[10px] font-semibold text-brand disabled:opacity-40">
                     {analyzingStudio ? "Analiz ediliyor..." : "Ürüne göre oluştur"}
                   </button>
                 </div>
@@ -1617,7 +1617,7 @@ export default function ProductImageStudio() {
                 ref={promptTextareaRef}
                 value={sourceSummaryDraft}
                 onChange={(event) => setSourceSummaryDraft(event.target.value)}
-                className="mt-1.5 h-20 w-full resize-none rounded-lg border border-zinc-200 bg-white px-2.5 py-2 text-[11px] leading-4 text-zinc-700 outline-none transition focus:border-[#E64A2E]"
+                className="mt-1.5 h-20 w-full resize-none rounded-lg border border-zinc-200 bg-white px-2.5 py-2 text-[11px] leading-4 text-zinc-700 outline-none transition focus:border-brand"
                 placeholder="Örnek: Bu ürünü kullanarak harika bir tasarımla revize et..."
               />
 
@@ -1627,7 +1627,7 @@ export default function ProductImageStudio() {
                   value={briefTitle}
                   onChange={(e) => setBriefTitle(e.target.value)}
                   placeholder="Brief adı (isteğe bağlı)"
-                  className="min-w-0 flex-1 rounded-lg border border-zinc-200 bg-white px-2.5 py-1 text-[11px] outline-none transition focus:border-[#E64A2E]"
+                  className="min-w-0 flex-1 rounded-lg border border-zinc-200 bg-white px-2.5 py-1 text-[11px] outline-none transition focus:border-brand"
                 />
                 <button
                   type="button"
@@ -1655,7 +1655,7 @@ export default function ProductImageStudio() {
                           <button
                             type="button"
                             onClick={() => handleUseBrief(brief)}
-                            className="rounded px-1.5 py-0.5 text-[9px] font-bold text-[#E64A2E] hover:bg-orange-50"
+                            className="rounded px-1.5 py-0.5 text-[9px] font-bold text-brand hover:bg-orange-50"
                           >
                             Kullan
                           </button>
@@ -1685,7 +1685,7 @@ export default function ProductImageStudio() {
                     onClick={() => setSelectedCategory(key)}
                     className={`flex items-center gap-1.5 rounded-xl border px-2 py-2 text-left text-xs font-semibold transition ${
                       selectedCategory === key
-                        ? "border-[#FFC8BB] bg-[#FFF2EF] text-[#E64A2E]"
+                        ? "border-[#FFC8BB] bg-[#FFF2EF] text-brand"
                         : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
                     }`}
                   >
@@ -1699,7 +1699,7 @@ export default function ProductImageStudio() {
                 type="button"
                 disabled={!currentStudio?.id || aiCategorySuggesting}
                 onClick={handleAiCategorySuggest}
-                className="mt-2 flex w-full items-center gap-1.5 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 px-2.5 py-2 text-left text-[11px] text-zinc-500 transition hover:border-[#E64A2E] hover:bg-orange-50 hover:text-[#E64A2E] disabled:opacity-50"
+                className="mt-2 flex w-full items-center gap-1.5 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 px-2.5 py-2 text-left text-[11px] text-zinc-500 transition hover:border-brand hover:bg-orange-50 hover:text-brand disabled:opacity-50"
               >
                 <span>🤖</span>
                 {aiCategorySuggesting ? "AI analiz ediyor..." : "AI ile ürün kategorisi öner"}
@@ -1768,7 +1768,7 @@ export default function ProductImageStudio() {
                       </div>
                       {/* Checkbox */}
                       <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition ${
-                        active ? "border-[#F14B2A] bg-[#F14B2A]" : "border-zinc-300 bg-white"
+                        active ? "border-brand bg-brand" : "border-zinc-300 bg-white"
                       }`}>
                         {active && <svg className="h-3 w-3 text-white" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                       </div>
@@ -1791,7 +1791,7 @@ export default function ProductImageStudio() {
                     type="button"
                     onClick={() => setSelectedBgStyle(prev => prev === style.key ? "" : style.key)}
                     className={`rounded-lg border-2 py-2 text-xs font-semibold transition ${
-                      selectedBgStyle === style.key ? "border-[#F14B2A] ring-2 ring-[#F14B2A]/20" : "border-zinc-200"
+                      selectedBgStyle === style.key ? "border-brand ring-2 ring-brand/20" : "border-zinc-200"
                     }`}
                     style={{ background: style.bg, color: style.key === "koyu" ? "#fff" : "#3f3f46" }}
                   >
@@ -1821,7 +1821,7 @@ export default function ProductImageStudio() {
                     ? handleGenerateAds(true)
                     : handleGenerateProducts(true)
                 }
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#F14B2A] px-4 py-3 text-sm font-bold text-white shadow-md shadow-orange-200 transition hover:bg-[#D93E1F] disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 text-sm font-bold text-white shadow-md shadow-orange-200 transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {generating && (activeTab === "reklam-studyosu" ? job?.mode === "ad" : job?.mode === "product") ? (
                   <>⏳ Üretiliyor...</>
@@ -1893,7 +1893,7 @@ export default function ProductImageStudio() {
                       <span>{job.completed}/{job.total}</span>
                     </div>
                     <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-zinc-200">
-                      <div className="h-full rounded-full bg-[#F14B2A] transition-all" style={{ width: `${progress}%` }} />
+                      <div className="h-full rounded-full bg-brand transition-all" style={{ width: `${progress}%` }} />
                     </div>
                   </div>
                 )}
@@ -1913,7 +1913,7 @@ export default function ProductImageStudio() {
                           onClick={() => setSelectedRatio(ratio.key)}
                           className={`rounded-lg px-3 py-1.5 text-[11px] font-bold transition ${
                             selectedRatio === ratio.key
-                              ? "bg-[#F14B2A] text-white"
+                              ? "bg-brand text-white"
                               : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
                           }`}
                           title={(ratio as { desc?: string }).desc || ratio.key}
@@ -1947,7 +1947,7 @@ export default function ProductImageStudio() {
                                 <img src={creationImageUrl} alt="AI üretilen görsel" className="h-full w-full object-cover" />
                               ) : creationGenerating ? (
                                 <div className="flex flex-col items-center gap-3">
-                                  <div className="h-10 w-10 animate-spin rounded-full border-3 border-zinc-300 border-t-[#F14B2A]" />
+                                  <div className="h-10 w-10 animate-spin rounded-full border-3 border-zinc-300 border-t-brand" />
                                   <span className="text-[11px] font-semibold text-zinc-400">Görsel üretiliyor...</span>
                                 </div>
                               ) : (
@@ -2009,7 +2009,7 @@ export default function ProductImageStudio() {
                     </div>
                     <h3 className="mt-5 text-base font-extrabold text-zinc-800">Görseliniz Hazır!</h3>
                     <p className="mt-2 max-w-sm text-sm leading-relaxed text-zinc-500">
-                      Lütfen sol paneldeki <strong className="text-zinc-700">platform, arka plan stili</strong> ve <strong className="text-zinc-700">kategori</strong> seçeneklerini belirleyin ve ardından <strong className="text-[#E64A2E]">✶ Görsel Oluştur</strong> butonuna basın.
+                      Lütfen sol paneldeki <strong className="text-zinc-700">platform, arka plan stili</strong> ve <strong className="text-zinc-700">kategori</strong> seçeneklerini belirleyin ve ardından <strong className="text-brand">✶ Görsel Oluştur</strong> butonuna basın.
                     </p>
                     <div className="mt-4 flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-2.5">
                       <span className="text-amber-500">💡</span>
@@ -2026,7 +2026,7 @@ export default function ProductImageStudio() {
                         <div className="relative bg-gradient-to-b from-zinc-100 to-zinc-50">
                           <div className="flex aspect-[4/5] flex-col items-center justify-center gap-3">
                             <div className="relative">
-                              <div className="h-12 w-12 animate-spin rounded-full border-[3px] border-zinc-200 border-t-[#F14B2A]" />
+                              <div className="h-12 w-12 animate-spin rounded-full border-[3px] border-zinc-200 border-t-brand" />
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <span className="text-sm">🎨</span>
                               </div>
@@ -2054,7 +2054,7 @@ export default function ProductImageStudio() {
                   {currentStudio?.variants?.map((variant) => {
                     const selected = selectedVariant?.id === variant.id;
                     return (
-                      <article key={variant.id} className={`overflow-hidden rounded-xl border bg-white transition ${selected ? "border-[#F14B2A] shadow-[0_8px_20px_rgba(241,75,42,0.14)]" : "border-zinc-200 hover:border-zinc-300"}`}>
+                      <article key={variant.id} className={`overflow-hidden rounded-xl border bg-white transition ${selected ? "border-brand shadow-[0_8px_20px_rgba(241,75,42,0.14)]" : "border-zinc-200 hover:border-zinc-300"}`}>
                         <div className={`relative ${variant.background.toLowerCase().includes("koyu") || variant.background.toLowerCase().includes("gece") ? "bg-[#181512]" : "bg-[#FAF7F2]"}`}>
                           <div className="absolute left-2 right-2 top-2 z-10 flex items-start justify-between gap-1">
                             <span className={`max-w-[65%] truncate rounded-lg px-2 py-1 text-[10px] font-bold ${toneClasses(variant.badge_tone)}`}>{variant.badge_label || variant.platform}</span>
@@ -2088,7 +2088,7 @@ export default function ProductImageStudio() {
                             <button
                               type="button"
                               onClick={() => downloadImage(mediaUrl(variant.preview_url), variant.name || "gorsel")}
-                              className="rounded-lg bg-[#F14B2A] py-1.5 text-center text-xs font-bold text-white transition hover:opacity-90"
+                              className="rounded-lg bg-brand py-1.5 text-center text-xs font-bold text-white transition hover:opacity-90"
                             >
                               ↓ İndir
                             </button>
@@ -2152,7 +2152,7 @@ export default function ProductImageStudio() {
                                 : [...prev, format.key]
                             )
                           }
-                          className={`shrink-0 rounded-md px-2.5 py-1 text-xs font-semibold transition ${active ? "bg-[#F14B2A] text-white" : "border border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"}`}
+                          className={`shrink-0 rounded-md px-2.5 py-1 text-xs font-semibold transition ${active ? "bg-brand text-white" : "border border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"}`}
                         >
                           {format.format_label}
                         </button>
@@ -2165,7 +2165,7 @@ export default function ProductImageStudio() {
                     <button
                       type="button"
                       onClick={() => setTextMode("ai")}
-                      className={`rounded-md px-2.5 py-1 text-xs font-semibold transition ${textMode === "ai" ? "bg-[#F14B2A] text-white" : "border border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"}`}
+                      className={`rounded-md px-2.5 py-1 text-xs font-semibold transition ${textMode === "ai" ? "bg-brand text-white" : "border border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"}`}
                     >
                       AI Oluştursun
                     </button>
@@ -2195,7 +2195,7 @@ export default function ProductImageStudio() {
                       <span>{job.completed}/{job.total}</span>
                     </div>
                     <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-zinc-200">
-                      <div className="h-full rounded-full bg-[#F14B2A] transition-all" style={{ width: `${progress}%` }} />
+                      <div className="h-full rounded-full bg-brand transition-all" style={{ width: `${progress}%` }} />
                     </div>
                   </div>
                 )}
@@ -2204,7 +2204,7 @@ export default function ProductImageStudio() {
                   {currentStudio?.ad_variants?.map((variant) => {
                     const selected = selectedAdVariant?.id === variant.id;
                     return (
-                      <article key={variant.id} className={`overflow-hidden rounded-xl border bg-white transition ${selected ? "border-[#F14B2A] shadow-[0_8px_20px_rgba(241,75,42,0.14)]" : "border-zinc-200 hover:border-zinc-300"}`}>
+                      <article key={variant.id} className={`overflow-hidden rounded-xl border bg-white transition ${selected ? "border-brand shadow-[0_8px_20px_rgba(241,75,42,0.14)]" : "border-zinc-200 hover:border-zinc-300"}`}>
                         <div className="relative">
                           <div className="absolute left-2 right-2 top-2 z-10 flex items-start justify-between gap-1">
                             <span className={`max-w-[70%] truncate rounded-lg px-2 py-1 text-[10px] font-bold ${toneClasses(variant.badge_tone)}`}>
@@ -2238,7 +2238,7 @@ export default function ProductImageStudio() {
                             <button
                               type="button"
                               onClick={() => downloadImage(mediaUrl(variant.preview_url), variant.name || "kreatif")}
-                              className="rounded-lg bg-[#F14B2A] py-1.5 text-center text-xs font-bold text-white transition hover:opacity-90"
+                              className="rounded-lg bg-brand py-1.5 text-center text-xs font-bold text-white transition hover:opacity-90"
                             >
                               ↓ İndir
                             </button>
@@ -2271,7 +2271,7 @@ export default function ProductImageStudio() {
                   <button
                     type="button"
                     onClick={() => setShowBrandSelector(!showBrandSelector)}
-                    className="flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-left transition hover:border-[#F14B2A]"
+                    className="flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-left transition hover:border-brand"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       {(() => {
@@ -2281,7 +2281,7 @@ export default function ProductImageStudio() {
                             {brand.logo_url ? (
                               <img src={brand.logo_url.startsWith('http') ? brand.logo_url : mediaUrl(brand.logo_url)} alt={brand.name} className="h-8 w-8 rounded-lg object-cover border border-zinc-100" />
                             ) : (
-                              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#F14B2A] to-[#D93E1F] text-[10px] font-extrabold text-white">
+                              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand to-brand-dark text-[10px] font-extrabold text-white">
                                 {brand.name.substring(0, 2).toUpperCase()}
                               </div>
                             )}
@@ -2315,7 +2315,7 @@ export default function ProductImageStudio() {
                             {brand.logo_url ? (
                               <img src={brand.logo_url.startsWith('http') ? brand.logo_url : mediaUrl(brand.logo_url)} alt={brand.name} className="h-8 w-8 rounded-lg object-cover border border-zinc-100" />
                             ) : (
-                              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#F14B2A] to-[#D93E1F] text-[10px] font-extrabold text-white">
+                              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand to-brand-dark text-[10px] font-extrabold text-white">
                                 {brand.name.substring(0, 2).toUpperCase()}
                               </div>
                             )}
@@ -2324,7 +2324,7 @@ export default function ProductImageStudio() {
                               {brand.sector && <p className="truncate text-[9px] text-zinc-400">{brand.sector}</p>}
                             </div>
                             {isActive && (
-                              <svg className="h-4 w-4 shrink-0 text-[#F14B2A]" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 8l3.5 3.5L13 5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                              <svg className="h-4 w-4 shrink-0 text-brand" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 8l3.5 3.5L13 5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                             )}
                           </button>
                         );
@@ -2378,7 +2378,7 @@ export default function ProductImageStudio() {
                       <button
                         type="button"
                         onClick={() => setShowBrandSelector(!showBrandSelector)}
-                        className="flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white px-3 py-2 text-left transition hover:border-[#F14B2A]"
+                        className="flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white px-3 py-2 text-left transition hover:border-brand"
                       >
                         <div className="flex items-center gap-2 min-w-0">
                           {(() => {
@@ -2388,7 +2388,7 @@ export default function ProductImageStudio() {
                                 {brand.logo_url ? (
                                   <img src={brand.logo_url.startsWith('http') ? brand.logo_url : mediaUrl(brand.logo_url)} alt={brand.name} className="h-7 w-7 rounded-lg object-cover border border-zinc-100" />
                                 ) : (
-                                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#F14B2A] to-[#D93E1F] text-[9px] font-extrabold text-white">
+                                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-brand to-brand-dark text-[9px] font-extrabold text-white">
                                     {brand.name.substring(0, 2).toUpperCase()}
                                   </div>
                                 )}
@@ -2416,12 +2416,12 @@ export default function ProductImageStudio() {
                                 {brand.logo_url ? (
                                   <img src={brand.logo_url.startsWith('http') ? brand.logo_url : mediaUrl(brand.logo_url)} alt={brand.name} className="h-7 w-7 rounded-lg object-cover border border-zinc-100" />
                                 ) : (
-                                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#F14B2A] to-[#D93E1F] text-[9px] font-extrabold text-white">
+                                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-brand to-brand-dark text-[9px] font-extrabold text-white">
                                     {brand.name.substring(0, 2).toUpperCase()}
                                   </div>
                                 )}
                                 <span className="truncate text-xs font-bold text-zinc-800 flex-1">{brand.name}</span>
-                                {isActive && <svg className="h-3.5 w-3.5 shrink-0 text-[#F14B2A]" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 8l3.5 3.5L13 5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                                {isActive && <svg className="h-3.5 w-3.5 shrink-0 text-brand" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 8l3.5 3.5L13 5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                               </button>
                             );
                           })}
@@ -2468,7 +2468,7 @@ export default function ProductImageStudio() {
                             : setSelectedVariantId(variant.id)
                         }
                         className={`overflow-hidden rounded-lg border-2 transition ${
-                          isActive ? "border-[#F14B2A] shadow-sm" : "border-zinc-200 hover:border-zinc-300"
+                          isActive ? "border-brand shadow-sm" : "border-zinc-200 hover:border-zinc-300"
                         }`}
                       >
                         {activeTab === "reklam-studyosu" ? (
@@ -2547,7 +2547,7 @@ export default function ProductImageStudio() {
                       type="button"
                       onClick={() => setCurrentStudio(studio)}
                       className={`flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left transition ${
-                        currentStudio?.id === studio.id ? "border-[#FBC7B9] bg-[#FFF3EF]" : "border-zinc-200 bg-white"
+                        currentStudio?.id === studio.id ? "border-[#FBC7B9] bg-brand-soft" : "border-zinc-200 bg-white"
                       }`}
                     >
                       <img src={mediaUrl(studio.source_image)} alt={studio.title} className="h-14 w-14 rounded-xl object-cover" />
@@ -2600,7 +2600,7 @@ export default function ProductImageStudio() {
               {/* AI Önerisi */}
               {(activeTab === "reklam-studyosu" ? selectedAdVariant?.design_notes : selectedVariant?.design_notes) && (
                 <div className="mt-4 rounded-xl border border-[#FECAB9] bg-[#FFF4F0] px-3 py-3">
-                  <p className="text-[11px] font-bold text-[#E64A2E]">✶ AI Önerisi</p>
+                  <p className="text-[11px] font-bold text-brand">✶ AI Önerisi</p>
                   <p className="mt-1.5 text-[12px] leading-5 text-zinc-600">
                     {activeTab === "reklam-studyosu" ? selectedAdVariant?.design_notes : selectedVariant?.design_notes}
                   </p>
@@ -2629,7 +2629,7 @@ export default function ProductImageStudio() {
                             <button
                               type="button"
                               onClick={() => setSelectedPlatforms((prev) => [...prev, platform.key])}
-                              className="text-xs font-bold text-[#F14B2A] hover:opacity-80"
+                              className="text-xs font-bold text-brand hover:opacity-80"
                             >
                               + Ekle
                             </button>
@@ -2649,7 +2649,7 @@ export default function ProductImageStudio() {
                     mediaUrl(activeTab === "reklam-studyosu" ? selectedAdVariant?.preview_url || "" : selectedVariant?.preview_url || ""),
                     activeTab === "reklam-studyosu" ? selectedAdVariant?.name || "kreatif" : selectedVariant?.name || "gorsel"
                   )}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#F14B2A] py-3 text-sm font-bold text-white transition hover:bg-[#D93E1F]"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-3 text-sm font-bold text-white transition hover:bg-brand-dark"
                 >
                   ↓ Bu Görseli İndir
                 </button>
@@ -2695,7 +2695,7 @@ export default function ProductImageStudio() {
                         type="button"
                         onClick={() => setCurrentStudio(studio)}
                         className={`flex w-full items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left transition ${
-                          currentStudio?.id === studio.id ? "border-[#FBC7B9] bg-[#FFF3EF]" : "border-zinc-200 bg-white hover:border-zinc-300"
+                          currentStudio?.id === studio.id ? "border-[#FBC7B9] bg-brand-soft" : "border-zinc-200 bg-white hover:border-zinc-300"
                         }`}
                       >
                         <img src={mediaUrl(studio.source_image)} alt={studio.title} className="h-10 w-10 rounded-lg object-cover" />

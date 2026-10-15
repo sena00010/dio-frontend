@@ -226,7 +226,7 @@ function TemplatesPanel({ templates, applyTemplate }: { templates: TemplateDef[]
       {/* Category pills */}
       <div className="flex flex-wrap gap-1">
         {cats.map((c) => (
-          <button key={c} type="button" onClick={() => setActiveCat(c)} className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold transition ${activeCat === c ? "border-[#F14B2A] bg-orange-50 text-[#E64A2E]" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50"}`}>
+          <button key={c} type="button" onClick={() => setActiveCat(c)} className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold transition ${activeCat === c ? "border-brand bg-orange-50 text-brand" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50"}`}>
             {c}
           </button>
         ))}
@@ -236,7 +236,7 @@ function TemplatesPanel({ templates, applyTemplate }: { templates: TemplateDef[]
         {filtered.map((tpl) => (
           <button key={tpl.id} type="button" onClick={() => applyTemplate(tpl)} className="group rounded-xl border border-zinc-200 p-2.5 text-left transition hover:border-orange-300 hover:bg-orange-50 active:scale-95">
             <span className="block text-2xl">{tpl.preview}</span>
-            <p className="mt-1 text-[11px] font-bold text-zinc-700 group-hover:text-[#E64A2E] leading-tight">{tpl.name}</p>
+            <p className="mt-1 text-[11px] font-bold text-zinc-700 group-hover:text-brand leading-tight">{tpl.name}</p>
             <p className="text-[9px] text-zinc-400">{tpl.layers.length} katman</p>
           </button>
         ))}
@@ -256,7 +256,7 @@ function StickerPanel({ categories, addLayer }: { categories: StickerCat[]; addL
       {/* Category tabs */}
       <div className="flex flex-wrap gap-1">
         {categories.map((c, i) => (
-          <button key={c.name} type="button" onClick={() => setActiveCat(i)} className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold transition ${activeCat === i ? "border-[#F14B2A] bg-orange-50 text-[#E64A2E]" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50"}`}>
+          <button key={c.name} type="button" onClick={() => setActiveCat(i)} className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold transition ${activeCat === i ? "border-brand bg-orange-50 text-brand" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50"}`}>
             {c.name.split(" ")[0]}
           </button>
         ))}
@@ -434,7 +434,7 @@ export default function ProductCanvasStudio({ imageUrl, variantId, variantName, 
         <label className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">{label}</label>
         <span className="text-[10px] text-zinc-400">{value}{unit}</span>
       </div>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="h-2 w-full cursor-pointer rounded-full bg-zinc-200 accent-[#F14B2A]" />
+      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="h-2 w-full cursor-pointer rounded-full bg-zinc-200 accent-brand" />
     </div>
   );
 
@@ -443,7 +443,7 @@ export default function ProductCanvasStudio({ imageUrl, variantId, variantName, 
       <span className="text-xs font-medium text-zinc-700">{label}</span>
       <label className="relative inline-flex cursor-pointer items-center">
         <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="peer sr-only" />
-        <div className="h-5 w-9 rounded-full bg-zinc-200 transition peer-checked:bg-[#F14B2A] after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full" />
+        <div className="h-5 w-9 rounded-full bg-zinc-200 transition peer-checked:bg-brand after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full" />
       </label>
     </div>
   );
@@ -463,7 +463,7 @@ export default function ProductCanvasStudio({ imageUrl, variantId, variantName, 
         <div className="flex items-center gap-2">
           {error && <span className="text-[11px] text-red-500">⚠️ {error}</span>}
           <button type="button" onClick={() => { setLayers([]); setEffects(DEFAULT_EFFECTS); }} className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-500 transition hover:bg-zinc-50">↺ Sıfırla</button>
-          <button type="button" onClick={handleSave} disabled={saving || !bgDataUrl} className={`rounded-lg px-4 py-1.5 text-xs font-bold text-white transition disabled:opacity-50 ${saveSuccess ? "bg-emerald-600" : "bg-[#F14B2A] hover:bg-[#D93E1F]"}`}>
+          <button type="button" onClick={handleSave} disabled={saving || !bgDataUrl} className={`rounded-lg px-4 py-1.5 text-xs font-bold text-white transition disabled:opacity-50 ${saveSuccess ? "bg-emerald-600" : "bg-brand hover:bg-brand-dark"}`}>
             {saving ? "Kaydediliyor…" : saveSuccess ? "✓ Kaydedildi" : "💾 Kaydet"}
           </button>
         </div>
@@ -482,7 +482,7 @@ export default function ProductCanvasStudio({ imageUrl, variantId, variantName, 
             ["effects", "🌗", "Efektler"],
           ] as [Tab, string, string][]).map(([id, icon, label]) => (
             <button key={id} type="button" onClick={() => setActiveTab(id)}
-              className={`mx-1 mb-0.5 flex flex-col items-center gap-0.5 rounded-lg px-1 py-2.5 transition-all ${activeTab === id ? "border border-zinc-200 bg-white text-[#E64A2E] shadow-sm" : "border border-transparent text-zinc-500 hover:bg-white/60"}`}>
+              className={`mx-1 mb-0.5 flex flex-col items-center gap-0.5 rounded-lg px-1 py-2.5 transition-all ${activeTab === id ? "border border-zinc-200 bg-white text-brand shadow-sm" : "border border-transparent text-zinc-500 hover:bg-white/60"}`}>
               <span className="text-base">{icon}</span>
               <span className="mt-0.5 text-[9px] font-medium">{label}</span>
             </button>
@@ -539,7 +539,7 @@ export default function ProductCanvasStudio({ imageUrl, variantId, variantName, 
                     </p>
 
                     {/* Text */}
-                    <textarea value={selectedLayer.text} onChange={(e) => updateLayer(selectedLayer.id, { text: e.target.value })} rows={2} className="w-full resize-none rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs outline-none focus:border-[#E64A2E]" />
+                    <textarea value={selectedLayer.text} onChange={(e) => updateLayer(selectedLayer.id, { text: e.target.value })} rows={2} className="w-full resize-none rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs outline-none focus:border-brand" />
 
                     {/* Font */}
                     <div>
@@ -553,16 +553,16 @@ export default function ProductCanvasStudio({ imageUrl, variantId, variantName, 
                     <div className="grid grid-cols-3 gap-1.5">
                       <div>
                         <label className="mb-0.5 block text-[10px] text-zinc-400">{selectedLayer.font_size}px</label>
-                        <input type="range" min={8} max={80} value={selectedLayer.font_size} onChange={(e) => updateLayer(selectedLayer.id, { font_size: Number(e.target.value) })} className="h-2 w-full cursor-pointer rounded-full bg-zinc-200 accent-[#F14B2A]" />
+                        <input type="range" min={8} max={80} value={selectedLayer.font_size} onChange={(e) => updateLayer(selectedLayer.id, { font_size: Number(e.target.value) })} className="h-2 w-full cursor-pointer rounded-full bg-zinc-200 accent-brand" />
                       </div>
-                      <button type="button" onClick={() => updateLayer(selectedLayer.id, { font_weight: selectedLayer.font_weight >= 700 ? 400 : 700 })} className={`rounded-lg border py-1 text-xs font-bold transition ${selectedLayer.font_weight >= 700 ? "border-[#F14B2A] bg-orange-50 text-[#F14B2A]" : "border-zinc-200 text-zinc-500"}`}>B</button>
-                      <button type="button" onClick={() => updateLayer(selectedLayer.id, { font_style: selectedLayer.font_style === "italic" ? "normal" : "italic" })} className={`rounded-lg border py-1 text-xs italic transition ${selectedLayer.font_style === "italic" ? "border-[#F14B2A] bg-orange-50 text-[#F14B2A]" : "border-zinc-200 text-zinc-500"}`}>I</button>
+                      <button type="button" onClick={() => updateLayer(selectedLayer.id, { font_weight: selectedLayer.font_weight >= 700 ? 400 : 700 })} className={`rounded-lg border py-1 text-xs font-bold transition ${selectedLayer.font_weight >= 700 ? "border-brand bg-orange-50 text-brand" : "border-zinc-200 text-zinc-500"}`}>B</button>
+                      <button type="button" onClick={() => updateLayer(selectedLayer.id, { font_style: selectedLayer.font_style === "italic" ? "normal" : "italic" })} className={`rounded-lg border py-1 text-xs italic transition ${selectedLayer.font_style === "italic" ? "border-brand bg-orange-50 text-brand" : "border-zinc-200 text-zinc-500"}`}>I</button>
                     </div>
 
                     {/* Text Align */}
                     <div className="flex gap-1">
                       {(["left", "center", "right"] as const).map((a) => (
-                        <button key={a} type="button" onClick={() => updateLayer(selectedLayer.id, { text_align: a })} className={`flex-1 rounded-lg border py-1 text-xs transition ${selectedLayer.text_align === a ? "border-[#F14B2A] bg-orange-50 text-[#F14B2A]" : "border-zinc-200 text-zinc-500"}`}>
+                        <button key={a} type="button" onClick={() => updateLayer(selectedLayer.id, { text_align: a })} className={`flex-1 rounded-lg border py-1 text-xs transition ${selectedLayer.text_align === a ? "border-brand bg-orange-50 text-brand" : "border-zinc-200 text-zinc-500"}`}>
                           {a === "left" ? "◀" : a === "center" ? "◆" : "▶"}
                         </button>
                       ))}
@@ -578,7 +578,7 @@ export default function ProductCanvasStudio({ imageUrl, variantId, variantName, 
                       <div className="flex flex-wrap items-center gap-1.5">
                         <input type="color" value={selectedLayer.color.startsWith("#") ? selectedLayer.color.slice(0, 7) : "#ffffff"} onChange={(e) => updateLayer(selectedLayer.id, { color: e.target.value })} className="h-7 w-7 cursor-pointer rounded-lg border border-zinc-200" />
                         {["#ffffff", "#000000", "#F14B2A", "#FFD93D", "#22c55e", "#3b82f6", "#d4af37"].map((c) => (
-                          <button key={c} type="button" onClick={() => updateLayer(selectedLayer.id, { color: c })} className={`h-5 w-5 rounded-md border-2 transition hover:scale-110 ${selectedLayer.color === c ? "border-[#F14B2A]" : "border-zinc-200"}`} style={{ backgroundColor: c }} />
+                          <button key={c} type="button" onClick={() => updateLayer(selectedLayer.id, { color: c })} className={`h-5 w-5 rounded-md border-2 transition hover:scale-110 ${selectedLayer.color === c ? "border-brand" : "border-zinc-200"}`} style={{ backgroundColor: c }} />
                         ))}
                       </div>
                     </div>
@@ -588,19 +588,19 @@ export default function ProductCanvasStudio({ imageUrl, variantId, variantName, 
                       <label className="mb-1 block text-[10px] font-bold uppercase text-zinc-400">Büyük Harf</label>
                       <div className="flex gap-1">
                         {([["uppercase", "AA"], ["capitalize", "Aa"], ["none", "ab"]] as const).map(([v, l]) => (
-                          <button key={v} type="button" onClick={() => updateLayer(selectedLayer.id, { text_transform: v })} className={`flex-1 rounded-lg border py-1 text-xs transition ${(selectedLayer.text_transform || "none") === v ? "border-[#F14B2A] bg-orange-50 text-[#F14B2A]" : "border-zinc-200 text-zinc-500"}`}>{l}</button>
+                          <button key={v} type="button" onClick={() => updateLayer(selectedLayer.id, { text_transform: v })} className={`flex-1 rounded-lg border py-1 text-xs transition ${(selectedLayer.text_transform || "none") === v ? "border-brand bg-orange-50 text-brand" : "border-zinc-200 text-zinc-500"}`}>{l}</button>
                         ))}
                       </div>
                     </div>
 
                     {/* Text Shadow / Glow */}
                     <div className="grid grid-cols-2 gap-1.5">
-                      <button type="button" onClick={() => updateLayer(selectedLayer.id, { text_shadow: !selectedLayer.text_shadow })} className={`rounded-lg border py-1.5 text-[10px] font-medium transition ${selectedLayer.text_shadow ? "border-[#F14B2A] bg-orange-50 text-[#F14B2A]" : "border-zinc-200 text-zinc-500"}`}>
+                      <button type="button" onClick={() => updateLayer(selectedLayer.id, { text_shadow: !selectedLayer.text_shadow })} className={`rounded-lg border py-1.5 text-[10px] font-medium transition ${selectedLayer.text_shadow ? "border-brand bg-orange-50 text-brand" : "border-zinc-200 text-zinc-500"}`}>
                         {selectedLayer.text_shadow ? "Gölge ✓" : "Gölge Ekle"}
                       </button>
                       <div>
                         <label className="mb-0.5 block text-[9px] text-zinc-400">Opaklık: {Math.round((selectedLayer.opacity ?? 1) * 100)}%</label>
-                        <input type="range" min={10} max={100} value={Math.round((selectedLayer.opacity ?? 1) * 100)} onChange={(e) => updateLayer(selectedLayer.id, { opacity: Number(e.target.value) / 100 })} className="h-2 w-full cursor-pointer rounded-full bg-zinc-200 accent-[#F14B2A]" />
+                        <input type="range" min={10} max={100} value={Math.round((selectedLayer.opacity ?? 1) * 100)} onChange={(e) => updateLayer(selectedLayer.id, { opacity: Number(e.target.value) / 100 })} className="h-2 w-full cursor-pointer rounded-full bg-zinc-200 accent-brand" />
                       </div>
                     </div>
 
@@ -609,7 +609,7 @@ export default function ProductCanvasStudio({ imageUrl, variantId, variantName, 
                       <label className="mb-1 block text-[10px] font-bold uppercase text-zinc-400">Metin Çerçevesi (Stroke)</label>
                       <div className="flex items-center gap-2">
                         <input type="color" value={selectedLayer.stroke_color || "#000000"} onChange={(e) => updateLayer(selectedLayer.id, { stroke_color: e.target.value })} className="h-6 w-6 cursor-pointer rounded border border-zinc-200" />
-                        <input type="range" min={0} max={8} step={0.5} value={selectedLayer.stroke_width ?? 0} onChange={(e) => updateLayer(selectedLayer.id, { stroke_width: Number(e.target.value) })} className="flex-1 h-2 cursor-pointer rounded-full bg-zinc-200 accent-[#F14B2A]" />
+                        <input type="range" min={0} max={8} step={0.5} value={selectedLayer.stroke_width ?? 0} onChange={(e) => updateLayer(selectedLayer.id, { stroke_width: Number(e.target.value) })} className="flex-1 h-2 cursor-pointer rounded-full bg-zinc-200 accent-brand" />
                         <span className="text-[10px] text-zinc-400 w-5">{selectedLayer.stroke_width ?? 0}</span>
                       </div>
                     </div>
@@ -688,7 +688,7 @@ export default function ProductCanvasStudio({ imageUrl, variantId, variantName, 
                   <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-zinc-400">🎨 Renk Filtresi</label>
                   <div className="grid grid-cols-3 gap-1">
                     {(["none", "warm", "cool", "sepia", "vintage", "dramatic", "fade", "hdr", "noir", "duotone"] as const).map((f) => (
-                      <button key={f} type="button" onClick={() => setFx("colorFilter", f)} className={`rounded-lg border py-1.5 text-[10px] font-semibold capitalize transition ${effects.colorFilter === f ? "border-[#F14B2A] bg-orange-50 text-[#E64A2E]" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50"}`}>
+                      <button key={f} type="button" onClick={() => setFx("colorFilter", f)} className={`rounded-lg border py-1.5 text-[10px] font-semibold capitalize transition ${effects.colorFilter === f ? "border-brand bg-orange-50 text-brand" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50"}`}>
                         {f === "none" ? "Normal" : f.charAt(0).toUpperCase() + f.slice(1)}
                       </button>
                     ))}
@@ -716,7 +716,7 @@ export default function ProductCanvasStudio({ imageUrl, variantId, variantName, 
                         <label className="mb-1 block text-[10px] font-bold uppercase text-zinc-400">Yön</label>
                         <div className="grid grid-cols-3 gap-1">
                           {GRADIENT_DIRS.map((d) => (
-                            <button key={d.value} type="button" onClick={() => setFx("gradientDirection", d.value as ImageEffects["gradientDirection"])} className={`rounded-lg border py-1 text-[10px] transition ${effects.gradientDirection === d.value ? "border-[#F14B2A] bg-orange-50 text-[#E64A2E]" : "border-zinc-200 text-zinc-500"}`}>{d.label}</button>
+                            <button key={d.value} type="button" onClick={() => setFx("gradientDirection", d.value as ImageEffects["gradientDirection"])} className={`rounded-lg border py-1 text-[10px] transition ${effects.gradientDirection === d.value ? "border-brand bg-orange-50 text-brand" : "border-zinc-200 text-zinc-500"}`}>{d.label}</button>
                           ))}
                         </div>
                       </div>
@@ -900,7 +900,7 @@ export default function ProductCanvasStudio({ imageUrl, variantId, variantName, 
             ) : (
               <div className="flex aspect-square w-full items-center justify-center rounded-2xl border-2 border-dashed border-zinc-300 bg-white shadow-inner">
                 <div className="flex flex-col items-center gap-3">
-                  <div className="h-10 w-10 animate-spin rounded-full border-2 border-zinc-200 border-t-[#F14B2A]" />
+                  <div className="h-10 w-10 animate-spin rounded-full border-2 border-zinc-200 border-t-brand" />
                   <p className="text-xs text-zinc-400">Görsel yükleniyor…</p>
                 </div>
               </div>

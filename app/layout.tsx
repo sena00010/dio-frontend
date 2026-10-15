@@ -5,29 +5,29 @@ import { Providers } from "./providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"], // latin-ext: ç ğ ı İ ş için
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"], // latin-ext: ç ğ ı İ ş için
 });
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"], // latin-ext: ç ğ ı İ ş için
   weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"], // latin-ext: ç ğ ı İ ş için
   weight: ["400", "500", "600", "700"],
 });
 
 const poppins = Poppins({
   variable: "--font-poppins",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"], // latin-ext: ç ğ ı İ ş için
   weight: ["400", "500", "600", "700", "800"],
 });
 

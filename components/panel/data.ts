@@ -7,7 +7,7 @@ export const navigationGroups: NavGroup[] = [
     label: "İçerik",
     icon: "📱",
     items: [
-      { key: "dashboard", label: "Dashboard", icon: "DB" },
+      { key: "dashboard", label: "Ana Sayfa", icon: "DB" },
       { key: "icerik", label: "İçerik Yönetimi", icon: "İY" },
       { key: "takvim", label: "İçerik Takvimi", icon: "TK" },
       { key: "zamanlayici", label: "Zamanlama", icon: "ZA" },
