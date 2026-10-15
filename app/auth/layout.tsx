@@ -15,7 +15,7 @@ function RotatingWord() {
     return () => clearInterval(t);
   }, []);
   return (
-    <span key={i} className="dio-word-in inline-block bg-gradient-to-r from-white to-[#ffe08a] bg-clip-text text-transparent">
+    <span key={i} className="dio-word-in inline-block bg-gradient-to-r from-white to-[#ffd1d3] bg-clip-text text-transparent">
       {ROTATING[i]}.
     </span>
   );
@@ -53,9 +53,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#fafafa]">
       {/* Üstte hareketli kırmızı geçiş bandı ve dalga */}
-      <div className="dio-gradient-shift absolute inset-x-0 top-0 h-[400px] bg-[linear-gradient(120deg,#e6272f_0%,#ff5a3c_35%,#ff8a5c_65%,#e6272f_100%)] md:h-[52vh] md:min-h-[440px]" />
+      <div className="dio-gradient-shift absolute inset-x-0 top-0 h-[400px] bg-[linear-gradient(120deg,#e6272f_0%,#c91f26_35%,#e6272f_65%,#d4222b_100%)] md:h-[52vh] md:min-h-[440px]" />
       <div className="dio-blob pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-white/15 blur-[90px]" />
-      <div className="dio-blob-delayed pointer-events-none absolute right-0 top-24 h-80 w-80 rounded-full bg-[#ffd1b8]/25 blur-[100px]" />
+      <div className="dio-blob-delayed pointer-events-none absolute right-0 top-24 h-80 w-80 rounded-full bg-[#ff4d54]/30 blur-[100px]" />
       <svg className="absolute inset-x-0 top-[280px] h-[120px] w-full md:top-[calc(max(52vh,440px)-120px)] md:h-[160px]" viewBox="0 0 1440 160" preserveAspectRatio="none" aria-hidden>
         <path d="M0,80 C320,160 520,0 860,60 C1120,110 1300,40 1440,70 L1440,160 L0,160 Z" fill="#fafafa" />
       </svg>
@@ -82,8 +82,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
         {/* Form kartı + yanlarda örnek gönderiler */}
         <div className="relative mt-8 w-full max-w-[440px] md:mt-10">
-          <SamplePost title="Kampanyanız hazır, siz sadece onaylayın." from="#ff8a5c" to="#e6272f" className="dio-float -left-[250px] top-14 rotate-[-6deg]" />
-          <SamplePost title="Kahve yanına en iyi 5 tatlı" from="#f59e0b" to="#ef4444" className="dio-float-delayed -right-[250px] top-24 rotate-[6deg]" />
+          <SamplePost title="Kampanyanız hazır, siz sadece onaylayın." from="#ff4d54" to="#c91f26" className="dio-float -left-[250px] top-14 rotate-[-6deg]" />
+          <SamplePost title="Kahve yanına en iyi 5 tatlı" from="#e6272f" to="#9f1239" className="dio-float-delayed -right-[250px] top-24 rotate-[6deg]" />
           <div className="relative rounded-3xl bg-white p-7 shadow-[0_30px_80px_-30px_rgba(17,24,39,0.35)] ring-1 ring-black/5 sm:p-9">
             {children}
           </div>
