@@ -14,6 +14,7 @@ import { useMarketingData } from "./useMarketingData";
 const ImageStudio = dynamic(() => import("./ImageStudio"), { ssr: false });
 const CarouselEditor = dynamic(() => import("./carousel/CarouselEditor"), { ssr: false });
 const HomeScreen = dynamic(() => import("./home/HomeScreen"), { ssr: false });
+const VideoScreen = dynamic(() => import("./video/VideoScreen"), { ssr: false });
 const ContentCalendar = dynamic(() => import("./ContentCalendar"), { ssr: false });
 const KreatifStudyoScreen = dynamic(() => import("./KreatifStudyo"), { ssr: false });
 const KreatifOlusturScreen = dynamic(() => import("./KreatifOlustur"), { ssr: false });
@@ -3018,6 +3019,7 @@ export function ScreenRenderer({
         onPrepareIdea={(idea) => { startWizardWithIdea(idea); onNavigate?.("yeni-icerik"); }}
       />
     );
+  if (screen === "video") return <VideoScreen />;
   if (screen === "zamanlayici") return <ZamanlayiciScreen initialPostId={schedulePostId} />;
   if (screen === "reklam") return <ReklamScreen />;
   if (screen === "ekip") return <EkipScreen />;

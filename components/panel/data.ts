@@ -20,6 +20,7 @@ export const navigationGroups: NavGroup[] = [
       { key: "zamanlayici", label: "Zamanlama", icon: "ZA" },
       { key: "kreatif-studyo", label: "Kreatif Stüdyo", icon: "KS" },
       { key: "urun-gorseli-studyosu", label: "Ürün Görseli Stüdyosu", icon: "ÜG" },
+      { key: "video", label: "Video Oluştur", icon: "VO", badge: { text: "Yeni", variant: "new" } },
       { key: "sosyal", label: "Sosyal Medya Analizi", icon: "SM" },
     ],
   },
