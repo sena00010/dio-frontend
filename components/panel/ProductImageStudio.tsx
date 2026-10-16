@@ -1,5 +1,6 @@
 "use client";
 
+import BrandLogo from "@/components/ui/BrandLogo";
 import { useAuth } from "@/lib/auth-context";
 import api from "@/lib/api";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -2279,7 +2280,7 @@ export default function ProductImageStudio() {
                         return brand ? (
                           <>
                             {brand.logo_url ? (
-                              <img src={brand.logo_url.startsWith('http') ? brand.logo_url : mediaUrl(brand.logo_url)} alt={brand.name} className="h-8 w-8 rounded-lg object-cover border border-zinc-100" />
+                              <BrandLogo logoUrl={brand.logo_url} name={brand.name} size={32} className="rounded-lg" />
                             ) : (
                               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand to-brand-dark text-[10px] font-extrabold text-white">
                                 {brand.name.substring(0, 2).toUpperCase()}
@@ -2313,7 +2314,7 @@ export default function ProductImageStudio() {
                             className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition hover:bg-orange-50 ${isActive ? "bg-orange-50/60" : ""}`}
                           >
                             {brand.logo_url ? (
-                              <img src={brand.logo_url.startsWith('http') ? brand.logo_url : mediaUrl(brand.logo_url)} alt={brand.name} className="h-8 w-8 rounded-lg object-cover border border-zinc-100" />
+                              <BrandLogo logoUrl={brand.logo_url} name={brand.name} size={32} className="rounded-lg" />
                             ) : (
                               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand to-brand-dark text-[10px] font-extrabold text-white">
                                 {brand.name.substring(0, 2).toUpperCase()}
@@ -2386,7 +2387,7 @@ export default function ProductImageStudio() {
                             return brand ? (
                               <>
                                 {brand.logo_url ? (
-                                  <img src={brand.logo_url.startsWith('http') ? brand.logo_url : mediaUrl(brand.logo_url)} alt={brand.name} className="h-7 w-7 rounded-lg object-cover border border-zinc-100" />
+                                  <BrandLogo logoUrl={brand.logo_url} name={brand.name} size={28} className="rounded-lg" />
                                 ) : (
                                   <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-brand to-brand-dark text-[9px] font-extrabold text-white">
                                     {brand.name.substring(0, 2).toUpperCase()}
@@ -2414,7 +2415,7 @@ export default function ProductImageStudio() {
                                 className={`flex w-full items-center gap-2 px-3 py-2 text-left transition hover:bg-orange-50 ${isActive ? "bg-orange-50/60" : ""}`}
                               >
                                 {brand.logo_url ? (
-                                  <img src={brand.logo_url.startsWith('http') ? brand.logo_url : mediaUrl(brand.logo_url)} alt={brand.name} className="h-7 w-7 rounded-lg object-cover border border-zinc-100" />
+                                  <BrandLogo logoUrl={brand.logo_url} name={brand.name} size={28} className="rounded-lg" />
                                 ) : (
                                   <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-brand to-brand-dark text-[9px] font-extrabold text-white">
                                     {brand.name.substring(0, 2).toUpperCase()}

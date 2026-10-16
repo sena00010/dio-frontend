@@ -1,5 +1,6 @@
 "use client";
 
+import BrandLogo from "@/components/ui/BrandLogo";
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
 import { format } from "date-fns";
@@ -99,7 +100,7 @@ export default function BrandProfileDetail({ brand, onBack, onEdit }: BrandProfi
           
           <div className="flex items-center gap-4">
             {brand.logo_url ? (
-              <img src={`${process.env.NEXT_PUBLIC_API_URL}${brand.logo_url}`} alt={brand.name} className="h-20 w-20 rounded-2xl border-2 border-white shadow-xl object-cover bg-white" />
+              <BrandLogo logoUrl={brand.logo_url} name={brand.name} size={80} className="rounded-2xl" />
             ) : (
               <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 border-2 border-white shadow-xl text-3xl font-bold text-white tracking-widest">
                 {brand.name[0]?.toUpperCase()}

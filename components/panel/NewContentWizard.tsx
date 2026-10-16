@@ -1,5 +1,6 @@
 "use client";
 
+import BrandLogo from "@/components/ui/BrandLogo";
 import { useState, useCallback, useEffect, type ReactNode } from "react";
 import { useAuth } from "@/lib/auth-context";
 import api from "@/lib/api";
@@ -362,13 +363,7 @@ function Step1Form({
                     : "border-zinc-200 bg-white text-foreground hover:border-zinc-300 hover:bg-zinc-50"
                 }`}
               >
-                {c.logo_url ? (
-                  <img src={`${process.env.NEXT_PUBLIC_API_URL}${c.logo_url}`} alt={c.name} className="h-5 w-5 sm:h-6 sm:w-6 rounded-md object-cover" />
-                ) : (
-                  <span className="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-md bg-zinc-100 text-[10px] font-bold text-zinc-500">
-                    {c.name[0]?.toUpperCase()}
-                  </span>
-                )}
+                <BrandLogo logoUrl={c.logo_url} name={c.name} size={28} className="rounded-md" />
                 <span className="truncate">{c.name}</span>
               </button>
             ))}

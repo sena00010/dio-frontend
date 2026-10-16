@@ -83,6 +83,65 @@ async function process(src: string): Promise<string> {
 
   // Neredeyse tüm görsel silindiyse (ör. açık renkli logo düz zeminde) orijinali koru
   if (removed > w * h * 0.97) return dataUrl;
+
+  // Harf içi boşluklar (A, O, P, R...): dış zemine bağlı olmayan kapalı zemin-renkli alanlar.
+  // İnce bir çizgiyle çevriliyse (kısa mesafede dış zemine ulaşılıyorsa) boşluktur → silinir.
+  // Geniş bir renk alanının içindeyse (ör. kırmızı daire içindeki beyaz yazı) bilinçlidir → korunur.
+  const outside = visited; // dış zemin pikselleri (taşma doldurmanın gezdiği ve silinenler)
+  const isOutside = (q: number) => outside[q] === 1 && px[q * 4 + 3] < 128;
+  const reach = Math.max(4, Math.round(Math.min(w, h) * 0.15));
+  const seen = new Uint8Array(w * h);
+  const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
+  for (let start = 0; start < w * h; start++) {
+    if (seen[start] || outside[start] || dist(start * 4) > TOL) continue;
+    // Kapalı bölgeyi topla
+    const region: number[] = [];
+    const q = [start];
+    seen[start] = 1;
+    while (q.length) {
+      const p = q.pop()!;
+      region.push(p);
+      const x = p % w;
+      const nbs = [x > 0 ? p - 1 : -1, x < w - 1 ? p + 1 : -1, p >= w ? p - w : -1, p < w * (h - 1) ? p + w : -1];
+      for (const nb of nbs) {
+        if (nb < 0 || seen[nb] || outside[nb] || dist(nb * 4) > TOL) continue;
+        seen[nb] = 1;
+        q.push(nb);
+      }
+    }
+    if (region.length > w * h * 0.08) continue; // büyük kapalı alanlar bilinçli tasarımdır
+    // Bölge sınırından örnekler: kısa mesafede dış zemine ulaşılıyor mu?
+    const inRegion = new Set(region);
+    const boundary = region.filter(p => {
+      const x = p % w;
+      return (x > 0 && !inRegion.has(p - 1)) || (x < w - 1 && !inRegion.has(p + 1)) || !inRegion.has(p - w) || !inRegion.has(p + w);
+    });
+    const step = Math.max(1, Math.floor(boundary.length / 120));
+    let hits = 0, samples = 0;
+    for (let k = 0; k < boundary.length; k += step) {
+      samples++;
+      const bx = boundary[k] % w, by = Math.floor(boundary[k] / w);
+      let hit = false;
+      for (const [dx, dy] of dirs) {
+        for (let d = 1; d <= reach && !hit; d++) {
+          const x = bx + dx * d, y = by + dy * d;
+          if (x < 0 || y < 0 || x >= w || y >= h) break;
+          const qq = y * w + x;
+          if (inRegion.has(qq)) continue;
+          if (isOutside(qq)) hit = true;
+        }
+        if (hit) break;
+      }
+      if (hit) hits++;
+    }
+    if (samples > 0 && hits / samples >= 0.6) {
+      for (const p of region) {
+        const i = p * 4;
+        const d = dist(i);
+        px[i + 3] = d < TOL * 0.5 ? 0 : Math.round(px[i + 3] * ((d - TOL * 0.5) / (TOL * 0.5)));
+      }
+    }
+  }
   ctx.putImageData(data, 0, 0);
   return canvas.toDataURL("image/png");
 }

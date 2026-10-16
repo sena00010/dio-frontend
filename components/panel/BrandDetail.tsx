@@ -1,5 +1,6 @@
 "use client";
 
+import BrandLogo from "@/components/ui/BrandLogo";
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -174,7 +175,7 @@ export default function BrandDetail({
         </button>
         <div className="flex items-center gap-4 flex-1 min-w-0">
           {brand.logo_url ? (
-            <img src={`${process.env.NEXT_PUBLIC_API_URL}${brand.logo_url}`} alt={brand.name} className="h-14 w-14 rounded-2xl border border-zinc-200 object-cover shadow-md" />
+            <BrandLogo logoUrl={brand.logo_url} name={brand.name} size={56} className="rounded-2xl" />
           ) : (
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-100 to-zinc-200 border border-zinc-200 shadow-md">
               <span className="text-xl font-bold text-zinc-400">{brand.name[0]?.toUpperCase()}</span>

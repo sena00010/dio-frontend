@@ -1,5 +1,6 @@
 "use client";
 
+import BrandLogo from "@/components/ui/BrandLogo";
 import { useState, useEffect, useRef } from "react";
 import { PanelTitle, SectionCard, StatusPill } from "./ui";
 import type { ScreenKey } from "./types";
@@ -1754,13 +1755,19 @@ function IcerikScreen({ onNewContent, onOpenStudio }: { onNewContent?: () => voi
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">İçerik Yönetimi</h1>
-          <p className="subtle text-sm">
-            {brandFilter === "all"
-              ? "Tüm markalarınızın içeriklerini yönetin"
-              : `${getBrandName(Number(brandFilter))} markasının içeriklerini yönetin`}
-          </p>
+        <div className="flex items-center gap-3">
+          {brandFilter !== "all" && (() => {
+            const b = companies.find(c => String(c.id) === brandFilter);
+            return b ? <BrandLogo logoUrl={b.logo_url} name={b.name} size={44} className="rounded-xl" /> : null;
+          })()}
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">İçerik Yönetimi</h1>
+            <p className="subtle text-sm">
+              {brandFilter === "all"
+                ? "Tüm markalarınızın içeriklerini yönetin"
+                : `${getBrandName(Number(brandFilter))} markasının içeriklerini yönetin`}
+            </p>
+          </div>
         </div>
         <button
           onClick={onNewContent}
@@ -1783,18 +1790,19 @@ function IcerikScreen({ onNewContent, onOpenStudio }: { onNewContent?: () => voi
 
         {/* Brand filter */}
         {companies.length > 1 && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-muted">Marka:</span>
-            <select
-              value={brandFilter}
-              onChange={(e) => setBrandFilter(e.target.value)}
-              className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/10"
-            >
-              <option value="all">🏢 Tüm Markalar</option>
-              {companies.map((c) => (
-                <option key={c.id} value={String(c.id)}>{c.name}</option>
-              ))}
-            </select>
+          <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Marka filtresi">
+            <span className="mr-1 text-xs font-semibold text-muted">Marka:</span>
+            <button type="button" onClick={() => setBrandFilter("all")}
+              className={`rounded-lg border px-3 py-1.5 text-sm transition ${brandFilter === "all" ? "border-brand bg-brand/5 font-semibold text-brand" : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"}`}>
+              Tüm Markalar
+            </button>
+            {companies.map((c) => (
+              <button key={c.id} type="button" onClick={() => setBrandFilter(String(c.id))}
+                className={`flex items-center gap-2 rounded-lg border py-1 pl-1 pr-3 text-sm transition ${brandFilter === String(c.id) ? "border-brand bg-brand/5 font-semibold text-brand" : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"}`}>
+                <BrandLogo logoUrl={c.logo_url} name={c.name} size={26} className="rounded-md" />
+                <span className="max-w-[160px] truncate">{c.name}</span>
+              </button>
+            ))}
           </div>
         )}
       </div>
@@ -1844,9 +1852,15 @@ function IcerikScreen({ onNewContent, onOpenStudio }: { onNewContent?: () => voi
                 <p className="mt-1 text-xs text-muted line-clamp-2 leading-relaxed">{post.content}</p>
                 <div className="mt-3 flex items-center justify-between">
                   <span className="text-[11px] text-muted">{new Date(post.created_at).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" })}</span>
-                  {brandFilter === "all" && brandName && (
-                    <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-semibold text-zinc-500">{brandName}</span>
-                  )}
+                  {brandFilter === "all" && brandName && (() => {
+                    const b = companies.find(c => c.id === post.company_id);
+                    return (
+                      <span className="flex items-center gap-1.5 rounded-full bg-zinc-100 py-0.5 pl-0.5 pr-2 text-[10px] font-semibold text-zinc-600">
+                        <BrandLogo logoUrl={b?.logo_url} name={brandName} size={18} className="rounded-full" />
+                        {brandName}
+                      </span>
+                    );
+                  })()}
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 rounded-xl">
                   <button
@@ -2622,13 +2636,7 @@ function ProfilScreen() {
                     <span className="absolute right-3 top-3 rounded-full bg-brand px-2 py-0.5 text-[9px] font-bold text-white">AKTİF</span>
                   )}
                   <div className="flex items-center gap-3 mb-3">
-                    {brand.logo_url ? (
-                      <img src={`${process.env.NEXT_PUBLIC_API_URL}${brand.logo_url}`} alt={brand.name} className="h-12 w-12 rounded-xl border border-zinc-200 object-cover shadow-sm" />
-                    ) : (
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-50 border border-zinc-200 shadow-sm">
-                        <span className="text-lg font-bold text-zinc-400">{brand.name[0]?.toUpperCase()}</span>
-                      </div>
-                    )}
+                    <BrandLogo logoUrl={brand.logo_url} name={brand.name} size={48} className="rounded-xl" />
                     <div className="min-w-0 flex-1">
                       <h3 className="text-sm font-semibold text-foreground truncate">{brand.name}</h3>
                       <p className="text-[11px] text-muted">{SECTOR_LABELS[brand.sector] || brand.sector || "Sektör belirtilmemiş"}</p>
