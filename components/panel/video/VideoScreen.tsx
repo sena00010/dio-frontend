@@ -28,6 +28,7 @@ export default function VideoScreen() {
   const [custom, setCustom] = useState("");
   const [format, setFormat] = useState<"9:16" | "1:1">("9:16");
   const [voice, setVoice] = useState<"kadin" | "erkek" | "yok">("kadin");
+  const [pronunciation, setPronunciation] = useState("");
   const [posts, setPosts] = useState<PostLite[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
   const [creating, setCreating] = useState(false);
@@ -67,7 +68,7 @@ export default function VideoScreen() {
     }
     setCreating(true);
     try {
-      await api.post("/api/protected/videos", { company_id: activeCompany.id, brief, duration_sec: finalDuration, format, voice });
+      await api.post("/api/protected/videos", { company_id: activeCompany.id, brief, duration_sec: finalDuration, format, voice, pronunciation });
       toast.success("Video hazırlanıyor. Bu sayfadan ilerlemesini takip edebilirsiniz.");
       setBrief("");
       load();
@@ -132,8 +133,18 @@ export default function VideoScreen() {
             </div>
           </div>
 
+          {voice !== "yok" && (
+            <div>
+              <label htmlFor="video-pron" className="mb-1.5 block text-sm font-semibold">Telaffuz <span className="font-normal text-muted">(isteğe bağlı)</span></label>
+              <input id="video-pron" value={pronunciation} onChange={e => setPronunciation(e.target.value)}
+                placeholder="Örn: İNKA=İnka, DIO=Dio"
+                className="w-full rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-brand" />
+              <p className="mt-1 text-[11px] text-muted">Seslendirmede yanlış okunan marka/kelime varsa nasıl okunacağını yazın.</p>
+            </div>
+          )}
+
           <div className="rounded-xl bg-zinc-50 px-4 py-3 text-xs text-muted">
-            ~{scenes} sahne · {finalDuration} sn · her sahne için AI görsel{voice !== "yok" ? ", Türkçe seslendirme" : ""} ve marka renginde alt yazı. Hazırlanması genelde 1-3 dakika sürer.
+            ~{scenes} sahne · {finalDuration} sn · her sahne için AI görsel{voice !== "yok" ? ", Türkçe seslendirme" : ""} ve marka renginde alt yazı. Seslendirme sakin tempoda olduğu için süre birkaç saniye değişebilir. Hazırlanması genelde 1-3 dakika sürer.
           </div>
 
           <button type="button" onClick={create} disabled={creating || !activeCompany}
