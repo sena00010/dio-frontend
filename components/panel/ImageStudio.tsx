@@ -384,6 +384,63 @@ export default function ImageStudio({ postId, onBack, onComplete, onOpenCarousel
   }, [loading, post, autoGenTriggered, imageUrl, handleGenerate]);
 
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // ── AI yerleşim: görsele bakıp yazıları boş ve kontrastlı alanlara yerleştirir ──
+  type LayoutSnapshot = { layers: DesignLayer[]; logo: { x: number; y: number; w: number; enabled: boolean } };
+  const [autoLayouting, setAutoLayouting] = useState(false);
+  const [prevLayout, setPrevLayout] = useState<LayoutSnapshot | null>(null);
+  const autoRanFor = useRef<string>("");
+  const runAutoLayout = useCallback(async (silent = false) => {
+    if (!imageUrl || autoLayouting) return;
+    const textOf = (t: DesignLayer["type"]) => layers.find(l => l.type === t)?.text || "";
+    setAutoLayouting(true); setError("");
+    try {
+      const { data } = await api.post(`/api/protected/posts/${postId}/auto-layout`, {
+        image_url: imageUrl,
+        aspect_ratio: canvasH > CANVAS_SIZE * 1.1 ? "4:5" : "1:1",
+        headline: textOf("headline") || post?.title || "",
+        description: textOf("description"),
+        cta: textOf("cta") || "Hemen Keşfet",
+      });
+      const next: DesignLayer[] = (data.layers || []).map((l: DesignLayer) => ({
+        ...l, rotation: 0, opacity: l.opacity ?? 1,
+        letter_spacing: l.letter_spacing ?? (l.type === "headline" ? 0.5 : 0),
+        line_height: l.line_height || (l.type === "headline" ? 1.15 : 1.4),
+      }));
+      if (!next.length) throw new Error("empty");
+      setPrevLayout({ layers, logo: { x: logoX, y: logoY, w: logoWidth, enabled: logoEnabled } });
+      loadAllLayerFonts(next);
+      setLayers(next); setSelectedLayerId(null);
+      if (data.logo && logoDataUrl) {
+        setLogoX(Math.round((data.logo.x / 100) * CANVAS_SIZE));
+        setLogoY(Math.round((data.logo.y / 100) * canvasH));
+        setLogoWidth(Math.round((data.logo.max_width / 100) * CANVAS_SIZE));
+        setLogoEnabled(true);
+      }
+    } catch {
+      if (!silent) setError("AI yerleşimi yapılamadı, tekrar deneyin");
+    } finally { setAutoLayouting(false); }
+  }, [imageUrl, autoLayouting, layers, postId, canvasH, post?.title, logoX, logoY, logoWidth, logoEnabled, logoDataUrl]);
+
+  const undoAutoLayout = useCallback(() => {
+    if (!prevLayout) return;
+    setLayers(prevLayout.layers);
+    setLogoX(prevLayout.logo.x); setLogoY(prevLayout.logo.y); setLogoWidth(prevLayout.logo.w); setLogoEnabled(prevLayout.logo.enabled);
+    setPrevLayout(null);
+  }, [prevLayout]);
+
+  // Yeni görselde stüdyo ilk açıldığında bir kez otomatik yerleştir (tasarımı tamamlanmış gönderilerde değil)
+  useEffect(() => {
+    if (loading || !bgDataUrl || !imageUrl || !post || post.status === "ready") return;
+    const key = `dio:autolayout:${postId}:${imageUrl}`;
+    if (autoRanFor.current === key) return;
+    try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, "1"); } catch { /* yok say */ }
+    autoRanFor.current = key;
+    // Tuval oranı ölçülsün diye kısa gecikme
+    const t = setTimeout(() => runAutoLayout(true), 400);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, bgDataUrl, imageUrl, post, postId]);
   const handleSave = useCallback(async (): Promise<boolean> => {
     if (!compositeRef.current || !bgDataUrl) return false; setSaving(true); setError(""); setSaveSuccess(false);
     try {
@@ -423,6 +480,8 @@ export default function ImageStudio({ postId, onBack, onComplete, onOpenCarousel
         </div>
         <div className="flex items-center gap-2">
           {error && <span className="text-xs text-red-500">⚠️ {error}</span>}
+          {bgDataUrl && prevLayout && !autoLayouting && <button onClick={undoAutoLayout} className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50">↶ Geri al</button>}
+          {bgDataUrl && <button onClick={() => runAutoLayout()} disabled={autoLayouting || saving} className="rounded-lg border border-brand/30 bg-brand-soft px-3 py-1.5 text-xs font-semibold text-brand transition hover:bg-brand/10 disabled:opacity-60">{autoLayouting ? "Yerleştiriliyor…" : "✨ AI ile Yerleştir"}</button>}
           {bgDataUrl && <button onClick={handleSave} disabled={saving} className={`rounded-lg px-4 py-1.5 text-xs font-medium text-white transition ${saveSuccess ? "bg-emerald-600 hover:bg-emerald-700" : "bg-zinc-900 hover:bg-zinc-800"} disabled:opacity-50`}>{saving ? "Kaydediliyor…" : saveSuccess ? "✓ Kaydedildi" : "💾 Kaydet"}</button>}
           {bgDataUrl && <button onClick={async () => { if (await handleSave()) onComplete(); }} disabled={saving} className="rounded-lg bg-gradient-to-r from-brand to-brand-dark px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:shadow-md disabled:opacity-50">Kaydet ve Zamanla →</button>}
         </div>
@@ -559,6 +618,11 @@ export default function ImageStudio({ postId, onBack, onComplete, onOpenCarousel
         {/* CENTER CANVAS */}
         <div className="flex-1 flex items-center justify-center p-4 bg-zinc-100/50 min-w-0 border-l border-zinc-200">
           <div ref={compositeRef} className="relative" style={{ width: CANVAS_SIZE, height: canvasH, maxWidth: "100%" }}>
+            {autoLayouting && (
+              <div className="absolute inset-0 z-30 flex items-center justify-center rounded-xl bg-white/30 backdrop-blur-[2px]">
+                <span className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-brand shadow-lg">✨ AI yazıları görsele göre yerleştiriyor…</span>
+              </div>
+            )}
             {bgDataUrl ? (
               <div ref={canvasRef} className="relative overflow-hidden rounded-xl shadow-2xl" style={{ width: "100%", aspectRatio: `${CANVAS_SIZE}/${canvasH}` }} onClick={() => { setSelectedLayerId(null); setEditingLayerId(null); }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
