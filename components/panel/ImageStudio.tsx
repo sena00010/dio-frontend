@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import api from "@/lib/api";
 import { toPng } from "html-to-image";
+import { makeLogoTransparent } from "@/lib/logoTransparent";
 
 // ── Types ──
 type PostData = {
@@ -326,7 +327,7 @@ export default function ImageStudio({ postId, onBack, onComplete, onOpenCarousel
   useEffect(() => {
     if (!company?.logo_url) { const ini = (company?.name || "?").charAt(0).toUpperCase(); let pc = "#e6272f"; if (company?.brand_colors) { try { const c = JSON.parse(company.brand_colors); if (c.length) pc = c[0]; } catch {/* */} } const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" rx="40" fill="${pc}"/><text x="100" y="100" text-anchor="middle" dominant-baseline="central" font-family="Inter,sans-serif" font-size="100" font-weight="700" fill="white">${ini}</text></svg>`; setLogoDataUrl(`data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`); return; }
     const fullUrl = company.logo_url.startsWith("/") ? `${process.env.NEXT_PUBLIC_API_URL}${company.logo_url}` : company.logo_url;
-    fetch(fullUrl, { mode: "cors" }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.blob(); }).then(b => { const r = new FileReader(); r.onload = () => { setLogoDataUrl(r.result as string); setLogoEnabled(true); }; r.readAsDataURL(b); }).catch(() => { const img = new Image(); img.crossOrigin = "anonymous"; img.onload = () => { const c = document.createElement("canvas"); c.width = img.naturalWidth; c.height = img.naturalHeight; const ctx = c.getContext("2d"); if (ctx) { ctx.drawImage(img,0,0); setLogoDataUrl(c.toDataURL("image/png")); } }; img.onerror = () => setLogoDataUrl(""); img.src = fullUrl; });
+    fetch(fullUrl, { mode: "cors" }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.blob(); }).then(b => { const r = new FileReader(); r.onload = () => { makeLogoTransparent(r.result as string).then(u => { setLogoDataUrl(u); setLogoEnabled(true); }); }; r.readAsDataURL(b); }).catch(() => { const img = new Image(); img.crossOrigin = "anonymous"; img.onload = () => { const c = document.createElement("canvas"); c.width = img.naturalWidth; c.height = img.naturalHeight; const ctx = c.getContext("2d"); if (ctx) { ctx.drawImage(img,0,0); makeLogoTransparent(c.toDataURL("image/png")).then(setLogoDataUrl); } }; img.onerror = () => setLogoDataUrl(""); img.src = fullUrl; });
   }, [company?.logo_url, company?.name, company?.brand_colors]);
 
   useEffect(() => { if (!logoDragging) return; const hm = (e: MouseEvent) => { const r = canvasRef.current?.getBoundingClientRect(); if (!r) return; setLogoX(Math.max(0, Math.min(CANVAS_SIZE-logoWidth, e.clientX-r.left-logoDragOffset.dx))); setLogoY(Math.max(0, Math.min(canvasH-logoWidth, e.clientY-r.top-logoDragOffset.dy))); }; const hu = () => setLogoDragging(false); window.addEventListener("mousemove", hm); window.addEventListener("mouseup", hu); return () => { window.removeEventListener("mousemove", hm); window.removeEventListener("mouseup", hu); }; }, [logoDragging, logoDragOffset, logoWidth, canvasH]);
@@ -503,7 +504,7 @@ export default function ImageStudio({ postId, onBack, onComplete, onOpenCarousel
                 {logoEnabled && logoDataUrl && (<>
                   <div className="flex items-center gap-3 rounded-lg bg-zinc-50 p-3">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={logoDataUrl} alt="Logo" className="h-12 w-12 rounded-lg border border-zinc-200 object-contain bg-white p-1" />
+                    <img src={logoDataUrl} alt="Logo" className="h-12 w-12 rounded-lg border border-zinc-200 object-contain p-1" />
                     <div><p className="text-xs font-medium">{company?.name}</p><p className={`text-[10px] ${company?.logo_url?"text-emerald-600":"text-blue-500"}`}>{company?.logo_url?"✓ Yüklenen":"✎ Otomatik"}</p></div>
                   </div>
                   <div><label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted">Boyut: {logoWidth}px</label>

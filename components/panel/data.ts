@@ -1,29 +1,35 @@
 import type { NavGroup } from "./types";
 
-// Menü işe göre gruplanır: önce günlük içerik işi, sonra analiz/reklam, en sonda SEO.
+// Ürünün üç ana bölümü (Sosyal Medya, Reklam, SEO) ayrı ve her zaman açık gruplar halinde.
 export const navigationGroups: NavGroup[] = [
   {
-    id: "icerik",
-    label: "İçerik",
-    icon: "📱",
+    id: "genel",
+    label: "Genel",
+    icon: "🏠",
     items: [
       { key: "dashboard", label: "Ana Sayfa", icon: "DB" },
+    ],
+  },
+  {
+    id: "sosyal-medya",
+    label: "Sosyal Medya",
+    icon: "📱",
+    items: [
       { key: "icerik", label: "İçerik Yönetimi", icon: "İY" },
       { key: "takvim", label: "İçerik Takvimi", icon: "TK" },
       { key: "zamanlayici", label: "Zamanlama", icon: "ZA" },
       { key: "kreatif-studyo", label: "Kreatif Stüdyo", icon: "KS" },
       { key: "urun-gorseli-studyosu", label: "Ürün Görseli Stüdyosu", icon: "ÜG" },
+      { key: "sosyal", label: "Sosyal Medya Analizi", icon: "SM" },
     ],
   },
   {
-    id: "analiz",
-    label: "Analiz & Reklam",
-    icon: "📈",
+    id: "reklam",
+    label: "Reklam",
+    icon: "📣",
     items: [
-      { key: "sosyal", label: "Sosyal Medya Analizi", icon: "SM" },
-      { key: "performans", label: "Performans", icon: "PF" },
       { key: "reklam", label: "Reklam Yönetimi", icon: "RY" },
-      { key: "yapay-zeka", label: "Yapay Zeka Asistanı", icon: "YZ" },
+      { key: "performans", label: "Performans", icon: "PF" },
     ],
   },
   {
@@ -42,10 +48,11 @@ export const navigationGroups: NavGroup[] = [
     ],
   },
   {
-    id: "profil",
-    label: "Hesap",
+    id: "hesap",
+    label: "Araçlar ve Hesap",
     icon: "👤",
     items: [
+      { key: "yapay-zeka", label: "Yapay Zeka Asistanı", icon: "YZ" },
       { key: "profil", label: "Firma ve Markalar", icon: "FM" },
       { key: "ekip", label: "Ekip Yönetimi", icon: "EY" },
     ],

@@ -11,6 +11,7 @@ import {
   SparklesIcon,
 } from "@heroicons/react/24/outline";
 import type { NavGroup, ScreenKey } from "../types";
+import { useTransparentLogo } from "@/lib/logoTransparent";
 
 // Panelin tek kenar çubuğu: masaüstünde sabit, mobilde çekmece içinde aynı bileşen.
 
@@ -39,9 +40,10 @@ const initialsOf = (name: string) =>
   name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toLocaleUpperCase("tr-TR") || "?";
 
 function BrandAvatar({ company, size = 36 }: { company: Company | null; size?: number }) {
-  if (company?.logo_url) {
+  const logo = useTransparentLogo(company?.logo_url ? (company.logo_url.startsWith("/") ? `${apiUrl}${company.logo_url}` : company.logo_url) : null);
+  if (logo) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={company.logo_url.startsWith("/") ? `${apiUrl}${company.logo_url}` : company.logo_url} alt="" className="rounded-lg bg-white object-contain" style={{ width: size, height: size }} />;
+    return <img src={logo} alt="" className="rounded-lg object-contain" style={{ width: size, height: size }} />;
   }
   return (
     <span className="flex items-center justify-center rounded-lg bg-brand font-bold text-white" style={{ width: size, height: size, fontSize: size * 0.36 }}>
@@ -136,6 +138,9 @@ export default function Sidebar({
                           {selected && <span className="absolute -left-3 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-brand" />}
                           {Icon ? <Icon className={`h-[18px] w-[18px] shrink-0 ${selected ? "text-brand-light" : "text-zinc-500"}`} /> : <span className="w-[18px]" />}
                           <span className="truncate">{item.label}</span>
+                          {item.badge && (
+                            <span className="ml-auto rounded-full bg-brand px-1.5 py-px text-[10px] font-bold text-white">{item.badge.text}</span>
+                          )}
                         </button>
                       </li>
                     );

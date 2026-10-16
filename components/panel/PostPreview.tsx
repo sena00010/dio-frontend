@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { useTransparentLogo } from "@/lib/logoTransparent";
 
 // Gönderinin platformda nasıl görüneceğini gösteren önizleme (Instagram / LinkedIn / genel feed)
 
@@ -44,9 +45,10 @@ function CarouselMedia({ slides }: { slides: ReactNode[] }) {
 }
 
 function Avatar({ brandName, logoUrl, size }: { brandName: string; logoUrl?: string; size: number }) {
-  if (logoUrl) {
+  const logo = useTransparentLogo(logoUrl);
+  if (logo) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={logoUrl} alt={brandName} className="rounded-full border border-zinc-200 bg-white object-contain" style={{ width: size, height: size }} />;
+    return <img src={logo} alt={brandName} className="rounded-full object-contain" style={{ width: size, height: size }} />;
   }
   return (
     <div className="flex items-center justify-center rounded-full bg-brand text-white font-bold" style={{ width: size, height: size, fontSize: size * 0.42 }}>

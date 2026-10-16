@@ -5,6 +5,7 @@ import { toPng } from "html-to-image";
 import api from "@/lib/api";
 import { useToast } from "@/components/ui/Toast";
 import { getApiError } from "@/lib/apiError";
+import { makeLogoTransparent } from "@/lib/logoTransparent";
 import PostPreview from "../PostPreview";
 import SlideCanvas, { type Slide } from "./SlideCanvas";
 
@@ -63,7 +64,8 @@ export default function CarouselEditor({ postId, onBack, onComplete }: { postId:
     const urls = [data?.company.logo_url, ...slides.map(s => s.image_url)].map(abs).filter(u => u && !requested.current.has(u));
     urls.forEach(u => {
       requested.current.add(u);
-      toDataUrl(u).then(d => setImages(m => ({ ...m, [u]: d }))).catch(() => setImages(m => ({ ...m, [u]: u })));
+      const isLogo = u === abs(data?.company.logo_url);
+      (isLogo ? makeLogoTransparent(u) : toDataUrl(u)).then(d => setImages(m => ({ ...m, [u]: d }))).catch(() => setImages(m => ({ ...m, [u]: u })));
     });
   }, [data?.company.logo_url, slides]);
 

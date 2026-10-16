@@ -31,6 +31,7 @@ import {
   DocumentTextIcon,
   WrenchScrewdriverIcon,
   LinkIcon,
+  VideoCameraIcon,
 } from "@heroicons/react/24/outline";
 
 /* ── Nav item icon map ────────────────────── */
@@ -55,6 +56,7 @@ const NAV_ICONS: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement
   performans: ChartBarIcon,
   "yapay-zeka": CpuChipIcon,
   "kreatif-studyo": SparklesIcon,
+  video: VideoCameraIcon,
   "urun-gorseli-studyosu": PhotoIcon,
 };
 
@@ -134,7 +136,6 @@ export default function Home() {
     userName: fullName,
     userEmail: user.email,
     onLogout: () => logout(),
-    collapsibleGroupIds: ["seo-analiz"],
   };
 
   return (

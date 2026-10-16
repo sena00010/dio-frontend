@@ -17,6 +17,7 @@ export const SCREEN_KEYS = [
   "yeni-icerik",
   "studio",
   "carousel",
+  "video",
   "ekip",
   "takvim",
   "zamanlayici",
