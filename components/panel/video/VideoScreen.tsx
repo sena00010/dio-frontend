@@ -12,11 +12,13 @@ import { getApiError } from "@/lib/apiError";
 type Video = {
   id: number; title: string; brief: string; duration_sec: number; format: string; voice: string;
   status: "queued" | "running" | "done" | "failed"; stage: string; progress: number;
+  language?: string; subtitles?: boolean; source_url?: string;
   video_url: string; thumb_url: string; error: string; created_at: string;
 };
 type PostLite = { id: number; title: string; content: string };
 
 const DURATIONS = [15, 30, 60, 90];
+const LANGUAGES: [string, string][] = [["tr", "Türkçe"], ["en", "English"], ["de", "Deutsch"], ["fr", "Français"], ["es", "Español"], ["ar", "العربية"], ["ru", "Русский"], ["az", "Azərbaycanca"], ["nl", "Nederlands"], ["it", "Italiano"]];
 const API = process.env.NEXT_PUBLIC_API_URL || "";
 const abs = (u?: string) => (!u ? "" : u.startsWith("/") ? `${API}${u}` : u);
 
@@ -29,6 +31,11 @@ export default function VideoScreen() {
   const [format, setFormat] = useState<"9:16" | "1:1">("9:16");
   const [voice, setVoice] = useState<"kadin" | "erkek" | "yok">("kadin");
   const [pronunciation, setPronunciation] = useState("");
+  const [source, setSource] = useState<"text" | "link">("text");
+  const [link, setLink] = useState("");
+  const [language, setLanguage] = useState("tr");
+  const [subtitles, setSubtitles] = useState(true);
+  const [intro, setIntro] = useState(true);
   const [posts, setPosts] = useState<PostLite[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
   const [creating, setCreating] = useState(false);
@@ -62,15 +69,23 @@ export default function VideoScreen() {
   const finalDuration = custom ? Math.min(180, Math.max(10, Number(custom) || 60)) : duration;
 
   const create = async () => {
-    if (!activeCompany || brief.trim().length < 10) {
+    if (!activeCompany) return;
+    if (source === "link" && !/^https?:\/\/\S+\.\S+/.test(link.trim())) {
+      toast.error("Geçerli bir web adresi girin (https:// ile başlayan).");
+      return;
+    }
+    if (source === "text" && brief.trim().length < 10) {
       toast.error("Videonun anlatacağı içeriği en az bir cümleyle yazın.");
       return;
     }
     setCreating(true);
     try {
-      await api.post("/api/protected/videos", { company_id: activeCompany.id, brief, duration_sec: finalDuration, format, voice, pronunciation });
+      await api.post("/api/protected/videos", {
+        company_id: activeCompany.id, brief, duration_sec: finalDuration, format, voice, pronunciation,
+        language, subtitles, intro, source_url: source === "link" ? link.trim() : "",
+      });
       toast.success("Video hazırlanıyor. Bu sayfadan ilerlemesini takip edebilirsiniz.");
-      setBrief("");
+      setBrief(""); setLink("");
       load();
     } catch (err) {
       toast.error(getApiError(err, "Video başlatılamadı."));
@@ -86,15 +101,31 @@ export default function VideoScreen() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Video Oluştur</h1>
-        <p className="mt-1 text-sm text-muted">İçeriğinizi yazın; DIO senaryoyu yazsın, sahne görsellerini üretsin, Türkçe seslendirsin ve alt yazılı videoyu hazırlasın.</p>
+        <p className="mt-1 text-sm text-muted">İçeriğinizi yazın ya da bir link verin; DIO senaryoyu yazsın, sahne görsellerini üretsin, seçtiğiniz dilde seslendirsin ve markanıza özel videoyu hazırlasın.</p>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
         {/* Form */}
         <section className="card space-y-5 p-5">
+          <div className="flex rounded-xl bg-zinc-100 p-1" role="tablist" aria-label="İçerik kaynağı">
+            {([["text", "Metinden"], ["link", "Linkten"]] as const).map(([v, l]) => (
+              <button key={v} type="button" role="tab" aria-selected={source === v} onClick={() => setSource(v)}
+                className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${source === v ? "bg-white text-foreground shadow-sm" : "text-muted"}`}>{l}</button>
+            ))}
+          </div>
+
+          {source === "link" && (
+            <div>
+              <label htmlFor="video-link" className="mb-1.5 block text-sm font-semibold">Sayfa linki</label>
+              <input id="video-link" type="url" value={link} onChange={e => setLink(e.target.value)} placeholder="https://ornek.com/urun-ya-da-blog-yazisi"
+                className="w-full rounded-xl border border-line px-3.5 py-2.5 text-sm outline-none focus:border-brand" />
+              <p className="mt-1 text-[11px] text-muted">DIO sayfadaki içeriği okur ve videoyu ona göre kurgular. Aşağıya ek not da yazabilirsiniz.</p>
+            </div>
+          )}
+
           <div>
-            <label htmlFor="video-brief" className="mb-1.5 block text-sm font-semibold">Video ne anlatsın?</label>
-            <textarea id="video-brief" value={brief} onChange={e => setBrief(e.target.value)} rows={5}
+            <label htmlFor="video-brief" className="mb-1.5 block text-sm font-semibold">{source === "link" ? "Ek not (isteğe bağlı)" : "Video ne anlatsın?"}</label>
+            <textarea id="video-brief" value={brief} onChange={e => setBrief(e.target.value)} rows={source === "link" ? 3 : 5}
               placeholder="Örn: Kahve dükkânımızın yeni sezon menüsü — 3 imza içeceğimiz, taze kavrulmuş çekirdek ve hafta sonu %10 indirim."
               className="w-full rounded-xl border border-line px-3.5 py-3 text-sm outline-none focus:border-brand" />
             {posts.length > 0 && (
@@ -133,6 +164,26 @@ export default function VideoScreen() {
             </div>
           </div>
 
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="video-lang" className="mb-1.5 block text-sm font-semibold">Video dili</label>
+              <select id="video-lang" value={language} onChange={e => setLanguage(e.target.value)}
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm outline-none focus:border-brand">
+                {LANGUAGES.map(([c, n]) => <option key={c} value={c}>{n}</option>)}
+              </select>
+              <p className="mt-1 text-[11px] text-muted">Senaryo bu dilde yazılır, ana dili gibi seslendirilir.</p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-semibold">Seçenekler</p>
+              {([["Altyazı", subtitles, setSubtitles, "Ekranda kısa yazılar"], ["Marka girişi", intro, setIntro, "Başta logolu açılış + köşede logo"]] as const).map(([label, on, set, hint]) => (
+                <label key={label} className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-line px-3 py-2">
+                  <span><span className="block text-xs font-semibold">{label}</span><span className="block text-[11px] text-muted">{hint}</span></span>
+                  <input type="checkbox" checked={on} onChange={e => set(e.target.checked)} className="h-4 w-4 accent-[var(--brand)]" />
+                </label>
+              ))}
+            </div>
+          </div>
+
           {voice !== "yok" && (
             <div>
               <label htmlFor="video-pron" className="mb-1.5 block text-sm font-semibold">Telaffuz <span className="font-normal text-muted">(isteğe bağlı)</span></label>
@@ -144,7 +195,7 @@ export default function VideoScreen() {
           )}
 
           <div className="rounded-xl bg-zinc-50 px-4 py-3 text-xs text-muted">
-            ~{scenes} sahne · {finalDuration} sn · her sahne için AI görsel{voice !== "yok" ? ", Türkçe seslendirme" : ""} ve marka renginde alt yazı. Seslendirme sakin tempoda olduğu için süre birkaç saniye değişebilir. Hazırlanması genelde 1-3 dakika sürer.
+            ~{scenes} sahne · {finalDuration} sn · her sahne için AI görsel{voice !== "yok" ? `, ${LANGUAGES.find(l => l[0] === language)?.[1]} seslendirme` : ""} {subtitles ? " ve marka renginde altyazı" : ", altyazısız"}{intro ? ", logolu marka girişi" : ""}. Seslendirme sakin tempoda olduğu için süre birkaç saniye değişebilir. Hazırlanması genelde 1-3 dakika sürer.
           </div>
 
           <button type="button" onClick={create} disabled={creating || !activeCompany}
@@ -173,7 +224,7 @@ export default function VideoScreen() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="line-clamp-2 text-sm font-semibold">{v.title}</p>
-                      <p className="mt-0.5 text-[11px] text-muted">{v.duration_sec} sn · {v.format} · {v.voice === "yok" ? "Sessiz" : v.voice === "erkek" ? "Erkek sesi" : "Kadın sesi"}</p>
+                      <p className="mt-0.5 text-[11px] text-muted">{v.duration_sec} sn · {v.format} · {v.voice === "yok" ? "Sessiz" : v.voice === "erkek" ? "Erkek sesi" : "Kadın sesi"}{v.language && v.language !== "tr" ? ` · ${LANGUAGES.find(l => l[0] === v.language)?.[1] || v.language}` : ""}{v.subtitles === false ? " · altyazısız" : ""}{v.source_url ? " · linkten" : ""}</p>
                       {(v.status === "queued" || v.status === "running") && (
                         <div className="mt-2">
                           <div className="mb-1 flex justify-between text-[11px] font-medium"><span>{v.stage}</span><span className="text-muted">%{v.progress}</span></div>
