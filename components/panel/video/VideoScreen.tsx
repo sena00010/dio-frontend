@@ -13,11 +13,19 @@ type Video = {
   id: number; title: string; brief: string; duration_sec: number; format: string; voice: string;
   status: "queued" | "running" | "done" | "failed"; stage: string; progress: number;
   language?: string; subtitles?: boolean; source_url?: string;
+  platform?: string; post_title?: string; post_text?: string; hashtags?: string; script?: string;
   video_url: string; thumb_url: string; error: string; created_at: string;
 };
 type PostLite = { id: number; title: string; content: string };
 
-const DURATIONS = [15, 30, 60, 90];
+// Mecraya göre format, önerilen süreler ve üst sınır (backend ile aynı)
+const PLATFORMS = [
+  { id: "instagram", label: "Instagram Reels", hint: "Dikey 9:16 · estetik, hızlı kanca", format: "9:16", durations: [15, 30, 60, 90], max: 90 },
+  { id: "tiktok", label: "TikTok", hint: "Dikey 9:16 · samimi, çok hızlı kanca", format: "9:16", durations: [15, 30, 60, 90], max: 180 },
+  { id: "youtube_shorts", label: "YouTube Shorts", hint: "Dikey 9:16 · en fazla 60 sn", format: "9:16", durations: [15, 30, 45, 60], max: 60 },
+  { id: "youtube", label: "YouTube", hint: "Yatay 16:9 · açıklayıcı, bölümlü", format: "16:9", durations: [45, 60, 90, 120, 180], max: 180 },
+] as const;
+type PlatformId = typeof PLATFORMS[number]["id"];
 const LANGUAGES: [string, string][] = [["tr", "Türkçe"], ["en", "English"], ["de", "Deutsch"], ["fr", "Français"], ["es", "Español"], ["ar", "العربية"], ["ru", "Русский"], ["az", "Azərbaycanca"], ["nl", "Nederlands"], ["it", "Italiano"]];
 const API = process.env.NEXT_PUBLIC_API_URL || "";
 const abs = (u?: string) => (!u ? "" : u.startsWith("/") ? `${API}${u}` : u);
@@ -28,7 +36,9 @@ export default function VideoScreen() {
   const [brief, setBrief] = useState("");
   const [duration, setDuration] = useState(60);
   const [custom, setCustom] = useState("");
-  const [format, setFormat] = useState<"9:16" | "1:1">("9:16");
+  const [platform, setPlatform] = useState<PlatformId>("instagram");
+  const plat = PLATFORMS.find(p => p.id === platform)!;
+  const [details, setDetails] = useState<number | null>(null);
   const [voice, setVoice] = useState<"kadin" | "erkek" | "yok">("kadin");
   const [pronunciation, setPronunciation] = useState("");
   const [source, setSource] = useState<"text" | "link">("text");
@@ -66,7 +76,7 @@ export default function VideoScreen() {
     return () => { if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; } };
   }, [anyRunning, load]);
 
-  const finalDuration = custom ? Math.min(180, Math.max(10, Number(custom) || 60)) : duration;
+  const finalDuration = Math.min(plat.max, custom ? Math.max(10, Number(custom) || 60) : duration);
 
   const create = async () => {
     if (!activeCompany) return;
@@ -81,7 +91,7 @@ export default function VideoScreen() {
     setCreating(true);
     try {
       await api.post("/api/protected/videos", {
-        company_id: activeCompany.id, brief, duration_sec: finalDuration, format, voice, pronunciation,
+        company_id: activeCompany.id, brief, duration_sec: finalDuration, platform, voice, pronunciation,
         language, subtitles, intro, source_url: source === "link" ? link.trim() : "",
       });
       toast.success("Video hazırlanıyor. Bu sayfadan ilerlemesini takip edebilirsiniz.");
@@ -107,6 +117,21 @@ export default function VideoScreen() {
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
         {/* Form */}
         <section className="card space-y-5 p-5">
+          <div>
+            <p className="mb-1.5 text-sm font-semibold">Hangi mecra için?</p>
+            <div className="grid grid-cols-2 gap-2">
+              {PLATFORMS.map(p => (
+                <button key={p.id} type="button" onClick={() => { setPlatform(p.id); setCustom(""); if (!(p.durations as readonly number[]).includes(duration)) setDuration(p.durations[1] ?? p.durations[0]); }}
+                  aria-pressed={platform === p.id}
+                  className={`rounded-xl border px-3 py-2.5 text-left transition ${platform === p.id ? "border-brand bg-brand-soft" : "border-line bg-white hover:border-zinc-300"}`}>
+                  <span className={`block text-sm font-bold ${platform === p.id ? "text-brand" : "text-foreground"}`}>{p.label}</span>
+                  <span className="block text-[11px] text-muted">{p.hint}</span>
+                </button>
+              ))}
+            </div>
+            <p className="mt-1.5 text-[11px] text-muted">İçeriğiniz bu mecranın akışına ve seçtiğiniz süreye göre yeniden kurgulanır; paylaşım metni de mecraya göre hazırlanır.</p>
+          </div>
+
           <div className="flex rounded-xl bg-zinc-100 p-1" role="tablist" aria-label="İçerik kaynağı">
             {([["text", "Metinden"], ["link", "Linkten"]] as const).map(([v, l]) => (
               <button key={v} type="button" role="tab" aria-selected={source === v} onClick={() => setSource(v)}
@@ -140,20 +165,13 @@ export default function VideoScreen() {
           <div>
             <p className="mb-1.5 text-sm font-semibold">Süre</p>
             <div className="flex flex-wrap items-center gap-1.5">
-              {DURATIONS.map(d => <button key={d} type="button" className={chip(!custom && duration === d)} onClick={() => { setDuration(d); setCustom(""); }}>{d} sn</button>)}
-              <input type="number" min={10} max={180} value={custom} onChange={e => setCustom(e.target.value)} placeholder="Özel (sn)"
+              {plat.durations.map(d => <button key={d} type="button" className={chip(!custom && duration === d)} onClick={() => { setDuration(d); setCustom(""); }}>{d} sn</button>)}
+              <input type="number" min={10} max={plat.max} value={custom} onChange={e => setCustom(e.target.value)} placeholder="Özel (sn)"
                 aria-label="Özel süre (saniye)" className={`w-24 rounded-lg border px-2.5 py-1.5 text-xs outline-none ${custom ? "border-brand" : "border-line"}`} />
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <p className="mb-1.5 text-sm font-semibold">Format</p>
-              <div className="flex gap-1.5">
-                <button type="button" className={chip(format === "9:16")} onClick={() => setFormat("9:16")}>Dikey 9:16 · Reels/TikTok</button>
-                <button type="button" className={chip(format === "1:1")} onClick={() => setFormat("1:1")}>Kare 1:1</button>
-              </div>
-            </div>
+          <div>
             <div>
               <p className="mb-1.5 text-sm font-semibold">Seslendirme</p>
               <div className="flex gap-1.5">
@@ -218,13 +236,13 @@ export default function VideoScreen() {
               {videos.map(v => (
                 <li key={v.id} className="rounded-xl border border-line p-3">
                   <div className="flex gap-3">
-                    <div className={`relative shrink-0 overflow-hidden rounded-lg bg-zinc-100 ${v.format === "1:1" ? "h-20 w-20" : "h-28 w-16"}`}>
+                    <div className={`relative shrink-0 overflow-hidden rounded-lg bg-zinc-100 ${v.format === "1:1" ? "h-20 w-20" : v.format === "16:9" ? "h-16 w-28" : "h-28 w-16"}`}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       {v.thumb_url && <img src={abs(v.thumb_url)} alt="" className="h-full w-full object-cover" />}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="line-clamp-2 text-sm font-semibold">{v.title}</p>
-                      <p className="mt-0.5 text-[11px] text-muted">{v.duration_sec} sn · {v.format} · {v.voice === "yok" ? "Sessiz" : v.voice === "erkek" ? "Erkek sesi" : "Kadın sesi"}{v.language && v.language !== "tr" ? ` · ${LANGUAGES.find(l => l[0] === v.language)?.[1] || v.language}` : ""}{v.subtitles === false ? " · altyazısız" : ""}{v.source_url ? " · linkten" : ""}</p>
+                      <p className="mt-0.5 text-[11px] text-muted">{PLATFORMS.find(p => p.id === v.platform)?.label ?? "Instagram Reels"} · {v.duration_sec} sn · {v.voice === "yok" ? "Sessiz" : v.voice === "erkek" ? "Erkek sesi" : "Kadın sesi"}{v.language && v.language !== "tr" ? ` · ${LANGUAGES.find(l => l[0] === v.language)?.[1] || v.language}` : ""}{v.subtitles === false ? " · altyazısız" : ""}{v.source_url ? " · linkten" : ""}</p>
                       {(v.status === "queued" || v.status === "running") && (
                         <div className="mt-2">
                           <div className="mb-1 flex justify-between text-[11px] font-medium"><span>{v.stage}</span><span className="text-muted">%{v.progress}</span></div>
@@ -245,7 +263,15 @@ export default function VideoScreen() {
                     </div>
                   </div>
                   {playing === v.id && v.status === "done" && (
-                    <video src={abs(v.video_url)} controls autoPlay playsInline className={`mx-auto mt-3 rounded-xl bg-black ${v.format === "1:1" ? "w-full max-w-sm" : "max-h-[560px]"}`} />
+                    <video src={abs(v.video_url)} controls autoPlay playsInline className={`mx-auto mt-3 rounded-xl bg-black ${v.format === "16:9" ? "w-full" : v.format === "1:1" ? "w-full max-w-sm" : "max-h-[560px]"}`} />
+                  )}
+                  {v.status === "done" && (v.post_text || v.script) && (
+                    <div className="mt-2">
+                      <button type="button" onClick={() => setDetails(details === v.id ? null : v.id)} className="text-[11px] font-semibold text-brand hover:underline">
+                        {details === v.id ? "Detayları gizle" : "Paylaşım metni ve zaman akışı"}
+                      </button>
+                      {details === v.id && <VideoDetails video={v} onCopy={() => toast.success("Kopyalandı")} />}
+                    </div>
                   )}
                 </li>
               ))}
@@ -253,6 +279,45 @@ export default function VideoScreen() {
           )}
         </section>
       </div>
+    </div>
+  );
+}
+
+// Mecraya hazır paylaşım metni (kopyalanabilir) ve saniye saniye zaman akışı
+function VideoDetails({ video, onCopy }: { video: Video; onCopy: () => void }) {
+  type Scene = { caption: string; narration: string; start?: number; end?: number };
+  let scenes: Scene[] = [];
+  try { scenes = JSON.parse(video.script || "[]"); } catch { /* boş */ }
+  const ts = (s = 0) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+  const full = [video.post_title, video.post_text, video.hashtags].filter(Boolean).join("\n\n");
+  const copy = async (text: string) => { try { await navigator.clipboard.writeText(text); onCopy(); } catch { /* izin yok */ } };
+
+  return (
+    <div className="mt-2 space-y-3 rounded-xl bg-zinc-50 p-3">
+      {(video.post_title || video.post_text) && (
+        <div>
+          <div className="mb-1 flex items-center justify-between">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted">Paylaşım metni</p>
+            <button type="button" onClick={() => copy(full)} className="rounded-md border border-line bg-white px-2 py-0.5 text-[11px] font-semibold hover:bg-zinc-100">Kopyala</button>
+          </div>
+          {video.post_title && <p className="text-sm font-semibold">{video.post_title}</p>}
+          {video.post_text && <p className="mt-1 whitespace-pre-line text-xs leading-relaxed text-zinc-700">{video.post_text}</p>}
+          {video.hashtags && <p className="mt-1 text-xs font-medium text-[#00376b]">{video.hashtags}</p>}
+        </div>
+      )}
+      {scenes.length > 0 && (
+        <div>
+          <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-muted">Zaman akışı</p>
+          <ol className="space-y-1.5">
+            {scenes.map((sc, i) => (
+              <li key={i} className="flex gap-2 text-xs">
+                <span className="w-[74px] shrink-0 font-mono text-[11px] text-muted">{sc.end ? `${ts(sc.start)}–${ts(sc.end)}` : `Sahne ${i + 1}`}</span>
+                <span><span className="font-semibold">{sc.caption}</span>{sc.narration && <span className="text-zinc-600"> — {sc.narration}</span>}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
     </div>
   );
 }
